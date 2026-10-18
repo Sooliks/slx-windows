@@ -22,6 +22,8 @@ internal static class FollowupChecks
         }
         Assert.Single(Sta.Descendants<AmbientBackdrop>(window));
         CheckQuickAdd();
+        LibraryChecks.Run(window);
+        AutoRoutingChecks.Run();
         CheckStartupRefresh();
     }
     private static void CheckQuickAdd()

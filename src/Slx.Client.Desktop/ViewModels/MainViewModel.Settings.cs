@@ -52,7 +52,7 @@ public sealed partial class MainViewModel
         SavePreferences();
         foreach (var name in new[] { nameof(FilteredApplications), nameof(SelectedApplications), nameof(HasApplications), nameof(HasSelectedApplications), nameof(HasSearchResults) }) OnPropertyChanged(name);
     }
-    private void MarkRulesChanged() { if (IsTunnelActive) RulesPending = true; }
+
     private void AddExecutable()
     {
         var picker = new OpenFileDialog { Filter = Text.Catalog["ExecutableFilter"], CheckFileExists = true, Multiselect = false };

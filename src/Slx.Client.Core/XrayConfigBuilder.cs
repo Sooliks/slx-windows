@@ -18,6 +18,12 @@ public static class XrayConfigBuilder
                 new
                 {
                     tag = "tun", protocol = "tun",
+                    sniffing = new
+                    {
+                        enabled = true, destOverride = new[] { "tls" }, routeOnly = false,
+                        ipsExcluded = new[] { "0.0.0.0/0", "::/128", "::1/128", "fc00::/7", "fe80::/10", "ff00::/8" },
+                        domainsExcluded = new[] { "full:cloudflare-ech.com" }
+                    },
                     settings = new
                     {
                         name = "SLX VPN", desc = "SLX VPN", mtu = 1500,

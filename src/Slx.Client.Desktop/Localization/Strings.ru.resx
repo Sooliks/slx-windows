@@ -59,7 +59,7 @@
 <data name="RemoveApp" xml:space="preserve"><value>Убрать из списка</value></data>
 <data name="RouteApp" xml:space="preserve"><value>Направлять приложение через VPN</value></data>
 <data name="NoSearchResults" xml:space="preserve"><value>Подходящих приложений нет.</value></data>
-<data name="RulesPending" xml:space="preserve"><value>Правила изменены. Переподключитесь, чтобы применить их к новым соединениям.</value></data>
+<data name="RulesPending" xml:space="preserve"><value>Применяем изменения автоматически. Соединение может ненадолго прерваться.</value></data>
 <data name="RulesNotice" xml:space="preserve"><value>После изменения маршрута приложению может понадобиться переподключение. SLX не закрывает чужие приложения.</value></data>
 <data name="AppLimitations" xml:space="preserve"><value>Поддерживаются обычные .exe. Лаунчеры, защищённые приложения и приложения из Store могут потребовать отдельной настройки. Изоляция DNS по приложениям не гарантируется.</value></data>
 <data name="DiscoveryTitle" xml:space="preserve"><value>Добавить запущенное приложение</value></data>
@@ -133,8 +133,8 @@
 <data name="ServiceCheckingHelp" xml:space="preserve"><value>Проверяем локальную службу SLX.</value></data>
 <data name="ServiceUnknownHelp" xml:space="preserve"><value>Служба не ответила вовремя. Состояние подключения пока неизвестно; SLX проверит его снова.</value></data>
 <data name="ExitUnknownBody" xml:space="preserve"><value>SLX не удалось подтвердить остановку VPN — он может продолжать работать. Можно отменить выход и повторить попытку или закрыть только приложение, без подтверждения отключения VPN.</value></data>
- <data name="QuickApps" xml:space="preserve"><value>Быстрое добавление</value></data>
- <data name="QuickAppsHint" xml:space="preserve"><value>Выберите запущенные программы — искать их файлы не нужно.</value></data>
+ <data name="QuickApps" xml:space="preserve"><value>Библиотека приложений</value></data>
+ <data name="QuickAppsHint" xml:space="preserve"><value>Выберите открытое приложение по иконке. Ручное добавление файла также доступно.</value></data>
  <data name="RefreshApps" xml:space="preserve"><value>Обновить список</value></data>
  <data name="FindRunningApp" xml:space="preserve"><value>Найти программу</value></data>
  <data name="FindingApps" xml:space="preserve"><value>Ищем запущенные программы…</value></data>
@@ -145,4 +145,5 @@
  <data name="CachedProfiles" xml:space="preserve"><value>Сохранённые настройки доступны. Обновить подписку можно кнопкой «Обновить».</value></data>
  <data name="ProfilesAutoRefresh" xml:space="preserve"><value>Способы подключения обновляются при запуске.</value></data>
  <data name="FaultCleanup" xml:space="preserve"><value>Windows ещё завершает отключение VPN. Подождите несколько секунд и повторите подключение.</value></data>
+<data name="RulesUnconfirmed" xml:space="preserve"><value>Изменения сохранены. Не удалось подтвердить их применение — проверьте подключение.</value></data>
 </root>

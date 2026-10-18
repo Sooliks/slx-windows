@@ -21,7 +21,7 @@ public sealed partial class MainViewModel
         _ = RefreshOnStartupAsync();
     }
     private async void PollTick(object? sender, EventArgs e) => await PollAsync();
-    private async Task PollAsync()
+    internal async Task PollAsync()
     {
         if (polling || IsBusy || disposed) return;
         polling = true;
@@ -29,7 +29,7 @@ public sealed partial class MainViewModel
         try
         {
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(3));
-            var reply = await service.SendAsync(new(PipeContract.Version, "status", Guid.NewGuid()), timeout.Token);
+            var reply = await SendControlAsync(new(PipeContract.Version, "status", Guid.NewGuid()), timeout.Token);
             if (owner != generation || disposed) return;
             if (!reply.Success) { MarkStatusUnknown(reply.Code); ShowFault(reply.Code); return; }
             status = reply.Status;
@@ -43,6 +43,7 @@ public sealed partial class MainViewModel
     private Task ToggleAsync() => IsTunnelActive || IsBusy ? ChangeTunnelAsync("disconnect") : ChangeTunnelAsync("connect");
     private async Task ChangeTunnelAsync(string action)
     {
+        CancelRoutingApply();
         if (action != "disconnect" && saved == null) { OpenImportCommand.Execute(null); return; }
         if (action != "disconnect" && IsSelectedMode && !HasSelectedApplications) { Notice("NoActiveApps"); Page = "applications"; return; }
         ConnectPlan? plan = action == "disconnect" || SelectedProfile == null ? null : new(SelectedProfile, preferences.Mode, Applications.Select(x => x.ToRule()).ToList());
@@ -57,13 +58,13 @@ public sealed partial class MainViewModel
         {
             await mutationGate.WaitAsync(current.Token);
             entered = true;
-            var reply = await service.SendAsync(new(PipeContract.Version, action, Guid.NewGuid(), plan), current.Token);
+            var reply = await SendControlAsync(new(PipeContract.Version, action, Guid.NewGuid(), plan), current.Token);
             if (owner != generation || disposed) return;
             if (!reply.Success) { MarkStatusUnknown(reply.Code); ShowFault(reply.Code); return; }
             status = reply.Status;
             statusFresh = true; lastServiceCode = null;
             if (status.Phase == TunnelPhase.Faulted && status.Code != null) ShowFault(status.Code);
-            if (action != "disconnect") RulesPending = false;
+            if (action != "disconnect" || status.Phase == TunnelPhase.Disconnected) RulesPending = false;
         }
         catch (Exception error) when (error is ClientFault or OperationCanceledException or IOException)
         {
@@ -129,7 +130,7 @@ public sealed partial class MainViewModel
     public void Dispose()
     {
         if (disposed) return;
-        disposed = true; CancelStartupRefresh(); timer.Stop(); timer.Tick -= PollTick; operation?.Cancel();
+        disposed = true; CancelRoutingApply(); CancelStartupRefresh(); timer.Stop(); timer.Tick -= PollTick; operation?.Cancel();
         Text.Catalog.PropertyChanged -= LanguageChanged;
         GC.SuppressFinalize(this);
     }

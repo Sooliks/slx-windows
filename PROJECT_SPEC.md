@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.2. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.3. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -42,3 +42,6 @@ Full acceptance requires actual installed service/UI control, both live VPN prot
 TCP/UDP/IPv4/IPv6, DNS, crash/sleep/network changes, installer upgrade/uninstall, multi-user IPC and a clean VM.
 Parser, build, same-SID pipe fixtures and synthetic TUN sinks do not substitute for these checks.
 The release remains a prerelease until the required acceptance passes.
+
+## Alpha.3 candidate
+See docs/NETWORK_DIAGNOSIS.md and docs/RELEASE_NOTES_ALPHA3.md. Add local icon library and automatic coalesced routing application with bounded reconnect. No retry after an unknown mutation result. IPv6 TLS hostname restoration preserves IPv4/LAN destinations and certificate validation; no broad IPv6/ECH guarantee.
