@@ -1,0 +1,1 @@
+<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><ProjectReference Include="../Slx.Client.Core/Slx.Client.Core.csproj"/><PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.13"/></ItemGroup></Project>

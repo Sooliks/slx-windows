@@ -1,0 +1,61 @@
+using System.ComponentModel;
+using System.Diagnostics;
+using Microsoft.Win32;
+using Slx.Client.Core;
+
+namespace Slx.Client.Windows;
+
+public static class AppDiscovery
+{
+    public static AppRule FromExecutable(string raw)
+    {
+        var path = Path.GetFullPath(raw);
+        if (!Path.IsPathFullyQualified(path) || path.StartsWith(@"\\", StringComparison.Ordinal)
+            || !string.Equals(Path.GetExtension(path), ".exe", StringComparison.OrdinalIgnoreCase) || !File.Exists(path))
+            throw new ClientFault("INVALID_APPLICATION");
+        string? label = null;
+        try { label = FileVersionInfo.GetVersionInfo(path).FileDescription; }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or Win32Exception) { }
+        var name = string.IsNullOrWhiteSpace(label) ? Path.GetFileNameWithoutExtension(path) : label.Trim();
+        return new(Guid.NewGuid(), name.Length > 100 ? name[..100] : name, path);
+    }
+    public static IReadOnlyList<AppRule> RunningApplications()
+    {
+        var found = new Dictionary<string, AppRule>(StringComparer.OrdinalIgnoreCase);
+        foreach (var process in Process.GetProcesses())
+        {
+            using (process)
+            {
+                try
+                {
+                    if (process.SessionId != Process.GetCurrentProcess().SessionId) continue;
+                    var path = process.MainModule?.FileName;
+                    if (path is not null && !found.ContainsKey(path)) found[path] = FromExecutable(path);
+                }
+                catch (Exception ex) when (ex is Win32Exception or InvalidOperationException or IOException or UnauthorizedAccessException or ClientFault) { }
+            }
+        }
+        return found.Values.OrderBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase).Take(300).ToArray();
+    }
+    public static IReadOnlyList<AppRule> InstalledApplications()
+    {
+        var found = new Dictionary<string, AppRule>(StringComparer.OrdinalIgnoreCase);
+        foreach (var hive in new[] { RegistryHive.LocalMachine, RegistryHive.CurrentUser })
+            foreach (var view in new[] { RegistryView.Registry64, RegistryView.Registry32 })
+            {
+                using var registry = RegistryKey.OpenBaseKey(hive, view);
+                using var entries = registry.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall");
+                if (entries is null) continue;
+                foreach (var name in entries.GetSubKeyNames().Take(1000))
+                {
+                    using var entry = entries.OpenSubKey(name);
+                    if (entry?.GetValue("DisplayIcon") is not string icon) continue;
+                    var path = icon.Trim().Trim('"');
+                    var comma = path.LastIndexOf(','); if (comma > 0) path = path[..comma].Trim().Trim('"');
+                    try { var app = FromExecutable(Environment.ExpandEnvironmentVariables(path)); found.TryAdd(app.ExecutablePath, app); }
+                    catch (Exception ex) when (ex is ClientFault or IOException or UnauthorizedAccessException or ArgumentException) { }
+                }
+            }
+        return found.Values.OrderBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase).Take(300).ToArray();
+    }
+}

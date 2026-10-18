@@ -1,0 +1,17 @@
+name: Windows source checks
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Locked restore, build and tests
+        shell: pwsh
+        run: ./scripts/verify.ps1

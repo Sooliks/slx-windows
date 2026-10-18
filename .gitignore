@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+artifacts/
+.runtime/
+.vs/
+.idea/
+*.user
+*.suo
+*.pfx
+*.key
+*.pem
+.env*
+!*.example
+TestResults/

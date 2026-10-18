@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-18",
+  "coreVersion": "26.9.9",
+  "scope": "real IPv4 TUN TCP/UDP process classifier to localhost synthetic sinks",
+  "passed": true,
+  "selected": {
+    "passed": true,
+    "tcp": "selected",
+    "exitCode": 0,
+    "udp": "selected"
+  },
+  "other": {
+    "passed": true,
+    "tcp": "other",
+    "exitCode": 0,
+    "udp": "other"
+  },
+  "defaultsUnchanged": true,
+  "cleanupErrors": [],
+  "fixturePhysicalBinding": "disabled only for localhost synthetic sinks",
+  "realVpnVerified": false,
+  "ipv6Verified": false,
+  "killSwitchVerified": false
+}

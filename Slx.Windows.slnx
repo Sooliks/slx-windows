@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Slx.Client.Core/Slx.Client.Core.csproj" />
+    <Project Path="src/Slx.Client.Desktop/Slx.Client.Desktop.csproj" />
+    <Project Path="src/Slx.Client.Service/Slx.Client.Service.csproj" />
+    <Project Path="src/Slx.Client.Windows/Slx.Client.Windows.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Slx.Client.Tests/Slx.Client.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?><root>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>2.0</value></resheader>
+<data name="NavConnection" xml:space="preserve"><value>Подключение</value></data>
+<data name="NavApplications" xml:space="preserve"><value>Приложения</value></data>
+<data name="NavSettings" xml:space="preserve"><value>Настройки</value></data>
+<data name="NavHelp" xml:space="preserve"><value>Помощь</value></data>
+<data name="OpenSource" xml:space="preserve"><value>Открытый исходный код</value></data>
+<data name="Account" xml:space="preserve"><value>Личный кабинет ↗</value></data>
+<data name="WindowMinimize" xml:space="preserve"><value>Свернуть</value></data>
+<data name="WindowMaximize" xml:space="preserve"><value>Развернуть или восстановить</value></data>
+<data name="WindowClose" xml:space="preserve"><value>Закрыть в трей</value></data>
+<data name="Eyebrow" xml:space="preserve"><value>SLX VPN / WINDOWS</value></data>
+<data name="ConnectionTitle" xml:space="preserve"><value>Ваше подключение.</value></data>
+<data name="ConnectionSubtitle" xml:space="preserve"><value>Личный маршрут для нужных приложений.</value></data>
+<data name="NotConnected" xml:space="preserve"><value>VPN выключен</value></data>
+<data name="Connected" xml:space="preserve"><value>VPN подключён</value></data>
+<data name="Connecting" xml:space="preserve"><value>Подключаемся…</value></data>
+<data name="Reconnecting" xml:space="preserve"><value>Переподключаемся…</value></data>
+<data name="Stopping" xml:space="preserve"><value>Отключаемся…</value></data>
+<data name="ConnectionFailed" xml:space="preserve"><value>Нужно проверить подключение</value></data>
+<data name="StatusUnknown" xml:space="preserve"><value>Проверяем службу…</value></data>
+<data name="StatusUnavailable" xml:space="preserve"><value>Служба SLX недоступна</value></data>
+<data name="Connect" xml:space="preserve"><value>Подключиться</value></data>
+<data name="Disconnect" xml:space="preserve"><value>Отключиться</value></data>
+<data name="Reconnect" xml:space="preserve"><value>Переподключиться</value></data>
+<data name="ImportTitle" xml:space="preserve"><value>Добавьте подписку SLX</value></data>
+<data name="ImportDescription" xml:space="preserve"><value>Скопируйте личную ссылку подключения из кабинета SLX. Импорт привяжет её к этой установке Windows.</value></data>
+<data name="ImportButton" xml:space="preserve"><value>Добавить подписку</value></data>
+<data name="ReplaceSubscription" xml:space="preserve"><value>Заменить ссылку</value></data>
+<data name="ImportAction" xml:space="preserve"><value>Добавить</value></data>
+<data name="Cancel" xml:space="preserve"><value>Отмена</value></data>
+<data name="Close" xml:space="preserve"><value>Закрыть</value></data>
+<data name="LinkLabel" xml:space="preserve"><value>Личная ссылка SLX</value></data>
+<data name="LinkPlaceholder" xml:space="preserve"><value>https://slxvpn.com/sub/…</value></data>
+<data name="ImportFootnote" xml:space="preserve"><value>Это личная ссылка. Она хранится на компьютере в зашифрованном виде и не попадает в диагностику.</value></data>
+<data name="Subscription" xml:space="preserve"><value>Подписка</value></data>
+<data name="NoSubscription" xml:space="preserve"><value>Добавьте ссылку, чтобы начать.</value></data>
+<data name="UpdateSubscription" xml:space="preserve"><value>Обновить</value></data>
+<data name="Freshness" xml:space="preserve"><value>Обновлена</value></data>
+<data name="Expires" xml:space="preserve"><value>Доступ до</value></data>
+<data name="ExpiryUnknown" xml:space="preserve"><value>Сервер не передал дату окончания доступа.</value></data>
+<data name="Profile" xml:space="preserve"><value>Способ подключения</value></data>
+<data name="AutoProfile" xml:space="preserve"><value>Hysteria2 — основной, VLESS — запасной.</value></data>
+<data name="ProfileAdvanced" xml:space="preserve"><value>Если один способ не работает, выберите другой здесь.</value></data>
+<data name="RoutingTitle" xml:space="preserve"><value>Где использовать VPN</value></data>
+<data name="ModeSelected" xml:space="preserve"><value>Выбранные приложения</value></data>
+<data name="ModeWhole" xml:space="preserve"><value>Весь компьютер</value></data>
+<data name="ModeSelectedDescription" xml:space="preserve"><value>Выбранные приложения используют SLX. Остальные выходят напрямую.</value></data>
+<data name="ModeWholeDescription" xml:space="preserve"><value>Интернет-трафик компьютера идёт через SLX. Локальная сеть остаётся прямой.</value></data>
+<data name="SelectedApps" xml:space="preserve"><value>Приложения через VPN</value></data>
+<data name="NoAppsTitle" xml:space="preserve"><value>Выберите первое приложение</value></data>
+<data name="NoAppsDescription" xml:space="preserve"><value>Добавьте браузер, мессенджер или другой .exe. Мы ничего не выбираем автоматически.</value></data>
+<data name="ManageApps" xml:space="preserve"><value>Выбрать приложения</value></data>
+<data name="AppsTitle" xml:space="preserve"><value>Только то, что нужно.</value></data>
+<data name="AppsSubtitle" xml:space="preserve"><value>Включайте VPN для отдельных приложений. Список хранится только на этом компьютере.</value></data>
+<data name="AddExecutable" xml:space="preserve"><value>Добавить .exe</value></data>
+<data name="RunningApps" xml:space="preserve"><value>Запущенные приложения</value></data>
+<data name="SearchApps" xml:space="preserve"><value>Поиск приложений</value></data>
+<data name="RemoveApp" xml:space="preserve"><value>Убрать из списка</value></data>
+<data name="RouteApp" xml:space="preserve"><value>Направлять приложение через VPN</value></data>
+<data name="NoSearchResults" xml:space="preserve"><value>Подходящих приложений нет.</value></data>
+<data name="RulesPending" xml:space="preserve"><value>Правила изменены. Переподключитесь, чтобы применить их к новым соединениям.</value></data>
+<data name="RulesNotice" xml:space="preserve"><value>После изменения маршрута приложению может понадобиться переподключение. SLX не закрывает чужие приложения.</value></data>
+<data name="AppLimitations" xml:space="preserve"><value>Поддерживаются обычные .exe. Лаунчеры, защищённые приложения и приложения из Store могут потребовать отдельной настройки. Изоляция DNS по приложениям не гарантируется.</value></data>
+<data name="DiscoveryTitle" xml:space="preserve"><value>Добавить запущенное приложение</value></data>
+<data name="DiscoveryDescription" xml:space="preserve"><value>Доступные запущенные приложения этого сеанса Windows. Также можно выбрать файл .exe.</value></data>
+<data name="Add" xml:space="preserve"><value>Добавить</value></data>
+<data name="NothingRunning" xml:space="preserve"><value>Подходящих запущенных приложений нет. Выберите файл .exe.</value></data>
+<data name="SettingsTitle" xml:space="preserve"><value>Как вам удобно.</value></data>
+<data name="SettingsSubtitle" xml:space="preserve"><value>Изменение оформления не прерывает VPN.</value></data>
+<data name="Appearance" xml:space="preserve"><value>Оформление</value></data>
+<data name="Language" xml:space="preserve"><value>Язык</value></data>
+<data name="LanguageRu" xml:space="preserve"><value>Русский</value></data>
+<data name="LanguageEn" xml:space="preserve"><value>English</value></data>
+<data name="Theme" xml:space="preserve"><value>Тема</value></data>
+<data name="ThemeOlive" xml:space="preserve"><value>SLX / Оливковая</value></data>
+<data name="ThemeTerminal" xml:space="preserve"><value>Терминал</value></data>
+<data name="Behavior" xml:space="preserve"><value>Поведение приложения</value></data>
+<data name="AutoStart" xml:space="preserve"><value>Запускать SLX при входе в Windows</value></data>
+<data name="AutoStartHint" xml:space="preserve"><value>Приложение откроется без автоматического подключения.</value></data>
+<data name="MinimizeTray" xml:space="preserve"><value>Оставлять в трее при закрытии окна</value></data>
+<data name="MinimizeTrayHint" xml:space="preserve"><value>Чтобы отключить VPN и выйти, выберите «Выход» в меню трея.</value></data>
+<data name="SubscriptionSettings" xml:space="preserve"><value>Настройки подключения</value></data>
+<data name="RemoveSubscription" xml:space="preserve"><value>Удалить сохранённую подписку</value></data>
+<data name="RemoveConfirm" xml:space="preserve"><value>Удалить ссылку с этого компьютера? Устройство в кабинете останется.</value></data>
+<data name="ConfirmRemove" xml:space="preserve"><value>Удалить ссылку</value></data>
+<data name="HelpTitle" xml:space="preserve"><value>Всё под рукой.</value></data>
+<data name="HelpSubtitle" xml:space="preserve"><value>Несколько простых шагов, если что-то не загружается.</value></data>
+<data name="HelpReconnectTitle" xml:space="preserve"><value>Подключено, но ничего не грузится?</value></data>
+<data name="HelpReconnectBody" xml:space="preserve"><value>Нажмите «Переподключиться». Если не помогло — обновите подписку и выберите другой способ в настройках.</value></data>
+<data name="HelpAppsTitle" xml:space="preserve"><value>Приложение идёт старым маршрутом?</value></data>
+<data name="HelpAppsBody" xml:space="preserve"><value>Полностью закройте и откройте приложение или перезапустите соединение в нём. Старые соединения могут сохранять прежний маршрут.</value></data>
+<data name="HelpBindingTitle" xml:space="preserve"><value>Переходите из Happ?</value></data>
+<data name="HelpBindingBody" xml:space="preserve"><value>Ссылка из Happ привязана к его установке. Создайте отдельное Windows-устройство или перенесите подключение в кабинете SLX. Мы не копируем идентификатор Happ.</value></data>
+<data name="Support" xml:space="preserve"><value>Написать в поддержку ↗</value></data>
+<data name="Website" xml:space="preserve"><value>Открыть сайт SLX ↗</value></data>
+<data name="SecurityNote" xml:space="preserve"><value>Без телеметрии посещений. Данные подключения зашифрованы средствами Windows. В alpha нет kill switch: при остановке сетевого модуля трафик может пойти напрямую. В режиме отдельных приложений общий DNS Windows тоже идёт напрямую.</value></data>
+<data name="VersionLabel" xml:space="preserve"><value>SLX VPN · 0.1.0-alpha.1</value></data>
+<data name="AlphaNotice" xml:space="preserve"><value>Предварительная версия. Реальные маршруты, DNS, восстановление после сна и чистая установка ещё проходят проверку.</value></data>
+<data name="ServiceHelp" xml:space="preserve"><value>Установите SLX через установщик и повторите попытку. Запускать приложение от администратора не нужно.</value></data>
+<data name="Busy" xml:space="preserve"><value>Подождите…</value></data>
+<data name="NoActiveApps" xml:space="preserve"><value>Выберите хотя бы одно приложение или режим «Весь компьютер».</value></data>
+<data name="FaultDeviceBound" xml:space="preserve"><value>Эта ссылка привязана к другой установке. Перенесите её в кабинете или добавьте Windows-устройство.</value></data>
+<data name="FaultAccess" xml:space="preserve"><value>Доступ недоступен, закончился или привязан к другой установке. Проверьте кабинет или перенесите подключение из Happ.</value></data>
+<data name="FaultUrl" xml:space="preserve"><value>Вставьте полную HTTPS-ссылку подписки с slxvpn.com.</value></data>
+<data name="FaultNetwork" xml:space="preserve"><value>Не удалось связаться с SLX. Проверьте интернет и повторите. Прежняя подписка сохранена.</value></data>
+<data name="FaultSubscription" xml:space="preserve"><value>Не удалось прочитать подписку. Обновите её в кабинете или обратитесь в поддержку.</value></data>
+<data name="FaultProfile" xml:space="preserve"><value>Эта версия не поддерживает такой способ подключения.</value></data>
+<data name="FaultStorage" xml:space="preserve"><value>Windows не удалось открыть защищённые настройки. Проверьте учётную запись Windows или обратитесь в поддержку.</value></data>
+<data name="FaultUnknown" xml:space="preserve"><value>Не удалось завершить действие. Повторите или обратитесь в поддержку.</value></data>
+<data name="FaultCancelled" xml:space="preserve"><value>Запрос отменён. Ссылка могла уже привязаться — при необходимости повторите с той же ссылкой.</value></data>
+<data name="FaultOwner" xml:space="preserve"><value>Активное подключение принадлежит другому пользователю Windows. Сначала отключите его в той учётной записи.</value></data>
+<data name="FaultCore" xml:space="preserve"><value>Не удалось запустить сетевой модуль. Переустановите SLX или обратитесь в поддержку.</value></data>
+<data name="SettingsSaved" xml:space="preserve"><value>Настройки сохранены.</value></data>
+<data name="Updated" xml:space="preserve"><value>Подписка обновлена.</value></data>
+<data name="Imported" xml:space="preserve"><value>Подписка добавлена. Выберите приложения и подключитесь.</value></data>
+<data name="WorkingRoute" xml:space="preserve"><value>Маршрут SLX</value></data>
+<data name="StatusStale" xml:space="preserve"><value>Не удалось обновить состояние. Статус подключения неизвестен.</value></data>
+<data name="NoMetrics" xml:space="preserve"><value>Состояние подключения проверяет служба SLX.</value></data>
+<data name="TrayOpen" xml:space="preserve"><value>Открыть SLX</value></data>
+<data name="TrayExit" xml:space="preserve"><value>Отключить VPN и выйти</value></data>
+<data name="TrayHint" xml:space="preserve"><value>SLX VPN</value></data>
+<data name="WindowTitle" xml:space="preserve"><value>SLX VPN</value></data>
+<data name="ExecutableFilter" xml:space="preserve"><value>Приложения (*.exe)|*.exe</value></data>
+<data name="FaultOtherVpn" xml:space="preserve"><value>Сетевой адаптер SLX уже существует. Сначала отключите прежнее подключение.</value></data>
+<data name="FaultServiceSecurity" xml:space="preserve"><value>Не удалось проверить установленную службу SLX. Переустановите приложение официальным установщиком. Запуск от администратора не нужен.</value></data>
+<data name="FaultSessions" xml:space="preserve"><value>В этой версии поддерживается один вошедший пользователь Windows. Сначала завершите другие сеансы.</value></data>
+</root>

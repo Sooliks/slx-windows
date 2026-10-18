@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?><root>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>2.0</value></resheader>
+<data name="NavConnection" xml:space="preserve"><value>Connection</value></data>
+<data name="NavApplications" xml:space="preserve"><value>Applications</value></data>
+<data name="NavSettings" xml:space="preserve"><value>Settings</value></data>
+<data name="NavHelp" xml:space="preserve"><value>Help</value></data>
+<data name="OpenSource" xml:space="preserve"><value>Open source</value></data>
+<data name="Account" xml:space="preserve"><value>My account ↗</value></data>
+<data name="WindowMinimize" xml:space="preserve"><value>Minimize</value></data>
+<data name="WindowMaximize" xml:space="preserve"><value>Maximize or restore</value></data>
+<data name="WindowClose" xml:space="preserve"><value>Close to tray</value></data>
+<data name="Eyebrow" xml:space="preserve"><value>SLX VPN / WINDOWS</value></data>
+<data name="ConnectionTitle" xml:space="preserve"><value>Your connection.</value></data>
+<data name="ConnectionSubtitle" xml:space="preserve"><value>A private route for the apps you choose.</value></data>
+<data name="NotConnected" xml:space="preserve"><value>VPN is off</value></data>
+<data name="Connected" xml:space="preserve"><value>VPN is connected</value></data>
+<data name="Connecting" xml:space="preserve"><value>Connecting…</value></data>
+<data name="Reconnecting" xml:space="preserve"><value>Reconnecting…</value></data>
+<data name="Stopping" xml:space="preserve"><value>Disconnecting…</value></data>
+<data name="ConnectionFailed" xml:space="preserve"><value>Connection needs attention</value></data>
+<data name="StatusUnknown" xml:space="preserve"><value>Checking the service…</value></data>
+<data name="StatusUnavailable" xml:space="preserve"><value>The SLX service is unavailable</value></data>
+<data name="Connect" xml:space="preserve"><value>Connect</value></data>
+<data name="Disconnect" xml:space="preserve"><value>Disconnect</value></data>
+<data name="Reconnect" xml:space="preserve"><value>Reconnect</value></data>
+<data name="ImportTitle" xml:space="preserve"><value>Add your SLX subscription</value></data>
+<data name="ImportDescription" xml:space="preserve"><value>Copy your personal connection link from your SLX account. Importing links this Windows installation to the device.</value></data>
+<data name="ImportButton" xml:space="preserve"><value>Add subscription</value></data>
+<data name="ReplaceSubscription" xml:space="preserve"><value>Replace link</value></data>
+<data name="ImportAction" xml:space="preserve"><value>Import</value></data>
+<data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+<data name="Close" xml:space="preserve"><value>Close</value></data>
+<data name="LinkLabel" xml:space="preserve"><value>Personal SLX link</value></data>
+<data name="LinkPlaceholder" xml:space="preserve"><value>https://slxvpn.com/sub/…</value></data>
+<data name="ImportFootnote" xml:space="preserve"><value>Your link is private. It is encrypted on this computer and is never included in diagnostics.</value></data>
+<data name="Subscription" xml:space="preserve"><value>Subscription</value></data>
+<data name="NoSubscription" xml:space="preserve"><value>Add a link to get started.</value></data>
+<data name="UpdateSubscription" xml:space="preserve"><value>Refresh</value></data>
+<data name="Freshness" xml:space="preserve"><value>Last updated</value></data>
+<data name="Expires" xml:space="preserve"><value>Access until</value></data>
+<data name="ExpiryUnknown" xml:space="preserve"><value>The server did not provide an expiry date.</value></data>
+<data name="Profile" xml:space="preserve"><value>Connection method</value></data>
+<data name="AutoProfile" xml:space="preserve"><value>Hysteria2 is preferred; VLESS is an alternative.</value></data>
+<data name="ProfileAdvanced" xml:space="preserve"><value>If a method does not work, select another here.</value></data>
+<data name="RoutingTitle" xml:space="preserve"><value>Where to use VPN</value></data>
+<data name="ModeSelected" xml:space="preserve"><value>Selected apps</value></data>
+<data name="ModeWhole" xml:space="preserve"><value>Entire computer</value></data>
+<data name="ModeSelectedDescription" xml:space="preserve"><value>Selected apps use SLX. Other apps connect directly.</value></data>
+<data name="ModeWholeDescription" xml:space="preserve"><value>Internet traffic from this computer uses SLX. Local networks remain direct.</value></data>
+<data name="SelectedApps" xml:space="preserve"><value>Apps using VPN</value></data>
+<data name="NoAppsTitle" xml:space="preserve"><value>Choose your first app</value></data>
+<data name="NoAppsDescription" xml:space="preserve"><value>Add a browser, messenger or another .exe. Nothing is selected automatically.</value></data>
+<data name="ManageApps" xml:space="preserve"><value>Choose applications</value></data>
+<data name="AppsTitle" xml:space="preserve"><value>Only what you choose.</value></data>
+<data name="AppsSubtitle" xml:space="preserve"><value>Turn VPN on for specific apps. Your list stays on this computer.</value></data>
+<data name="AddExecutable" xml:space="preserve"><value>Add .exe</value></data>
+<data name="RunningApps" xml:space="preserve"><value>Running apps</value></data>
+<data name="SearchApps" xml:space="preserve"><value>Search apps</value></data>
+<data name="RemoveApp" xml:space="preserve"><value>Remove from list</value></data>
+<data name="RouteApp" xml:space="preserve"><value>Route this app through VPN</value></data>
+<data name="NoSearchResults" xml:space="preserve"><value>No matching apps.</value></data>
+<data name="RulesPending" xml:space="preserve"><value>Your rules have changed. Reconnect to apply them to new connections.</value></data>
+<data name="RulesNotice" xml:space="preserve"><value>After changing a route, an app may need to reconnect. SLX does not close other apps.</value></data>
+<data name="AppLimitations" xml:space="preserve"><value>Desktop .exe apps are supported. Launchers, protected apps and Store apps may need additional setup. Per-app DNS isolation is not guaranteed.</value></data>
+<data name="DiscoveryTitle" xml:space="preserve"><value>Add a running app</value></data>
+<data name="DiscoveryDescription" xml:space="preserve"><value>Available running apps in this Windows session. You can also select an .exe file.</value></data>
+<data name="Add" xml:space="preserve"><value>Add</value></data>
+<data name="NothingRunning" xml:space="preserve"><value>No suitable running apps found. Select an .exe instead.</value></data>
+<data name="SettingsTitle" xml:space="preserve"><value>Make yourself at home.</value></data>
+<data name="SettingsSubtitle" xml:space="preserve"><value>Changes to appearance do not interrupt your VPN.</value></data>
+<data name="Appearance" xml:space="preserve"><value>Appearance</value></data>
+<data name="Language" xml:space="preserve"><value>Language</value></data>
+<data name="LanguageRu" xml:space="preserve"><value>Русский</value></data>
+<data name="LanguageEn" xml:space="preserve"><value>English</value></data>
+<data name="Theme" xml:space="preserve"><value>Theme</value></data>
+<data name="ThemeOlive" xml:space="preserve"><value>SLX / Olive</value></data>
+<data name="ThemeTerminal" xml:space="preserve"><value>Terminal</value></data>
+<data name="Behavior" xml:space="preserve"><value>App behavior</value></data>
+<data name="AutoStart" xml:space="preserve"><value>Launch SLX when I sign in to Windows</value></data>
+<data name="AutoStartHint" xml:space="preserve"><value>The app opens without automatically connecting.</value></data>
+<data name="MinimizeTray" xml:space="preserve"><value>Keep running in the tray when I close the window</value></data>
+<data name="MinimizeTrayHint" xml:space="preserve"><value>Use Exit in the tray menu to disconnect and quit.</value></data>
+<data name="SubscriptionSettings" xml:space="preserve"><value>Connection settings</value></data>
+<data name="RemoveSubscription" xml:space="preserve"><value>Remove saved subscription</value></data>
+<data name="RemoveConfirm" xml:space="preserve"><value>Remove this link from this computer? This does not revoke the device in your account.</value></data>
+<data name="ConfirmRemove" xml:space="preserve"><value>Remove link</value></data>
+<data name="HelpTitle" xml:space="preserve"><value>Here to help.</value></data>
+<data name="HelpSubtitle" xml:space="preserve"><value>A few simple steps if something is not loading.</value></data>
+<data name="HelpReconnectTitle" xml:space="preserve"><value>Connected, but no traffic?</value></data>
+<data name="HelpReconnectBody" xml:space="preserve"><value>Reconnect in SLX. If that does not help, refresh your subscription and try the alternative connection method in Settings.</value></data>
+<data name="HelpAppsTitle" xml:space="preserve"><value>An app still uses the old route?</value></data>
+<data name="HelpAppsBody" xml:space="preserve"><value>Fully close and open that app, or restart its connection. Existing connections may keep their previous route.</value></data>
+<data name="HelpBindingTitle" xml:space="preserve"><value>Moving from Happ?</value></data>
+<data name="HelpBindingBody" xml:space="preserve"><value>An existing Happ link belongs to that installation. Create a separate Windows device or transfer the connection in your SLX account. SLX never copies Happ’s device identity.</value></data>
+<data name="Support" xml:space="preserve"><value>Contact support ↗</value></data>
+<data name="Website" xml:space="preserve"><value>Open SLX website ↗</value></data>
+<data name="SecurityNote" xml:space="preserve"><value>No browsing telemetry. Secrets are encrypted with your Windows account. This alpha has no kill switch: traffic may go direct if the VPN core stops. In selected-app mode, shared Windows DNS goes direct.</value></data>
+<data name="VersionLabel" xml:space="preserve"><value>SLX VPN · 0.1.0-alpha.1</value></data>
+<data name="AlphaNotice" xml:space="preserve"><value>Preview release. Real tunnel, DNS, sleep recovery and clean-machine acceptance are still being verified.</value></data>
+<data name="ServiceHelp" xml:space="preserve"><value>Install SLX using its installer, then try again. Do not run the app as administrator.</value></data>
+<data name="Busy" xml:space="preserve"><value>Please wait…</value></data>
+<data name="NoActiveApps" xml:space="preserve"><value>Choose at least one app, or switch to Entire computer.</value></data>
+<data name="FaultDeviceBound" xml:space="preserve"><value>This link is already linked to another installation. Open your account to transfer it or add a Windows device.</value></data>
+<data name="FaultAccess" xml:space="preserve"><value>Access is unavailable, expired or linked to another installation. Open your account to check access or transfer a Happ connection.</value></data>
+<data name="FaultUrl" xml:space="preserve"><value>Enter a full HTTPS subscription link from slxvpn.com.</value></data>
+<data name="FaultNetwork" xml:space="preserve"><value>Could not reach SLX. Check your internet connection and retry. Your previous subscription is saved.</value></data>
+<data name="FaultSubscription" xml:space="preserve"><value>SLX could not read this subscription. Refresh it in your account or contact support.</value></data>
+<data name="FaultProfile" xml:space="preserve"><value>This connection method is not supported by this version.</value></data>
+<data name="FaultStorage" xml:space="preserve"><value>Windows could not open protected settings. Check your Windows account or contact support.</value></data>
+<data name="FaultUnknown" xml:space="preserve"><value>The operation could not be completed. Retry or contact support.</value></data>
+<data name="FaultCancelled" xml:space="preserve"><value>The request was cancelled. A link may already be bound; retry the same link if needed.</value></data>
+<data name="FaultOwner" xml:space="preserve"><value>Another Windows user owns the active connection. Disconnect in that account first.</value></data>
+<data name="FaultCore" xml:space="preserve"><value>The VPN engine is unavailable or could not start. Reinstall SLX or contact support.</value></data>
+<data name="SettingsSaved" xml:space="preserve"><value>Settings saved.</value></data>
+<data name="Updated" xml:space="preserve"><value>Subscription updated.</value></data>
+<data name="Imported" xml:space="preserve"><value>Subscription added. Choose apps and connect.</value></data>
+<data name="WorkingRoute" xml:space="preserve"><value>SLX route</value></data>
+<data name="StatusStale" xml:space="preserve"><value>Status could not be refreshed. Connection state is unknown.</value></data>
+<data name="NoMetrics" xml:space="preserve"><value>Connection status is checked by the SLX service.</value></data>
+<data name="TrayOpen" xml:space="preserve"><value>Open SLX</value></data>
+<data name="TrayExit" xml:space="preserve"><value>Disconnect and exit</value></data>
+<data name="TrayHint" xml:space="preserve"><value>SLX VPN</value></data>
+<data name="WindowTitle" xml:space="preserve"><value>SLX VPN</value></data>
+<data name="ExecutableFilter" xml:space="preserve"><value>Applications (*.exe)|*.exe</value></data>
+<data name="FaultOtherVpn" xml:space="preserve"><value>Another SLX tunnel adapter is already present. Disconnect the previous session before trying again.</value></data>
+<data name="FaultServiceSecurity" xml:space="preserve"><value>SLX could not verify its installed service. Reinstall using the official installer; do not run this app as administrator.</value></data>
+<data name="FaultSessions" xml:space="preserve"><value>Only one signed-in Windows user is supported in this preview. Sign out of other sessions first.</value></data>
+</root>
