@@ -112,7 +112,7 @@ public sealed partial class MainViewModel
         "OWNER_MISMATCH" or "OTHER_USER" or "CONTROLLER_OWNED" => "FaultOwner",
         "MULTI_SESSION_UNSUPPORTED" => "FaultSessions", "TUN_ADAPTER_CONFLICT" => "FaultOtherVpn", "TUN_CLEANUP_PENDING" => "FaultCleanup", "CORE_STOP_FAILED" => "FaultCore",
         "SERVICE_IDENTITY_FAILED" or "SERVICE_ACCESS_DENIED" => "FaultServiceSecurity", "CANCELLED" => "FaultCancelled",
-        "ADAPTER_QUERY_FAILED" or "CORE_MISSING" or "CORE_FAILED" or "CORE_UNAVAILABLE" or "TUNNEL_NOT_READY" or "CORE_EXITED" or "CORE_START_FAILED" or "VPN_PROBE_FAILED" or "TUN_NOT_READY" => "FaultCore", _ => "FaultUnknown"
+        "TUN_ADDRESS_FAILED" or "ADAPTER_QUERY_FAILED" or "CORE_MISSING" or "CORE_FAILED" or "CORE_UNAVAILABLE" or "TUNNEL_NOT_READY" or "CORE_EXITED" or "CORE_START_FAILED" or "VPN_PROBE_FAILED" or "TUN_NOT_READY" => "FaultCore", _ => "FaultUnknown"
         });
     }
     public void ExitUiOnly() { Dispose(); Application.Current.Shutdown(); }
@@ -130,7 +130,7 @@ public sealed partial class MainViewModel
     public void Dispose()
     {
         if (disposed) return;
-        disposed = true; CancelRoutingApply(); CancelStartupRefresh(); timer.Stop(); timer.Tick -= PollTick; operation?.Cancel();
+        disposed = true; discoveryCancellation?.Cancel(); CancelRoutingApply(); CancelStartupRefresh(); timer.Stop(); timer.Tick -= PollTick; operation?.Cancel();
         Text.Catalog.PropertyChanged -= LanguageChanged;
         GC.SuppressFinalize(this);
     }

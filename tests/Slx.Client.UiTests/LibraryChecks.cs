@@ -12,6 +12,7 @@ internal static class LibraryChecks
     {
         var model=(MainViewModel)window.DataContext;
         var oldPage=model.Page;var oldTheme=model.Theme;
+        model.CatalogEntries=[];
         model.Discovered.Clear();
         foreach(var name in new[]{"Browser","Messenger","Music","Video","Editor","Game"})
             model.Discovered.Add(new(Guid.NewGuid(),name,@"C:\Synthetic Library\"+name+".exe"));

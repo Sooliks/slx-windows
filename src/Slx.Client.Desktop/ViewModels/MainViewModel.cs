@@ -42,6 +42,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         AddExecutableCommand = new RelayCommand(AddExecutable);
         DiscoverCommand = new RelayCommand(() => _ = DiscoverApplicationsAsync(), () => !Discovering);
         AddDiscoveredCommand = new RelayCommand<AppRule>(AddDiscovered);
+        AddLibraryCommand = new RelayCommand<LibraryEntry>(AddLibrary);
         RemoveAppCommand = new RelayCommand<AppItemViewModel>(RemoveApp);
         OpenAccountCommand = new RelayCommand(() => OpenLink("https://slxvpn.com/account"));
         OpenSupportCommand = new RelayCommand(() => OpenLink("https://t.me/slxvpn?direct"));
@@ -56,7 +57,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public ObservableCollection<AppRule> Discovered { get; } = [];
     public IEnumerable<AppItemViewModel> FilteredApplications => Applications.Where(x =>
         x.Name.Contains(Search, StringComparison.CurrentCultureIgnoreCase));
-    public IEnumerable<AppItemViewModel> SelectedApplications => Applications.Where(x => x.Enabled).Take(4);
+    public IEnumerable<AppItemViewModel> SelectedApplications => Applications;
     public bool HasApplications => Applications.Count > 0;
     public bool HasSelectedApplications => Applications.Any(x => x.Enabled);
     public bool HasSearchResults => FilteredApplications.Any();
@@ -104,6 +105,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public RelayCommand AddExecutableCommand { get; }
     public RelayCommand DiscoverCommand { get; }
     public RelayCommand<AppRule> AddDiscoveredCommand { get; }
+    public RelayCommand<LibraryEntry> AddLibraryCommand { get; }
     public RelayCommand<AppItemViewModel> RemoveAppCommand { get; }
     public RelayCommand OpenAccountCommand { get; }
     public RelayCommand OpenSupportCommand { get; }
@@ -116,7 +118,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private void Notice(string key) { messageKey = key; OnPropertyChanged(nameof(Message)); OnPropertyChanged(nameof(ShowMessage)); }
     private void NotifyState()
     {
-        foreach (var name in new[] { nameof(RoutingUpdateText), nameof(IsConnected), nameof(CanEditRouting), nameof(CanConnect), nameof(CanReconnect), nameof(ConnectionAction), nameof(StatusText), nameof(StatusDetail), nameof(LastServiceCode), nameof(HasServiceCode), nameof(ServiceCodeLabel), nameof(HasSubscription), nameof(NoSubscription) }) OnPropertyChanged(name);
+        foreach (var name in new[] { nameof(ConnectionDuration), nameof(ActiveProtocol), nameof(LastConnectionCheck), nameof(RoutingUpdateText), nameof(IsConnected), nameof(CanEditRouting), nameof(CanConnect), nameof(CanReconnect), nameof(ConnectionAction), nameof(StatusText), nameof(StatusDetail), nameof(LastServiceCode), nameof(HasServiceCode), nameof(ServiceCodeLabel), nameof(HasSubscription), nameof(NoSubscription) }) OnPropertyChanged(name);
         ImportCommand?.NotifyCanExecuteChanged(); RefreshCommand?.NotifyCanExecuteChanged();
         ReconnectCommand?.NotifyCanExecuteChanged(); AskRemoveCommand?.NotifyCanExecuteChanged();
     }

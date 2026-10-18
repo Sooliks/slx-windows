@@ -2,16 +2,18 @@
 
 **Открытый исходный код · Open source.** Самостоятельный Windows-клиент SLX с выбором приложений для VPN, в стиле сайта SLX.
 
-**0.1.0-alpha.3 — ранняя версия для Windows 11 x64.** Исправление браузерных TLS/IPv6-обрывов, библиотека иконок и автоматическое применение приложений. Сборка установщика не означает завершённую системную приёмку. Проверки и ограничения: [docs/VERIFICATION.md](docs/VERIFICATION.md).
+**0.1.0-alpha.4 — ранняя версия для Windows 11 x64.** Исправление ChatGPT/Claude, каталог популярных программ, быстрые переключатели и статистика подключения. Сборка установщика не означает завершённую системную приёмку. Проверки и ограничения: [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
-[Скачать alpha.3](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.3) · [Предыдущая alpha.1](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.1) · [SLX](https://slxvpn.com) · [Поддержка](https://t.me/slxvpn?direct)
+[Скачать alpha.4](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.4) · [Предыдущая alpha.1](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.1) · [SLX](https://slxvpn.com) · [Поддержка](https://t.me/slxvpn?direct)
 
 ## Возможности
 
 - Импорт личной ссылки SLX: Hysteria2 и VLESS/XHTTP; выбор профиля.
 - Два режима: VPN для выбранных .exe или всего компьютера.
-- Быстрый выбор открытых программ с поиском, ручной выбор .exe и включение отдельных правил.
+- Общий каталог из 18 популярных программ, локальное обнаружение установленных приложений, иконки и ручной выбор .exe. Программу можно добавить до запуска.
+- Переключатели приложений на главной, длительность подключения, активный протокол и время ответа службы.
 - RU/EN, темы SLX и Terminal, системный трей и переподключение.
+- Каталог обновляется с SLX и работает без сети; список программ компьютера не отправляется на сервер.
 - Пользовательский интерфейс без прав администратора; отдельная сетевая служба.
 - DPAPI для локального хранения личной ссылки; секреты не попадают в исходники или журналы.
 
@@ -25,7 +27,7 @@
 
 Ссылка, уже привязанная к Happ, требует штатного переноса/сброса устройства через кабинет. SLX не копирует HWID Happ.
 Подписки и настройки остаются в %LOCALAPPDATA%/SLX/VPN; удаление приложения не стирает их автоматически.
-Обновление alpha.2 → alpha.3 использует тот же установщик приложения и идентификатор установки; повторно создавать устройство ради обновления не нужно.
+Обновление alpha.3 → alpha.4 использует тот же установщик приложения и идентификатор установки; повторно создавать устройство ради обновления не нужно.
 
 ## Ограничения alpha
 
@@ -52,11 +54,11 @@ pwsh -File scripts/verify.ps1
 pwsh -File scripts/build.ps1 -Candidate
 # После приёмки, проверки и коммита исходников:
 pwsh -File scripts/build.ps1
-pwsh -File scripts/package-source.ps1 -BaseRef v0.1.0-alpha.2
+pwsh -File scripts/package-source.ps1 -BaseRef v0.1.0-alpha.3
 ```
 
-Версия берётся из Directory.Build.props. Установщик и архивы: artifacts/release/0.1.0-alpha.3/.
-Рабочие сборки: artifacts/work/0.1.0-alpha.3/. Предыдущие версии не перезаписываются.
+Версия берётся из Directory.Build.props. Установщик и архивы: artifacts/release/0.1.0-alpha.4/.
+Рабочие сборки: artifacts/work/0.1.0-alpha.4/. Предыдущие версии не перезаписываются.
 Кандидаты -Candidate изолированы в artifacts/candidates/<version>/<timestamp>/ и не допускаются к публикации.
 Самодостаточная сборка включает .NET 10.0.13; пользователю не нужна отдельная установка .NET.
 Файлы Xray загружаются из закреплённого официального релиза, SHA256 и подпись драйвера проверяются.
@@ -70,7 +72,7 @@ MIT для исходников SLX; сторонние компоненты и�
 ## English
 
 An open-source SLX Windows client with per-application routing, Hysteria2/VLESS, RU/EN and native WPF UI.
-Alpha.2 improves local service communication and desktop usability; installed-service acceptance must be checked separately.
+Alpha.4 adds a curated local-first application catalog, dashboard switches and connection facts, and mitigates a confirmed browser IPv6 source-address failure.
 Download the unsigned alpha installer from Releases, install it, import a separate SLX device link, select applications and connect.
 This alpha has **no kill switch**; shared Windows DNS is direct in selected-app mode.
 System/network acceptance is incomplete. See SECURITY.md and docs/VERIFICATION.md before relying on it.

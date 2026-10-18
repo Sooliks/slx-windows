@@ -134,7 +134,7 @@
 <data name="ServiceUnknownHelp" xml:space="preserve"><value>The service did not reply in time. Connection state is unknown; SLX will check it again.</value></data>
 <data name="ExitUnknownBody" xml:space="preserve"><value>SLX could not confirm that the VPN stopped. It may still be running. You can cancel and retry, or close only this app without claiming the VPN is off.</value></data>
  <data name="QuickApps" xml:space="preserve"><value>Application library</value></data>
- <data name="QuickAppsHint" xml:space="preserve"><value>Choose an open app by its icon. You can also add an executable manually.</value></data>
+ <data name="QuickAppsHint" xml:space="preserve"><value>Popular apps and programs on this computer. Add apps before launching them. Your app inventory stays on this computer.</value></data>
  <data name="RefreshApps" xml:space="preserve"><value>Refresh list</value></data>
  <data name="FindRunningApp" xml:space="preserve"><value>Find an app</value></data>
  <data name="FindingApps" xml:space="preserve"><value>Finding running apps…</value></data>
@@ -146,4 +146,10 @@
  <data name="ProfilesAutoRefresh" xml:space="preserve"><value>Connection methods refresh at startup.</value></data>
  <data name="FaultCleanup" xml:space="preserve"><value>Windows is still finishing VPN disconnection. Wait a few seconds and try connecting again.</value></data>
 <data name="RulesUnconfirmed" xml:space="preserve"><value>Changes saved. Could not confirm they took effect — check the connection.</value></data>
+<data name="FindExecutable" xml:space="preserve"><value>Choose file</value></data>
+<data name="StatsTitle" xml:space="preserve"><value>Connection details</value></data>
+<data name="StatsDuration" xml:space="preserve"><value>Connected for</value></data>
+<data name="StatsProtocol" xml:space="preserve"><value>Connection method</value></data>
+<data name="StatsApps" xml:space="preserve"><value>Selected apps</value></data>
+<data name="StatsChecked" xml:space="preserve"><value>Last checked</value></data>
 </root>

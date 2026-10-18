@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.3. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.4. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -45,3 +45,10 @@ The release remains a prerelease until the required acceptance passes.
 
 ## Alpha.3 candidate
 See docs/NETWORK_DIAGNOSIS.md and docs/RELEASE_NOTES_ALPHA3.md. Add local icon library and automatic coalesced routing application with bounded reconnect. No retry after an unknown mutation result. IPv6 TLS hostname restoration preserves IPv4/LAN destinations and certificate validation; no broad IPv6/ECH guarantee.
+
+## Alpha.4 candidate
+See docs/RELEASE_NOTES_ALPHA4.md. Apply SkipAsSource only to the recorded owned TUN IPv6 address before Connected.
+A curated public catalog has an embedded fallback; local discovery supports programs that are not running.
+No inventory collection. Dashboard app switches apply automatically and remain present when disabled.
+Connection facts derive from authoritative service observations; no invented speed or traffic counters.
+The catalog API is an additive public contract with schemaVersion 1; no client/server credentials or DB migration.

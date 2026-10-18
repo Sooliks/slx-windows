@@ -24,6 +24,7 @@ internal static class FollowupChecks
         CheckQuickAdd();
         LibraryChecks.Run(window);
         AutoRoutingChecks.Run();
+        DashboardChecks.Run(window);
         CheckStartupRefresh();
     }
     private static void CheckQuickAdd()

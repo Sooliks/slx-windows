@@ -50,7 +50,7 @@ public sealed partial class MainViewModel
     {
         preferences = preferences with { Applications = Applications.Select(x => x.ToRule()).ToList() };
         SavePreferences();
-        foreach (var name in new[] { nameof(FilteredApplications), nameof(SelectedApplications), nameof(HasApplications), nameof(HasSelectedApplications), nameof(HasSearchResults) }) OnPropertyChanged(name);
+        foreach (var name in new[] { nameof(SelectedAppCount), nameof(FilteredApplications), nameof(HasApplications), nameof(HasSelectedApplications), nameof(HasSearchResults) }) OnPropertyChanged(name);
     }
 
     private void AddExecutable()

@@ -4,18 +4,18 @@
   <Label Content="{l:Tr FindRunningApp}" Target="{Binding ElementName=QuickSearch}" Padding="0,15,0,7" Foreground="{DynamicResource Muted}"/>
   <TextBox x:Name="QuickSearch" Text="{Binding DiscoverySearch, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{l:Tr FindRunningApp}"/>
   <TextBlock Text="{l:Tr FindingApps}" Style="{StaticResource MutedText}" Margin="0,12,0,0" Visibility="{Binding Discovering, Converter={StaticResource VisibleWhen}}"/>
-  <ScrollViewer MaxHeight="340" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,16,0,0"><ItemsControl ItemsSource="{Binding FilteredDiscovered}">
+  <ItemsControl ItemsSource="{Binding FilteredLibrary}" Margin="0,16,0,0">
    <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
    <ItemsControl.ItemTemplate><DataTemplate>
-    <Button Width="154" Height="154" Padding="12" Margin="0,0,10,10" Command="{Binding DataContext.AddDiscoveredCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" ToolTip="{Binding ExecutablePath}" AutomationProperties.Name="{Binding Name}" AutomationProperties.HelpText="{l:Tr Add}">
+    <Button Width="154" Height="154" Padding="12" Margin="0,0,10,10" Command="{Binding DataContext.AddLibraryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" ToolTip="{Binding Detail}" AutomationProperties.Name="{Binding Name}" AutomationProperties.HelpText="{l:Tr Add}">
      <Grid><Grid.RowDefinitions><RowDefinition Height="58"/><RowDefinition Height="*"/><RowDefinition Height="20"/></Grid.RowDefinitions>
-      <Image Source="{Binding ExecutablePath, Converter={StaticResource ApplicationIcon}}" Width="44" Height="44" HorizontalAlignment="Center"/>
+      <Image Source="{Binding Icon}" Width="44" Height="44" HorizontalAlignment="Center"/>
       <TextBlock Grid.Row="1" Text="{Binding Name}" TextAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="42" VerticalAlignment="Center" FontWeight="SemiBold"/>
-      <TextBlock Grid.Row="2" Text="{l:Tr Add}" Foreground="{DynamicResource Accent}" TextAlignment="Center" FontSize="11"/>
+      <TextBlock Grid.Row="2" Text="{Binding Action}" Foreground="{DynamicResource Accent}" TextAlignment="Center" FontSize="11"/>
      </Grid>
     </Button>
    </DataTemplate></ItemsControl.ItemTemplate>
-  </ItemsControl></ScrollViewer>
+  </ItemsControl>
   <TextBlock Text="{l:Tr QuickAppsEmpty}" FontSize="12" Margin="0,10,0,0"><TextBlock.Style><Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding HasDiscoveryResults}" Value="False"><Setter Property="Visibility" Value="Visible"/></DataTrigger><DataTrigger Binding="{Binding Discovering}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
  </StackPanel></Border>
 </UserControl>

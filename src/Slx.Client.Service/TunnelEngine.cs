@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using Slx.Client.Core;
+using Slx.Client.Windows;
 
 namespace Slx.Client.Service;
 
@@ -90,6 +91,7 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
             config = "";
             await LocalProbe.WaitAsync(probe.Port, probe.User, probe.Password, () => !process.HasExited, cancellationToken);
             ownedAdapterId = LocalProbe.AdapterIdentity() ?? throw new ClientFault("TUN_NOT_READY");
+            TunnelSourcePolicy.Apply(ownedAdapterId);
             cancellationToken.ThrowIfCancellationRequested();
             if (process.HasExited || !LocalProbe.TunnelReady()) throw new ClientFault("CORE_EXITED");
             state = new(TunnelPhase.Connected, DateTimeOffset.UtcNow, plan.Profile.Name,

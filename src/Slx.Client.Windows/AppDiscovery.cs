@@ -31,7 +31,7 @@ public static class AppDiscovery
                     if (process.SessionId != Process.GetCurrentProcess().SessionId) continue;
                     if (process.Id == Environment.ProcessId || process.MainWindowHandle == IntPtr.Zero) continue;
                     var path = process.MainModule?.FileName;
-                    if (path is not null && !found.ContainsKey(path)) found[path] = FromExecutable(path);
+                    if (path is not null && !path.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.Windows) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) && !found.ContainsKey(path)) found[path] = FromExecutable(path);
                 }
                 catch (Exception ex) when (ex is Win32Exception or InvalidOperationException or IOException or UnauthorizedAccessException or ClientFault) { }
             }
