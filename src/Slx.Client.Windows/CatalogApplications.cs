@@ -22,6 +22,7 @@ public static class CatalogApplications
         {
             try
             {
+                if(!LibraryApplication.IsCandidate(path))return;
                 var app=AppDiscovery.FromExecutable(path);
                 if(catalog.Any(item=>item.Executables.Contains(Path.GetFileName(app.ExecutablePath),StringComparer.OrdinalIgnoreCase)))
                     found.TryAdd(app.ExecutablePath,app);

@@ -52,7 +52,7 @@ foreach ($lock in Get-ChildItem src -Filter packages.lock.json -Recurse) {
  version=$metadata.Version; fileVersion=$metadata.FileVersion; status='PARTIAL'
  source='https://github.com/Sooliks/slx-windows'; commit=$commit; baseCommit=$baseCommit
  sourceArchives=$(if ($baseCommit) { 'Changed archive uses git diff from baseCommit; full archive contains all reviewed tracked files. Deletions are separate.' } else { 'Initial source: changed and full inventories are identical.' })
- core=$manifest; build=$build; dotnetRuntime=$metadata.RuntimeVersion; sdk=$metadata.SdkVersion; platform='Windows 11 x64'
+ core=$manifest; build=$build; dotnetRuntime=$metadata.RuntimeVersion; sdk=$metadata.SdkVersion; platform='Windows 10 / 11 (win-x64); Windows 10 acceptance pending'
  applicationSigned=$false; installerSigned=$false; driverSignature='Vendor signature checked by fetch-runtime.ps1 during build'
  nuget=($dependencies | Sort-Object -Unique)
 } | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $directory 'provenance.json') -Encoding utf8NoBOM

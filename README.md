@@ -2,9 +2,9 @@
 
 **Открытый исходный код · Open source.** Самостоятельный Windows-клиент SLX с выбором приложений для VPN, в стиле сайта SLX.
 
-**0.1.0-alpha.4 — ранняя версия для Windows 11 x64.** Исправление ChatGPT/Claude, каталог популярных программ, быстрые переключатели и статистика подключения. Сборка установщика не означает завершённую системную приёмку. Проверки и ограничения: [docs/VERIFICATION.md](docs/VERIFICATION.md).
+**0.1.0-alpha.5 — ранняя версия для Windows 10 / 11.** Исправление ChatGPT/Claude, каталог популярных программ, быстрые переключатели и статистика подключения. Сборка установщика не означает завершённую системную приёмку. Проверки и ограничения: [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
-[Скачать alpha.4](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.4) · [Предыдущая alpha.1](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.1) · [SLX](https://slxvpn.com) · [Поддержка](https://t.me/slxvpn?direct)
+[Скачать alpha.5](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.5) · [Предыдущая alpha.1](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.1) · [SLX](https://slxvpn.com) · [Поддержка](https://t.me/slxvpn?direct)
 
 ## Возможности
 
@@ -27,7 +27,7 @@
 
 Ссылка, уже привязанная к Happ, требует штатного переноса/сброса устройства через кабинет. SLX не копирует HWID Happ.
 Подписки и настройки остаются в %LOCALAPPDATA%/SLX/VPN; удаление приложения не стирает их автоматически.
-Обновление alpha.3 → alpha.4 использует тот же установщик приложения и идентификатор установки; повторно создавать устройство ради обновления не нужно.
+Обновление alpha.4 → alpha.5 использует тот же установщик приложения и идентификатор установки; повторно создавать устройство ради обновления не нужно.
 
 ## Ограничения alpha
 
@@ -46,7 +46,7 @@ SLX-приложение и установщик пока не подписан�
 C# / .NET 10 LTS, WPF/MVVM, Windows Service, Xray-core 26.9.9, официальный Wintun, Inno Setup 6.
 Один локальный сетевой процесс обслуживает оба протокола. Исходники сайта и серверные секреты сюда не входят.
 
-На Windows 11 x64: .NET SDK из global.json, PowerShell 7, Inno Setup 6.
+На Windows 10 / 11: .NET SDK из global.json, PowerShell 7, Inno Setup 6.
 
 ```powershell
 pwsh -File scripts/verify.ps1
@@ -54,11 +54,11 @@ pwsh -File scripts/verify.ps1
 pwsh -File scripts/build.ps1 -Candidate
 # После приёмки, проверки и коммита исходников:
 pwsh -File scripts/build.ps1
-pwsh -File scripts/package-source.ps1 -BaseRef v0.1.0-alpha.3
+pwsh -File scripts/package-source.ps1 -BaseRef v0.1.0-alpha.4
 ```
 
-Версия берётся из Directory.Build.props. Установщик и архивы: artifacts/release/0.1.0-alpha.4/.
-Рабочие сборки: artifacts/work/0.1.0-alpha.4/. Предыдущие версии не перезаписываются.
+Версия берётся из Directory.Build.props. Установщик и архивы: artifacts/release/0.1.0-alpha.5/.
+Рабочие сборки: artifacts/work/0.1.0-alpha.5/. Предыдущие версии не перезаписываются.
 Кандидаты -Candidate изолированы в artifacts/candidates/<version>/<timestamp>/ и не допускаются к публикации.
 Самодостаточная сборка включает .NET 10.0.13; пользователю не нужна отдельная установка .NET.
 Файлы Xray загружаются из закреплённого официального релиза, SHA256 и подпись драйвера проверяются.
@@ -78,3 +78,6 @@ This alpha has **no kill switch**; shared Windows DNS is direct in selected-app 
 System/network acceptance is incomplete. See SECURITY.md and docs/VERIFICATION.md before relying on it.
 
 Alpha.3: библиотека с локальными иконками, автоматическое применение списка и проверяемое исправление TLS/IPv6. Подробности: [диагностика](docs/NETWORK_DIAGNOSIS.md).
+
+Windows 10: начиная со сборки 19041, целевая совместимость предварительной версии. Фактическая проверка на Windows 10 ещё не завершена. [Границы совместимости](docs/COMPATIBILITY.md).
+Автоматическая библиотека исключает типовые deinstaller EXE для всех продуктов. Пользовательские правила и ручной выбор файла сохраняются.

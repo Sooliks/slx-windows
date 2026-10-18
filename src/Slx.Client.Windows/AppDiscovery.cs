@@ -31,7 +31,7 @@ public static class AppDiscovery
                     if (process.SessionId != Process.GetCurrentProcess().SessionId) continue;
                     if (process.Id == Environment.ProcessId || process.MainWindowHandle == IntPtr.Zero) continue;
                     var path = process.MainModule?.FileName;
-                    if (path is not null && !path.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.Windows) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) && !found.ContainsKey(path)) found[path] = FromExecutable(path);
+                    if (path is not null && LibraryApplication.IsCandidate(path) && !path.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.Windows) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) && !found.ContainsKey(path)) found[path] = FromExecutable(path);
                 }
                 catch (Exception ex) when (ex is Win32Exception or InvalidOperationException or IOException or UnauthorizedAccessException or ClientFault) { }
             }
@@ -53,7 +53,9 @@ public static class AppDiscovery
                     if (entry?.GetValue("DisplayIcon") is not string icon) continue;
                     var path = icon.Trim().Trim('"');
                     var comma = path.LastIndexOf(','); if (comma > 0) path = path[..comma].Trim().Trim('"');
-                    try { var app = FromExecutable(Environment.ExpandEnvironmentVariables(path)); found.TryAdd(app.ExecutablePath, app); }
+                    path = Environment.ExpandEnvironmentVariables(path);
+                    if (!LibraryApplication.IsCandidate(path)) continue;
+                    try { var app = FromExecutable(path); found.TryAdd(app.ExecutablePath, app); }
                     catch (Exception ex) when (ex is ClientFault or IOException or UnauthorizedAccessException or ArgumentException) { }
                 }
             }

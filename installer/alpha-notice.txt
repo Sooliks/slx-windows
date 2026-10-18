@@ -1,4 +1,4 @@
-SLX VPN 0.1.0 alpha — Windows 11 x64
+SLX VPN 0.1.0 alpha — Windows 10 / 11
 Open-source client: https://github.com/Sooliks/slx-windows
 
 This is an unsigned early test release, not a fully accepted production client.

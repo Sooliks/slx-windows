@@ -1,3 +1,9 @@
+# Verification — 0.1.0-alpha.5
+
+STATUS: PARTIAL. Windows 10 / 11 target; actual execution here is Windows 11.
+scripts/verify.ps1: exit 0, 140 unit/Windows and one WPF scenario passed, zero warnings/errors. Twelve new policy cases cover uninstall variants and preserving genuine app names and parent directories.
+Installer admits Windows 10 build19041+; real Windows 10 installer, UI and TUN acceptance remain open. Source review is not OS execution. See docs/COMPATIBILITY.md. Historical evidence below.
+
 # Verification — 0.1.0-alpha.4
 
 STATUS: PARTIAL. Windows 11 x64 prerelease. Historical alpha.3 and alpha.2 evidence remains below.

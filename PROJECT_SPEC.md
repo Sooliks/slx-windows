@@ -1,10 +1,10 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.4. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.5. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
-Windows 11 x64 primary; Windows 10 compatibility must be separately verified.
+Windows 10 build 19041+ and Windows 11 are compatibility targets; installed Windows 10 acceptance remains open.
 Pinned Xray core 26.9.9, official Wintun, per-process TUN routing; HY2 primary, VLESS/XHTTP fallback.
 The interface runs without elevation. One Windows service owns network/core changes.
 No production server, website, subscription, device slot or HWID security changes.
@@ -52,3 +52,4 @@ A curated public catalog has an embedded fallback; local discovery supports prog
 No inventory collection. Dashboard app switches apply automatically and remain present when disabled.
 Connection facts derive from authoritative service observations; no invented speed or traffic counters.
 The catalog API is an additive public contract with schemaVersion 1; no client/server credentials or DB migration.
+Alpha.5: generic automatic-library uninstall filtering, Windows 10 installer threshold and shared Win10/11 manifest. No networking/configuration changes. See docs/COMPATIBILITY.md.
