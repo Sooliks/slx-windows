@@ -21,11 +21,11 @@ foreach ($name in @('xray.exe','wintun.dll')) {
  $source = Join-Path $unpacked $name
  if (-not (Test-Path -LiteralPath $source)) { throw ('Missing upstream runtime: ' + $name) }
  Copy-Item -LiteralPath $source -Destination (Join-Path $out $name) -Force
- $files += @{ name=$name; sha256=(Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash.ToLowerInvariant() }
+ $files += [ordered]@{ name=$name; sha256=(Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash.ToLowerInvariant() }
 }
 $signature = Get-AuthenticodeSignature -LiteralPath (Join-Path $out 'wintun.dll')
 if ($signature.Status -ne 'Valid') { throw 'Wintun must have a valid vendor Authenticode signature' }
-$manifest = @{ xrayVersion='26.9.9'; files=$files; source=$url; archiveSha256=$sha; driverSignatureStatus=[string]$signature.Status; driverSigner=$signature.SignerCertificate.Subject }
+$manifest = [ordered]@{ xrayVersion='26.9.9'; files=$files; source=$url; archiveSha256=$sha; driverSignatureStatus=[string]$signature.Status; driverSigner=$signature.SignerCertificate.Subject }
 $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $out 'runtime-manifest.json') -Encoding utf8NoBOM
 [IO.Directory]::CreateDirectory((Join-Path $root 'runtime')) | Out-Null
 $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $root 'runtime/runtime-manifest.json') -Encoding utf8NoBOM

@@ -1,17 +1,17 @@
 {
+  "xrayVersion": "26.9.9",
   "files": [
     {
-      "sha256": "0d0fc0ea2b05641acb78c01fc36ad694e7b029861b2d5eb93da0e3e9fda9a98f",
-      "name": "xray.exe"
+      "name": "xray.exe",
+      "sha256": "0d0fc0ea2b05641acb78c01fc36ad694e7b029861b2d5eb93da0e3e9fda9a98f"
     },
     {
-      "sha256": "e5da8447dc2c320edc0fc52fa01885c103de8c118481f683643cacc3220dafce",
-      "name": "wintun.dll"
+      "name": "wintun.dll",
+      "sha256": "e5da8447dc2c320edc0fc52fa01885c103de8c118481f683643cacc3220dafce"
     }
   ],
-  "driverSignatureStatus": "Valid",
-  "archiveSha256": "244deaba2098c2964e49bba90df3707777e5f5f428a82d2f29604015f24beec2",
   "source": "https://github.com/XTLS/Xray-core/releases/download/v26.9.9/Xray-windows-64.zip",
-  "driverSigner": "CN=WireGuard LLC, O=WireGuard LLC, L=Boulder, S=Colorado, C=US, SERIALNUMBER=4227913, OID.2.5.4.15=Private Organization, OID.1.3.6.1.4.1.311.60.2.1.2=Ohio, OID.1.3.6.1.4.1.311.60.2.1.3=US",
-  "xrayVersion": "26.9.9"
+  "archiveSha256": "244deaba2098c2964e49bba90df3707777e5f5f428a82d2f29604015f24beec2",
+  "driverSignatureStatus": "Valid",
+  "driverSigner": "CN=WireGuard LLC, O=WireGuard LLC, L=Boulder, S=Colorado, C=US, SERIALNUMBER=4227913, OID.2.5.4.15=Private Organization, OID.1.3.6.1.4.1.311.60.2.1.2=Ohio, OID.1.3.6.1.4.1.311.60.2.1.3=US"
 }
