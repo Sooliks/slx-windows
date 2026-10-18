@@ -29,6 +29,7 @@ public static class AppDiscovery
                 try
                 {
                     if (process.SessionId != Process.GetCurrentProcess().SessionId) continue;
+                    if (process.Id == Environment.ProcessId || process.MainWindowHandle == IntPtr.Zero) continue;
                     var path = process.MainModule?.FileName;
                     if (path is not null && !found.ContainsKey(path)) found[path] = FromExecutable(path);
                 }

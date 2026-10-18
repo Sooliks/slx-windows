@@ -1,5 +1,14 @@
 #ifndef AppVersion
- #define AppVersion "0.1.0-alpha.1"
+ #error "Build with scripts/build.ps1: AppVersion is required"
+#endif
+#ifndef AppFileVersion
+ #error "Build with scripts/build.ps1: AppFileVersion is required"
+#endif
+#ifndef BundleDir
+ #error "Build with scripts/build.ps1: BundleDir is required"
+#endif
+#ifndef ReleaseDir
+ #error "Build with scripts/build.ps1: ReleaseDir is required"
 #endif
 [Setup]
 AppId={{916CD685-F2C4-4F8B-AC9C-A5BC222A49CE}
@@ -17,7 +26,7 @@ ArchitecturesAllowed=x64os
 ArchitecturesInstallIn64BitMode=x64os
 MinVersion=10.0.22000
 PrivilegesRequired=admin
-OutputDir=..\artifacts\release
+OutputDir={#ReleaseDir}
 OutputBaseFilename=SLX-VPN-{#AppVersion}-win-x64-setup
 SetupIconFile=..\assets\slx.ico
 UninstallDisplayIcon={app}\SLX VPN.exe
@@ -26,7 +35,8 @@ SolidCompression=yes
 WizardStyle=modern
 CloseApplications=yes
 RestartApplications=no
-VersionInfoVersion=0.1.0.1
+VersionInfoVersion={#AppFileVersion}
+VersionInfoTextVersion={#AppVersion}
 LicenseFile=..\LICENSE
 InfoBeforeFile=alpha-notice.txt
 [Languages]
@@ -35,7 +45,7 @@ Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 [Files]
-Source: "..\artifacts\bundle\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#BundleDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 [Icons]
 Name: "{group}\SLX VPN"; Filename: "{app}\SLX VPN.exe"
 Name: "{commondesktop}\SLX VPN"; Filename: "{app}\SLX VPN.exe"; Tasks: desktopicon

@@ -1,6 +1,4 @@
 using System.IO.Pipes;
-using System.Security.AccessControl;
-using System.Security.Principal;
 using Microsoft.Extensions.Hosting;
 using Slx.Client.Core;
 using Slx.Client.Windows;
@@ -17,7 +15,7 @@ internal sealed class ControlWorker(ControlDispatcher dispatcher, TunnelEngine e
 
     private async Task RunPipeAsync(CancellationToken stoppingToken)
     {
-        await using var pipe = CreatePipe();
+        await using var pipe = ControlPipe.Create(PipeContract.Name);
         while (!stoppingToken.IsCancellationRequested)
         {
             try
@@ -25,17 +23,15 @@ internal sealed class ControlWorker(ControlDispatcher dispatcher, TunnelEngine e
                 await pipe.WaitForConnectionAsync(stoppingToken);
                 using var budget = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
                 budget.CancelAfter(TimeSpan.FromSeconds(50));
-                string? sid = null;
-                pipe.RunAsClient(() => sid = WindowsIdentity.GetCurrent().User?.Value);
-                var request = await PipeFraming.ReadAsync<PipeRequest>(pipe, budget.Token);
-                var reply = sid is null ? Rejected("IPC_CALLER_INVALID")
-                    : await dispatcher.DispatchAsync(sid, request, budget.Token);
-                await PipeFraming.WriteAsync(pipe, reply, budget.Token);
+                var caller = await ControlPipe.ReadRequestAsync(pipe, budget.Token);
+                var reply = await dispatcher.DispatchAsync(caller.Sid, caller.Request, budget.Token);
+                await PipeFraming.WriteReplyAndWaitAckAsync(pipe, reply, budget.Token);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
-            catch (Exception error) when (error is IOException or UnauthorizedAccessException
-                or OperationCanceledException or ClientFault or InvalidOperationException)
-            { /* Invalid or abandoned requests cannot terminate the service. */ }
+            catch (ClientFault fault) { await RejectSafelyAsync(pipe, fault.Code); }
+            catch (OperationCanceledException) { await RejectSafelyAsync(pipe, "IPC_REQUEST_TIMEOUT"); }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidOperationException)
+            { await RejectSafelyAsync(pipe, "IPC_REQUEST_FAILED"); }
             finally { if (pipe.IsConnected) pipe.Disconnect(); }
         }
     }
@@ -51,23 +47,15 @@ internal sealed class ControlWorker(ControlDispatcher dispatcher, TunnelEngine e
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { }
     }
 
-    private static NamedPipeServerStream CreatePipe()
+    internal static async Task RejectSafelyAsync(NamedPipeServerStream pipe, string code)
     {
-        var acl = new PipeSecurity();
-        acl.SetAccessRuleProtection(true, false);
-        foreach (WellKnownSidType denied in new[] { WellKnownSidType.NetworkSid, WellKnownSidType.AnonymousSid })
-            acl.AddAccessRule(new PipeAccessRule(new SecurityIdentifier(denied, null),
-                PipeAccessRights.FullControl, AccessControlType.Deny));
-        acl.AddAccessRule(new PipeAccessRule(new SecurityIdentifier(WellKnownSidType.InteractiveSid, null),
-            PipeAccessRights.ReadWrite | PipeAccessRights.Synchronize, AccessControlType.Allow));
-        foreach (WellKnownSidType allowed in new[] { WellKnownSidType.LocalSystemSid, WellKnownSidType.BuiltinAdministratorsSid })
-            acl.AddAccessRule(new PipeAccessRule(new SecurityIdentifier(allowed, null),
-                PipeAccessRights.FullControl, AccessControlType.Allow));
-        return NamedPipeServerStreamAcl.Create(PipeContract.Name, PipeDirection.InOut, 1,
-            PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough | PipeOptions.FirstPipeInstance,
-            PipeContract.MaxBytes, PipeContract.MaxBytes, acl);
+        if (!pipe.IsConnected) return;
+        using var budget = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+        try
+        {
+            await PipeFraming.WriteReplyAndWaitAckAsync(pipe, new PipeReply(false, code,
+                new TunnelStatus(TunnelPhase.Disconnected, DateTimeOffset.UtcNow)), budget.Token);
+        }
+        catch (Exception error) when (error is IOException or InvalidOperationException or OperationCanceledException) { }
     }
-
-    private static PipeReply Rejected(string code) => new(false, code,
-        new TunnelStatus(TunnelPhase.Disconnected, DateTimeOffset.UtcNow));
 }

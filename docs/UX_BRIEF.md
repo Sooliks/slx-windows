@@ -54,3 +54,54 @@ Still required: actual imported connection UI flow, live tray/keyboard UI Automa
 DPI 100/125/150/200, multiple monitors, screen-reader verification and real network,
 sleep, service-crash and clean-machine acceptance. No independently verified per-app
 kill switch is claimed; Help states that limitation.
+
+## Populated UI regression — 0.1.0 alpha follow-up
+The original empty-only render missed a collapsed ComboBox failure. A separate
+`Slx.Client.UiTests` STA WPF project now creates the actual MainWindow with typed,
+synthetic subscription/preferences injected in memory. Fixtures live only in the
+test project; no saved user data, subscription GET, service call or TUN is used.
+The new test reproduced the reported redacted `VpnProfile` display before the fix.
+Binding the missing ItemTemplateSelector fixed both DisplayMemberPath and explicit
+ItemTemplate rendering. Core model ToString redaction remains intact.
+
+The populated regression verifies HY2/VLESS selection, both profiles in the opened
+popup, Settings language changes, actual selected/whole layouts at 1200x820,
+subscription and connection action above the fold, no collapsed-section divider gap,
+940x660 without horizontal overflow, app-name ellipsis, and the themed tray menu.
+Current actual WPF screenshots are `artifacts/ui/slx-populated-*.png`,
+`slx-tray-menu.png` and `slx-exit-unknown.png`; the data is visibly synthetic.
+The regression passed after the fix. This is UI evidence, not real tunnel evidence.
+
+An IPC failure now retains an allowlisted safe code and specific guidance; it does
+not universally claim the service needs installation or duplicate a banner on the
+connection page. An unknown stop no longer traps the user indefinitely: a dialog
+explains the VPN may still be running and offers explicit app-only exit. Cancel is
+the default and Escape action; exiting the UI does not claim the VPN was stopped.
+The dialog default and explicit choice are exercised by the populated STA test.
+The app version label is derived from assembly metadata instead of a hardcoded tag.
+
+Final UI checks: Release desktop build passed without warnings/errors; populated
+STA regression passed; 145 RU/EN keys match and all XAML keys resolve. Authored
+Desktop/UiTests sources and catalogs remain below 200 nonblank lines per file.
+Installed service/IPC, actual profile traffic and upgrade checks remain separate
+acceptance owned by the root workflow and are not implied by these UI checks.
+
+## Installed app and focus follow-up
+Root's current installed-client check verified the unknown-stop dialog's explicit
+app-only exit: the UI process exited while the running service remained unchanged,
+as disclosed. This does not claim VPN traffic stopped or end-to-end tray acceptance.
+Button focus now uses WPF keyboard-only FocusVisualStyle adorners instead of changing
+the measured button border on every mouse/programmatic focus. Navigation and title-bar
+buttons retain stable geometry; keyboard users keep a visible outline, including a
+contrasting inner outline on the primary action. The root candidate build owns the
+subsequent installed screenshot and input verification.
+
+## Alpha.2 final follow-up
+Main content has a static cut-X background; it has no timers or animation and is omitted in high contrast.
+Hover/focus feedback uses opacity, color or a reserved outline. It does not change padding, margins or border geometry.
+The applications page discovers programs with open windows asynchronously, with inline search and one-click Add.
+The manual executable picker remains visible. Background/helper processes can be selected manually.
+An existing saved subscription gets one bounded refresh at startup. Cached profiles remain available during fetch or failure.
+Refresh activity is separate from tunnel mutations; explicit import cancels the background fetch and late results cannot replace it.
+A running tunnel is never silently replaced. Startup auto-connect and periodic subscription retries are not introduced.
+Current installed HY2/VLESS and reconnect evidence belongs to docs/VERIFICATION.md; full network isolation acceptance remains incomplete.

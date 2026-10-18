@@ -19,7 +19,7 @@ public sealed class ServiceClient
             await pipe.ConnectAsync(3000, budget.Token);
             PipeServiceIdentity.Validate(pipe.SafePipeHandle);
             await PipeFraming.WriteAsync(pipe, request, budget.Token);
-            return await PipeFraming.ReadAsync<PipeReply>(pipe, budget.Token);
+            return await PipeFraming.ReceiveReplyAndAcknowledgeAsync(pipe, budget.Token);
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         { throw new ClientFault("SERVICE_TIMEOUT"); }
@@ -33,19 +33,32 @@ internal static class PipeServiceIdentity
 {
     public static void Validate(SafePipeHandle pipe)
     {
-        if (!GetNamedPipeServerProcessId(pipe, out uint pipePid)) throw new ClientFault("SERVICE_IDENTITY_FAILED");
+        uint pipePid = ServerProcessId(pipe);
+        if (RunningServiceProcessId("SLXVPN") != pipePid) throw new ClientFault("SERVICE_IDENTITY_FAILED");
+    }
+
+    internal static uint ServerProcessId(SafePipeHandle pipe)
+    {
+        if (!GetNamedPipeServerProcessId(pipe, out uint pipePid) || pipePid == 0)
+            throw new ClientFault("SERVICE_IDENTITY_FAILED");
+        return pipePid;
+    }
+
+    internal static uint RunningServiceProcessId(string serviceName)
+    {
         IntPtr manager = OpenSCManagerW(null, null, 1);
         if (manager == IntPtr.Zero) throw new ClientFault("SERVICE_IDENTITY_FAILED");
         try
         {
-            IntPtr service = OpenServiceW(manager, "SLXVPN", 4);
+            IntPtr service = OpenServiceW(manager, serviceName, 4);
             if (service == IntPtr.Zero) throw new ClientFault("SERVICE_IDENTITY_FAILED");
             try
             {
                 if (!QueryServiceStatusEx(service, 0, out var status,
                     (uint)Marshal.SizeOf<ServiceStatus>(), out _) || status.CurrentState != 4
-                    || status.ProcessId == 0 || status.ProcessId != pipePid)
+                    || status.ProcessId == 0)
                     throw new ClientFault("SERVICE_IDENTITY_FAILED");
+                return status.ProcessId;
             }
             finally { CloseServiceHandle(service); }
         }

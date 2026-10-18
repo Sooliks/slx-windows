@@ -20,6 +20,7 @@ public sealed partial class MainViewModel
     private async Task FetchSubscriptionAsync(string url, bool importing)
     {
         if (IsBusy) return;
+        CancelStartupRefresh();
         var owner = ++generation;
         IsBusy = true; ClearMessage();
         try
@@ -27,14 +28,7 @@ public sealed partial class MainViewModel
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(35));
             var snapshot = await subscriptions.FetchAsync(url, store.GetOrCreateInstallationId(), Text.Catalog.Language, timeout.Token);
             if (owner != generation || disposed) return;
-            var next = new StoredSubscription(url, snapshot);
-            store.SaveSubscription(next);
-            saved = next;
-            var previous = SelectedProfile?.Id;
-            Profiles.Clear();
-            foreach (var profile in snapshot.Profiles) Profiles.Add(profile);
-            SelectedProfile = Profiles.FirstOrDefault(x => x.Id == previous)
-                ?? Profiles.FirstOrDefault(x => x.Kind == "hysteria2") ?? Profiles.FirstOrDefault();
+            ApplySubscription(url, snapshot);
             ImportVisible = false;
             OnPropertyChanged(nameof(IsOverlayVisible));
             OnPropertyChanged(nameof(SubscriptionTitle)); OnPropertyChanged(nameof(SubscriptionUpdated));
@@ -50,6 +44,7 @@ public sealed partial class MainViewModel
     private async Task RemoveSubscriptionAsync()
     {
         if (IsBusy) return;
+        CancelStartupRefresh();
         if (IsTunnelActive) await ChangeTunnelAsync("disconnect");
         if (IsTunnelActive || !statusFresh) return;
         try

@@ -61,7 +61,12 @@ public partial class MainWindow : Window
     {
         if (exiting) return;
         exiting = true;
-        if (!await model.ExitAsync()) { exiting = false; Restore(); }
+        if (!await model.ExitAsync())
+        {
+            Restore();
+            if (new ExitUnknownDialog(this).ShowDialog() == true) model.ExitUiOnly();
+            else exiting = false;
+        }
     }
     private void Minimize_Click(object sender, RoutedEventArgs args) => WindowState = WindowState.Minimized;
     private void Maximize_Click(object sender, RoutedEventArgs args) => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;

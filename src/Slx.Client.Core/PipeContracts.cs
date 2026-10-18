@@ -2,8 +2,8 @@ namespace Slx.Client.Core;
 
 public static class PipeContract
 {
-    public const int Version = 1;
-    public const string Name = "SLX.VPN.Control.v1";
+    public const int Version = 2;
+    public const string Name = "SLX.VPN.Control.v2";
     public const int MaxBytes = 65536;
 }
 public enum TunnelPhase { Disconnected, Connecting, Connected, Reconnecting, Stopping, Faulted }

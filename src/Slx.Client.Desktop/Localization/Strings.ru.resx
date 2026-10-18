@@ -95,7 +95,7 @@
 <data name="Support" xml:space="preserve"><value>Написать в поддержку ↗</value></data>
 <data name="Website" xml:space="preserve"><value>Открыть сайт SLX ↗</value></data>
 <data name="SecurityNote" xml:space="preserve"><value>Без телеметрии посещений. Данные подключения зашифрованы средствами Windows. В alpha нет kill switch: при остановке сетевого модуля трафик может пойти напрямую. В режиме отдельных приложений общий DNS Windows тоже идёт напрямую.</value></data>
-<data name="VersionLabel" xml:space="preserve"><value>SLX VPN · 0.1.0-alpha.1</value></data>
+<data name="VersionLabel" xml:space="preserve"><value>SLX VPN</value></data>
 <data name="AlphaNotice" xml:space="preserve"><value>Предварительная версия. Реальные маршруты, DNS, восстановление после сна и чистая установка ещё проходят проверку.</value></data>
 <data name="ServiceHelp" xml:space="preserve"><value>Установите SLX через установщик и повторите попытку. Запускать приложение от администратора не нужно.</value></data>
 <data name="Busy" xml:space="preserve"><value>Подождите…</value></data>
@@ -123,6 +123,26 @@
 <data name="WindowTitle" xml:space="preserve"><value>SLX VPN</value></data>
 <data name="ExecutableFilter" xml:space="preserve"><value>Приложения (*.exe)|*.exe</value></data>
 <data name="FaultOtherVpn" xml:space="preserve"><value>Сетевой адаптер SLX уже существует. Сначала отключите прежнее подключение.</value></data>
-<data name="FaultServiceSecurity" xml:space="preserve"><value>Не удалось проверить установленную службу SLX. Переустановите приложение официальным установщиком. Запуск от администратора не нужен.</value></data>
+<data name="FaultServiceSecurity" xml:space="preserve"><value>Не удалось проверить доступ к локальной службе SLX. Перезапустите приложение или восстановите его официальным установщиком. Запуск от администратора не нужен.</value></data>
 <data name="FaultSessions" xml:space="preserve"><value>В этой версии поддерживается один вошедший пользователь Windows. Сначала завершите другие сеансы.</value></data>
+<data name="ExitUnknownTitle" xml:space="preserve"><value>Отключение не подтверждено</value></data>
+<data name="ExitUiOnly" xml:space="preserve"><value>Закрыть приложение</value></data>
+<data name="ServiceRequestHelp" xml:space="preserve"><value>Служба не смогла принять запрос. Обновите приложение и службу одним установщиком.</value></data>
+<data name="ErrorCode" xml:space="preserve"><value>Код</value></data>
+<data name="ServiceContactHelp" xml:space="preserve"><value>Не удалось связаться со службой SLX. Повторите попытку или перезапустите приложение.</value></data>
+<data name="ServiceCheckingHelp" xml:space="preserve"><value>Проверяем локальную службу SLX.</value></data>
+<data name="ServiceUnknownHelp" xml:space="preserve"><value>Служба не ответила вовремя. Состояние подключения пока неизвестно; SLX проверит его снова.</value></data>
+<data name="ExitUnknownBody" xml:space="preserve"><value>SLX не удалось подтвердить остановку VPN — он может продолжать работать. Можно отменить выход и повторить попытку или закрыть только приложение, без подтверждения отключения VPN.</value></data>
+ <data name="QuickApps" xml:space="preserve"><value>Быстрое добавление</value></data>
+ <data name="QuickAppsHint" xml:space="preserve"><value>Выберите запущенные программы — искать их файлы не нужно.</value></data>
+ <data name="RefreshApps" xml:space="preserve"><value>Обновить список</value></data>
+ <data name="FindRunningApp" xml:space="preserve"><value>Найти программу</value></data>
+ <data name="FindingApps" xml:space="preserve"><value>Ищем запущенные программы…</value></data>
+ <data name="QuickAppsEmpty" xml:space="preserve"><value>Нет подходящих программ. Откройте нужную программу и обновите список или выберите её .exe вручную.</value></data>
+ <data name="AddedApps" xml:space="preserve"><value>Добавлены в SLX</value></data>
+ <data name="DiscoveryUnavailable" xml:space="preserve"><value>Не удалось обновить список программ. Можно выбрать .exe вручную.</value></data>
+ <data name="RefreshingProfiles" xml:space="preserve"><value>Обновляем способы подключения…</value></data>
+ <data name="CachedProfiles" xml:space="preserve"><value>Сохранённые настройки доступны. Обновить подписку можно кнопкой «Обновить».</value></data>
+ <data name="ProfilesAutoRefresh" xml:space="preserve"><value>Способы подключения обновляются при запуске.</value></data>
+ <data name="FaultCleanup" xml:space="preserve"><value>Windows ещё завершает отключение VPN. Подождите несколько секунд и повторите подключение.</value></data>
 </root>

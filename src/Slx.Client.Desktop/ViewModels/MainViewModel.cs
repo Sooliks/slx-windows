@@ -17,11 +17,13 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private ClientPreferences preferences = new();
     private StoredSubscription? saved;
     private TunnelStatus? status;
+    private string? lastServiceCode;
     private string page = "connection", search = "", importLink = "", messageKey = "";
     private bool busy, importVisible, discoveryVisible, removeVisible, rulesPending, statusFresh;
-    public MainViewModel(bool loadStoredData = true)
+    public MainViewModel(bool loadStoredData = true, StoredSubscription? initialSubscription = null, ClientPreferences? initialPreferences = null)
     {
         persistPreferences = loadStoredData;
+        if (!loadStoredData) { saved = initialSubscription; preferences = initialPreferences ?? new(); }
         try { if (loadStoredData) { preferences = store.LoadPreferences(); saved = store.LoadSubscription(); } }
         catch (ClientFault) { messageKey = "FaultStorage"; }
         Text.Catalog.SetLanguage(preferences.Language);
@@ -31,14 +33,14 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         selectedProfile = Profiles.FirstOrDefault(x => x.Id == preferences.SelectedProfileId)
             ?? Profiles.FirstOrDefault(x => x.Kind == "hysteria2") ?? Profiles.FirstOrDefault();
         NavigateCommand = new RelayCommand<string>(value => { Page = value ?? "connection"; ClearMessage(); });
-        OpenImportCommand = new RelayCommand(() => { ImportLink = ""; ImportVisible = true; ClearMessage(); });
+        OpenImportCommand = new RelayCommand(() => { CancelStartupRefresh(); ImportLink = ""; ImportVisible = true; ClearMessage(); });
         CancelOverlayCommand = new RelayCommand(CloseOverlay);
         ImportCommand = new AsyncRelayCommand(ImportAsync, () => !IsBusy);
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => saved != null && !IsBusy);
         ToggleConnectionCommand = new AsyncRelayCommand(ToggleAsync, AsyncRelayCommandOptions.AllowConcurrentExecutions);
         ReconnectCommand = new AsyncRelayCommand(() => ChangeTunnelAsync("reconnect"), () => CanReconnect);
         AddExecutableCommand = new RelayCommand(AddExecutable);
-        DiscoverCommand = new RelayCommand(DiscoverApplications);
+        DiscoverCommand = new RelayCommand(() => _ = DiscoverApplicationsAsync(), () => !Discovering);
         AddDiscoveredCommand = new RelayCommand<AppRule>(AddDiscovered);
         RemoveAppCommand = new RelayCommand<AppItemViewModel>(RemoveApp);
         OpenAccountCommand = new RelayCommand(() => OpenLink("https://slxvpn.com/account"));
@@ -59,7 +61,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public bool HasSelectedApplications => Applications.Any(x => x.Enabled);
     public bool HasSearchResults => FilteredApplications.Any();
     public bool HasDiscovered => Discovered.Count > 0;
-    public string Page { get => page; set => SetProperty(ref page, value); }
+    public string Page { get => page; set { if (SetProperty(ref page, value) && value == "applications" && persistPreferences) _ = DiscoverApplicationsAsync(); } }
     public string Search { get => search; set { if (SetProperty(ref search, value)) { OnPropertyChanged(nameof(FilteredApplications)); OnPropertyChanged(nameof(HasSearchResults)); } } }
     public string ImportLink { get => importLink; set => SetProperty(ref importLink, value); }
     public bool ImportVisible { get => importVisible; set { if (SetProperty(ref importVisible, value)) OnPropertyChanged(nameof(IsOverlayVisible)); } }
@@ -81,13 +83,17 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public bool CanEditRouting => !IsBusy;
     public bool CanConnect => (HasSubscription && statusFresh) || IsTunnelActive || IsBusy;
     public string ConnectionAction => Text.Catalog[IsTunnelActive || IsBusy ? "Disconnect" : "Connect"];
-    public string StatusText => Text.Catalog[!statusFresh ? status == null ? "StatusUnavailable" : "StatusStale" : status?.Phase switch
+    public string StatusText => Text.Catalog[!statusFresh ? lastServiceCode == null ? "StatusUnknown" : status == null ? "StatusUnavailable" : "StatusStale" : status?.Phase switch
     {
         TunnelPhase.Connected when status.ProbePassed => "Connected", TunnelPhase.Connecting => "Connecting",
         TunnelPhase.Reconnecting => "Reconnecting", TunnelPhase.Stopping => "Stopping",
         TunnelPhase.Faulted => "ConnectionFailed", _ => "NotConnected"
     }];
-    public string StatusDetail => !statusFresh ? Text.Catalog["ServiceHelp"] : Text.Catalog["NoMetrics"];
+    public string? LastServiceCode => lastServiceCode;
+    public bool HasServiceCode => lastServiceCode != null;
+    public string ServiceCodeLabel => lastServiceCode == null ? "" : $"{Text.Catalog["ErrorCode"]}: {lastServiceCode}";
+    public string StatusDetail => Text.Catalog[!statusFresh ? ServiceStateCopy.DetailKey(lastServiceCode) : "NoMetrics"];
+    public string VersionLabel => "SLX VPN · " + (System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false).OfType<System.Reflection.AssemblyInformationalVersionAttribute>().FirstOrDefault()?.InformationalVersion.Split('+')[0] ?? "alpha");
     public RelayCommand<string> NavigateCommand { get; }
     public RelayCommand OpenImportCommand { get; }
     public RelayCommand CancelOverlayCommand { get; }
@@ -110,7 +116,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private void Notice(string key) { messageKey = key; OnPropertyChanged(nameof(Message)); OnPropertyChanged(nameof(ShowMessage)); }
     private void NotifyState()
     {
-        foreach (var name in new[] { nameof(IsConnected), nameof(CanEditRouting), nameof(CanConnect), nameof(CanReconnect), nameof(ConnectionAction), nameof(StatusText), nameof(StatusDetail), nameof(HasSubscription), nameof(NoSubscription) }) OnPropertyChanged(name);
+        foreach (var name in new[] { nameof(IsConnected), nameof(CanEditRouting), nameof(CanConnect), nameof(CanReconnect), nameof(ConnectionAction), nameof(StatusText), nameof(StatusDetail), nameof(LastServiceCode), nameof(HasServiceCode), nameof(ServiceCodeLabel), nameof(HasSubscription), nameof(NoSubscription) }) OnPropertyChanged(name);
         ImportCommand?.NotifyCanExecuteChanged(); RefreshCommand?.NotifyCanExecuteChanged();
         ReconnectCommand?.NotifyCanExecuteChanged(); AskRemoveCommand?.NotifyCanExecuteChanged();
     }

@@ -57,20 +57,20 @@ internal sealed class TrayIcon : IDisposable
     }
     private void ShowMenu()
     {
-        var menu = new ContextMenu { Placement = PlacementMode.MousePoint, PlacementTarget = window };
+        var menu = new ContextMenu { Placement = PlacementMode.MousePoint, PlacementTarget = window, Style = (Style)window.FindResource("TrayMenu") };
         menu.SetResourceReference(Control.BackgroundProperty, "Surface");
         menu.SetResourceReference(Control.ForegroundProperty, "Text");
         menu.SetResourceReference(Control.BorderBrushProperty, "Border");
         Add(menu, Text.Catalog["TrayOpen"], () => window.Restore());
         Add(menu, Text.Catalog["Reconnect"], () => model.ReconnectCommand.Execute(null), model.CanReconnect);
         Add(menu, Text.Catalog["Disconnect"], () => model.ToggleConnectionCommand.Execute(null), model.IsTunnelActive);
-        menu.Items.Add(new Separator());
+        menu.Items.Add(new Separator { Style = (Style)window.FindResource("TrayMenuSeparator") });
         Add(menu, Text.Catalog["TrayExit"], () => _ = window.ExitAsync());
         window.Activate(); menu.IsOpen = true;
     }
     private static void Add(ContextMenu menu, string label, Action action, bool enabled = true)
     {
-        var item = new MenuItem { Header = label, IsEnabled = enabled };
+        var item = new MenuItem { Header = label, IsEnabled = enabled, Style = (Style)Application.Current.FindResource("TrayMenuItem") };
         item.SetResourceReference(Control.ForegroundProperty, "Text");
         item.SetResourceReference(Control.BackgroundProperty, "Surface");
         item.Click += (_, _) => action(); menu.Items.Add(item);

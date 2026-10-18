@@ -51,7 +51,10 @@ internal static class LocalProbe
         catch (Exception error) when (error is HttpRequestException or OperationCanceledException) { return false; }
     }
 
-    public static bool AdapterExists() => NetworkInterface.GetAllNetworkInterfaces().Any(adapter => adapter.Name == "SLX VPN");
+    public static string? AdapterIdentity() => NetworkInterface.GetAllNetworkInterfaces().FirstOrDefault(adapter => adapter.Name == "SLX VPN" && PresentAdapters.Contains(adapter.Id))?.Id;
+    public static bool AdapterIdentityExists(string id) => PresentAdapters.Contains(id);
+
+    public static bool AdapterExists() => AdapterIdentity() is not null;
 
     public static bool TunnelReady() => NetworkInterface.GetAllNetworkInterfaces().Any(adapter =>
         adapter.Name == "SLX VPN" && adapter.OperationalStatus == OperationalStatus.Up

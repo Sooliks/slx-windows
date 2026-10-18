@@ -13,7 +13,7 @@ internal sealed partial class TunnelEngine
             if (!ReferenceEquals(child, exited)) return;
             string? name = state.ProfileName;
             RoutingMode? mode = state.Mode;
-            await StopChildAsync();
+            if (!await BackgroundCleanup.TryAsync(StopChildAsync)) return;
             state = new(TunnelPhase.Faulted, DateTimeOffset.UtcNow, name, "CORE_EXITED", Mode: mode);
         }
         finally { lifecycle.Release(); }

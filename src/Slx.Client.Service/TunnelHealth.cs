@@ -26,9 +26,11 @@ internal sealed partial class TunnelEngine
                 var pinned = await PinEndpointAsync(currentPlan, cancellationToken);
                 await LaunchAsync(pinned, RuntimeTrust.Verify(), TunnelPhase.Reconnecting, cancellationToken);
             }
+            catch (ClientFault fault) when (BackgroundCleanup.IsPending(fault))
+            { return; }
             catch (Exception error)
             {
-                await StopChildAsync();
+                if (!await BackgroundCleanup.TryAsync(StopChildAsync)) return;
                 state = new(TunnelPhase.Faulted, DateTimeOffset.UtcNow, currentPlan.Profile.Name,
                     error is ClientFault fault ? fault.Code : error is OperationCanceledException ? "OPERATION_INTERRUPTED" : "SERVICE_FAILURE", Mode: currentPlan.Mode);
             }

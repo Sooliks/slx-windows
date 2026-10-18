@@ -60,20 +60,13 @@ public sealed partial class MainViewModel
         try { AddDiscovered(AppDiscovery.FromExecutable(picker.FileName)); }
         catch (ClientFault fault) { ShowFault(fault.Code); }
     }
-    private void DiscoverApplications()
-    {
-        Discovered.Clear();
-        try { foreach (var app in AppDiscovery.RunningApplications()) if (!Applications.Any(x => string.Equals(x.ExecutablePath, app.ExecutablePath, StringComparison.OrdinalIgnoreCase))) Discovered.Add(app); }
-        catch (ClientFault fault) { ShowFault(fault.Code); }
-        DiscoveryVisible = true; OnPropertyChanged(nameof(HasDiscovered)); OnPropertyChanged(nameof(IsOverlayVisible));
-    }
     private void AddDiscovered(AppRule? rule)
     {
         if (rule == null) return;
         var existing = Applications.FirstOrDefault(x => string.Equals(x.ExecutablePath, rule.ExecutablePath, StringComparison.OrdinalIgnoreCase));
         if (existing != null) existing.Enabled = true;
         else { Attach(rule with { Enabled = true }); SaveApplications(); MarkRulesChanged(); }
-        DiscoveryVisible = false; OnPropertyChanged(nameof(IsOverlayVisible));
+        RefreshDiscoveryProperties();
     }
     private void RemoveApp(AppItemViewModel? item)
     {

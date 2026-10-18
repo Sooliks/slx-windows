@@ -11,7 +11,7 @@
   <TextBlock Text="{l:Tr SubscriptionSettings}" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,16"/>
   <TextBlock Text="{l:Tr AutoProfile}" Style="{StaticResource MutedText}" Margin="0,0,0,15"/>
   <Label Content="{l:Tr Profile}" Target="{Binding ElementName=ProfileSelect}" Foreground="{DynamicResource Muted}" Padding="0,0,0,8"/>
-  <ComboBox IsEnabled="{Binding CanEditRouting}" x:Name="ProfileSelect" ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}" DisplayMemberPath="Name" AutomationProperties.Name="{l:Tr Profile}" Margin="0,0,0,8"/>
+  <ComboBox IsEnabled="{Binding CanEditRouting}" x:Name="ProfileSelect" ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}" ItemTemplate="{StaticResource ProfileNameTemplate}" AutomationProperties.Name="{l:Tr Profile}" Margin="0,0,0,8"/>
   <TextBlock Text="{l:Tr ProfileAdvanced}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,0,0,18"/>
   <WrapPanel><Button Content="{l:Tr UpdateSubscription}" Command="{Binding RefreshCommand}" Margin="0,0,9,8"/><Button Content="{l:Tr ReplaceSubscription}" Command="{Binding OpenImportCommand}" Margin="0,0,9,8"/><Button Content="{l:Tr RemoveSubscription}" Command="{Binding AskRemoveCommand}" Style="{StaticResource DangerButton}" Margin="0,0,0,8"/></WrapPanel>
   <StackPanel Orientation="Horizontal" Margin="0,6,0,0"><TextBlock Text="{l:Tr Freshness}" Style="{StaticResource MonoLabel}" Margin="0,0,8,0"/><TextBlock Text="{Binding SubscriptionUpdated}" Style="{StaticResource MonoLabel}"/></StackPanel>

@@ -9,6 +9,35 @@ public static class PipeFraming
     private static readonly JsonSerializerOptions Json = new()
     { PropertyNameCaseInsensitive = false, MaxDepth = 16, UnmappedMemberHandling = System.Text.Json.Serialization.JsonUnmappedMemberHandling.Disallow };
 
+    public static async Task<bool> WriteReplyAndWaitAckAsync(Stream stream, PipeReply reply, CancellationToken cancellationToken = default)
+    {
+        await WriteAsync(stream, reply, cancellationToken);
+        using var budget = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        budget.CancelAfter(TimeSpan.FromSeconds(2));
+        byte[] ack = new byte[1];
+        try
+        {
+            // DisconnectNamedPipe discards unread reply bytes. Never use an unbounded drain wait.
+            await stream.ReadExactlyAsync(ack, budget.Token);
+            return ack[0] == 6;
+        }
+        catch (Exception error) when (error is IOException or OperationCanceledException or ObjectDisposedException)
+        { return false; }
+    }
+
+    public static async Task<PipeReply> ReceiveReplyAndAcknowledgeAsync(Stream stream, CancellationToken cancellationToken = default)
+    {
+        var reply = await ReadAsync<PipeReply>(stream, cancellationToken);
+        using var budget = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+        try
+        {
+            await stream.WriteAsync(new byte[] { 6 }, budget.Token);
+            await stream.FlushAsync(budget.Token);
+        }
+        catch (Exception error) when (error is IOException or OperationCanceledException or ObjectDisposedException)
+        { /* The complete authenticated reply is known; ACK failure cannot make its outcome unknown. */ }
+        return reply;
+    }
     public static async Task<T> ReadAsync<T>(Stream stream, CancellationToken cancellationToken = default)
     {
         byte[] header = new byte[4];

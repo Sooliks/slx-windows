@@ -13,6 +13,7 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
     private ProcessJob? job;
     private ConnectPlan? currentPlan;
     private string? ownerSid;
+    private string? ownedAdapterId;
     private (int Port, string User, string Password) probe;
     private int recoveryAttempts;
     public TunnelStatus Status => state;
@@ -88,6 +89,7 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
             process.StandardInput.Close();
             config = "";
             await LocalProbe.WaitAsync(probe.Port, probe.User, probe.Password, () => !process.HasExited, cancellationToken);
+            ownedAdapterId = LocalProbe.AdapterIdentity() ?? throw new ClientFault("TUN_NOT_READY");
             cancellationToken.ThrowIfCancellationRequested();
             if (process.HasExited || !LocalProbe.TunnelReady()) throw new ClientFault("CORE_EXITED");
             state = new(TunnelPhase.Connected, DateTimeOffset.UtcNow, plan.Profile.Name,
@@ -119,24 +121,6 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
         catch (SocketException) { throw new ClientFault("ENDPOINT_UNREACHABLE"); }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         { throw new ClientFault("ENDPOINT_TIMEOUT"); }
-    }
-
-    private async Task StopChildAsync()
-    {
-        var process = child;
-        child = null;
-        job?.Dispose();
-        job = null;
-        probe = default;
-        if (process is null) return;
-        try
-        {
-            if (!process.HasExited) process.Kill(entireProcessTree: true);
-            using var budget = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            await process.WaitForExitAsync(budget.Token);
-        }
-        catch (Exception error) when (error is InvalidOperationException or System.ComponentModel.Win32Exception or OperationCanceledException) { }
-        finally { process.Dispose(); }
     }
 
     private static async Task DrainAsync(Stream stream)

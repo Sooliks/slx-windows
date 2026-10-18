@@ -6,7 +6,7 @@ public static class ThemeManager
     public static void Apply(string name)
     {
         var resources = Application.Current.Resources.MergedDictionaries;
-        resources[0] = new ResourceDictionary { Source = new Uri($"Themes/{(name == "terminal" ? "Terminal" : "Olive")}.xaml", UriKind.Relative) };
+        resources[0] = new ResourceDictionary { Source = new Uri($"/{typeof(ThemeManager).Assembly.GetName().Name};component/Themes/{(name == "terminal" ? "Terminal" : "Olive")}.xaml", UriKind.Relative) };
         if (!SystemParameters.HighContrast) return;
         foreach (var key in new[] { "Background", "Surface", "SurfaceRaised" })
             Application.Current.Resources[key] = SystemColors.WindowBrush;
