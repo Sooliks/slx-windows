@@ -152,4 +152,5 @@
 <data name="StatsProtocol" xml:space="preserve"><value>Способ подключения</value></data>
 <data name="StatsApps" xml:space="preserve"><value>Выбрано приложений</value></data>
 <data name="StatsChecked" xml:space="preserve"><value>Последняя проверка</value></data>
+  <data name="TrafficProtected" xml:space="preserve"><value>Защита включена. При обрыве VPN выбранный трафик блокируется до восстановления. Отключить защиту можно кнопкой «Отключиться».</value></data>
 </root>

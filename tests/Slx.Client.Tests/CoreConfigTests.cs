@@ -24,7 +24,7 @@ public sealed class CoreConfigTests
         Assert.Equal("direct", rules[^1].GetProperty("outboundTag").GetString());
         Assert.True(Array.FindIndex(rules, rule => rule.TryGetProperty("inboundTag", out _))
             < Array.FindIndex(rules, rule => rule.TryGetProperty("process", out _)));
-        Assert.Equal("direct", rules.Single(rule => rule.TryGetProperty("port", out _)).GetProperty("outboundTag").GetString());
+        Assert.Equal("dns", rules.Single(rule => rule.TryGetProperty("port", out _)).GetProperty("outboundTag").GetString());
     }
 
     [Fact]
@@ -35,7 +35,7 @@ public sealed class CoreConfigTests
         Assert.Equal("direct", rules[0].GetProperty("outboundTag").GetString());
         Assert.Contains(rules[0].GetProperty("ip").EnumerateArray(), ip => ip.GetString() == "fc00::/7");
         Assert.Contains(rules, rule => rule.TryGetProperty("process", out var process) && process[0].GetString() == "self/");
-        Assert.DoesNotContain(rules, rule => rule.TryGetProperty("port", out _));
+        Assert.Equal("dns",rules.Single(rule=>rule.TryGetProperty("port",out _)).GetProperty("outboundTag").GetString());
         Assert.Equal("vpn", rules[^1].GetProperty("outboundTag").GetString());
     }
 

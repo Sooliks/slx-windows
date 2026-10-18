@@ -19,3 +19,5 @@ SLX application source: MIT, [LICENSE](LICENSE).
 
 The SLX installer is unsigned. The Wintun DLL and its embedded driver retain vendor signatures.
 SLX, Xray, Happ, WireGuard and other names belong to their respective owners; this client is not a Happ fork.
+
+- **Microsoft.Windows.CsWin32 0.3.333**, Microsoft, MIT: official Windows API source generator (build only). https://github.com/microsoft/CsWin32

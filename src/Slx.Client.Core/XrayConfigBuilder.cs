@@ -12,6 +12,7 @@ public static class XrayConfigBuilder
             throw new ClientFault("INVALID_PLAN");
         var config = new
         {
+            dns = new { servers = new[] { "https://1.1.1.1/dns-query", "https://8.8.8.8/dns-query" }, tag = "resolver", queryStrategy = "UseIP", disableFallback = true },
             log = new { access = "none", error = "none", loglevel = "none" },
             inbounds = new object[]
             {
@@ -46,7 +47,8 @@ public static class XrayConfigBuilder
             outbounds = new object[]
             {
                 new { tag = "direct", protocol = "freedom", settings = new { domainStrategy = "AsIs" } },
-                XrayOutbound.Build(plan.Profile)
+                XrayOutbound.Build(plan.Profile),
+                new { tag = "dns", protocol = "dns", settings = new { } }
             },
             routing = new { domainStrategy = "AsIs", rules = XrayRouting.Build(plan) }
         };

@@ -8,3 +8,5 @@ SLX does not change production servers or publish private web repository content
 Credentials go through authenticated local IPC to memory-only Xray stdin. No plaintext config or raw core logs.
 Xray and driver must have pinned provenance. Authenticated localhost proxy is only an internal readiness probe.
 Connected means owned core + tunnel readiness + real proxy probe, not process start alone.
+
+Alpha.5: Windows owns native WFP and protected resume storage; Service owns intent/lifecycle and retry. UI expands known application groups locally into ordinary validated exact-path AppRules. Persistent policy survives host/core stop; only explicit off/uninstall releases it. See NETWORK.md.

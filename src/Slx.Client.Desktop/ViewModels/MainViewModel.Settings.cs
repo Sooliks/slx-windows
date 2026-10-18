@@ -40,15 +40,15 @@ public sealed partial class MainViewModel
         preferences = preferences with { Mode = value }; SavePreferences(); MarkRulesChanged();
         OnPropertyChanged(nameof(IsSelectedMode)); OnPropertyChanged(nameof(IsWholeMode)); OnPropertyChanged(nameof(ModeDescription));
     }
-    private void Attach(AppRule rule)
+    private void Attach(IEnumerable<AppRule> rules)
     {
-        var item = new AppItemViewModel(rule);
+        var item = new AppItemViewModel(rules);
         item.RuleChanged += (_, _) => { SaveApplications(); MarkRulesChanged(); };
         Applications.Add(item);
     }
     private void SaveApplications()
     {
-        preferences = preferences with { Applications = Applications.Select(x => x.ToRule()).ToList() };
+        preferences = preferences with { Applications = Applications.SelectMany(x => x.ToRules()).ToList() };
         SavePreferences();
         foreach (var name in new[] { nameof(SelectedAppCount), nameof(FilteredApplications), nameof(HasApplications), nameof(HasSelectedApplications), nameof(HasSearchResults) }) OnPropertyChanged(name);
     }
@@ -63,9 +63,12 @@ public sealed partial class MainViewModel
     private void AddDiscovered(AppRule? rule)
     {
         if (rule == null) return;
-        var existing = Applications.FirstOrDefault(x => string.Equals(x.ExecutablePath, rule.ExecutablePath, StringComparison.OrdinalIgnoreCase));
-        if (existing != null) existing.Enabled = true;
-        else { Attach(rule with { Enabled = true }); SaveApplications(); MarkRulesChanged(); }
+        rule=ApplicationGroups.Normalize(rule);
+        var paths=Discovered.Where(x=>string.Equals(x.Name.Trim(),rule.Name.Trim(),StringComparison.CurrentCultureIgnoreCase)).Append(rule).ToArray();
+        var existing=Applications.FirstOrDefault(x=>string.Equals(x.Name.Trim(),rule.Name.Trim(),StringComparison.CurrentCultureIgnoreCase));
+        if(existing!=null){foreach(var path in paths)existing.AddPath(path);existing.Enabled=true;}
+        else Attach(paths.Select(x=>x with{Enabled=true}));
+        SaveApplications();MarkRulesChanged();
         RefreshDiscoveryProperties();
     }
     private void RemoveApp(AppItemViewModel? item)

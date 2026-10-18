@@ -1,7 +1,6 @@
+using System.Diagnostics;
 using Slx.Client.Core;
-
 namespace Slx.Client.Service;
-
 internal sealed partial class TunnelEngine
 {
     public async Task CheckHealthAsync(CancellationToken cancellationToken)
@@ -9,32 +8,33 @@ internal sealed partial class TunnelEngine
         await lifecycle.WaitAsync(cancellationToken);
         try
         {
-            if (state.Phase != TunnelPhase.Connected || child is null || currentPlan is null) return;
+            if(!desiredConnected||currentPlan==null)return;
+            if(Stopwatch.GetTimestamp()<retryAt)return;
             try
             {
-                InteractiveSessions.RequireSingleOwner(ownerSid ?? "");
-                if (child.HasExited) throw new ClientFault("CORE_EXITED");
-                if (!LocalProbe.TunnelReady()) throw new ClientFault("TUN_NOT_READY");
-                if (await LocalProbe.CheckOnceAsync(probe.Port, probe.User, probe.Password, cancellationToken))
+                InteractiveSessions.RequireSingleOwner(ownerSid??"");
+                if(state.Phase==TunnelPhase.Connected&&child is not null&&!child.HasExited&&LocalProbe.TunnelReady())
                 {
-                    state = state with { ObservedAt = DateTimeOffset.UtcNow, ProbePassed = true };
-                    return;
+                    if(Stopwatch.GetTimestamp()<healthAt)return;
+                    healthAt=Stopwatch.GetTimestamp()+15*Stopwatch.Frequency;
+                    if(await LocalProbe.CheckOnceAsync(probe.Port,probe.User,probe.Password,cancellationToken))
+                    {state=state with{ObservedAt=DateTimeOffset.UtcNow,ProbePassed=true};return;}
                 }
-                state = state with { Phase = TunnelPhase.Reconnecting, ObservedAt = DateTimeOffset.UtcNow, ProbePassed = false };
+                state=state with{Phase=TunnelPhase.Reconnecting,ObservedAt=DateTimeOffset.UtcNow,ProbePassed=false,ProtectionActive=protectionActive};
                 await StopChildAsync();
-                if (recoveryAttempts++ >= 1) throw new ClientFault("RECOVERY_LIMIT");
-                var pinned = await PinEndpointAsync(currentPlan, cancellationToken);
-                await LaunchAsync(pinned, RuntimeTrust.Verify(), TunnelPhase.Reconnecting, cancellationToken);
+                ArmProtection(currentPlan);
+                var pinned=pinnedPlan??await PinEndpointAsync(currentPlan,cancellationToken);
+                intents.Save(new(ownerSid!,pinned,currentPlan.Profile.Host));
+                await LaunchAsync(pinned,RuntimeTrust.Verify(),TunnelPhase.Reconnecting,cancellationToken);
+                retryAt=0;
             }
-            catch (ClientFault fault) when (BackgroundCleanup.IsPending(fault))
-            { return; }
-            catch (Exception error)
+            catch(OperationCanceledException) when(cancellationToken.IsCancellationRequested){throw;}
+            catch(Exception error)
             {
-                if (!await BackgroundCleanup.TryAsync(StopChildAsync)) return;
-                state = new(TunnelPhase.Faulted, DateTimeOffset.UtcNow, currentPlan.Profile.Name,
-                    error is ClientFault fault ? fault.Code : error is OperationCanceledException ? "OPERATION_INTERRUPTED" : "SERVICE_FAILURE", Mode: currentPlan.Mode);
+                await BackgroundCleanup.TryAsync(StopChildAsync);
+                ScheduleRecovery(error is ClientFault fault?fault.Code:"SERVICE_FAILURE");
             }
         }
-        finally { lifecycle.Release(); }
+        finally{lifecycle.Release();}
     }
 }

@@ -2,7 +2,7 @@
 
 **Открытый исходный код · Open source.** Самостоятельный Windows-клиент SLX с выбором приложений для VPN, в стиле сайта SLX.
 
-**0.1.0-alpha.5 — ранняя версия для Windows 10 / 11.** Исправление ChatGPT/Claude, каталог популярных программ, быстрые переключатели и статистика подключения. Сборка установщика не означает завершённую системную приёмку. Проверки и ограничения: [docs/VERIFICATION.md](docs/VERIFICATION.md).
+**0.1.0-alpha.5 — ранняя версия для Windows 10 / 11.** Восстановление VPN с защитой трафика, защищённый DNS и удобная библиотека приложений. Сборка установщика не означает завершённую системную приёмку. Проверки и ограничения: [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
 [Скачать alpha.5](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.5) · [Предыдущая alpha.1](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.1) · [SLX](https://slxvpn.com) · [Поддержка](https://t.me/slxvpn?direct)
 
@@ -10,9 +10,9 @@
 
 - Импорт личной ссылки SLX: Hysteria2 и VLESS/XHTTP; выбор профиля.
 - Два режима: VPN для выбранных .exe или всего компьютера.
-- Общий каталог из 18 популярных программ, локальное обнаружение установленных приложений, иконки и ручной выбор .exe. Программу можно добавить до запуска.
+- Каталог из 18 программ, ярлыки рабочего стола и меню «Пуск», иконки и ручной выбор .exe. Codex / ChatGPT добавляются одной записью с помощниками. Программы можно добавлять до запуска.
 - Переключатели приложений на главной, длительность подключения, активный протокол и время ответа службы.
-- RU/EN, темы SLX и Terminal, системный трей и переподключение.
+- Защита выбранного трафика при сбое и автоматическое восстановление; RU/EN, темы SLX и Terminal, системный трей.
 - Каталог обновляется с SLX и работает без сети; список программ компьютера не отправляется на сервер.
 - Пользовательский интерфейс без прав администратора; отдельная сетевая служба.
 - DPAPI для локального хранения личной ссылки; секреты не попадают в исходники или журналы.
@@ -31,8 +31,8 @@
 
 ## Ограничения alpha
 
-**Kill switch пока нет:** при сбое ядра выбранные приложения могут выйти в интернет напрямую.
-DNS выбранных приложений использует общий резолвер Windows напрямую. LAN/loopback обходят VPN.
+При сбое VPN защищённый публичный трафик блокируется до автоматического восстановления; «Отключиться» снимает защиту.
+Публичный DNS из TUN использует HTTPS через VPN. Это общий Windows DNS; LAN/loopback остаются прямыми.
 Лаунчеры, дочерние процессы, Store-приложения и привилегированные службы могут требовать отдельных правил.
 Несколько интерактивных пользователей Windows одновременно не поддерживаются.
 Полная приёмка трафика через реальные серверы, IPv6, сна, обновления/удаления и чистой VM ещё не завершена.
@@ -74,7 +74,7 @@ MIT для исходников SLX; сторонние компоненты и�
 An open-source SLX Windows client with per-application routing, Hysteria2/VLESS, RU/EN and native WPF UI.
 Alpha.4 adds a curated local-first application catalog, dashboard switches and connection facts, and mitigates a confirmed browser IPv6 source-address failure.
 Download the unsigned alpha installer from Releases, install it, import a separate SLX device link, select applications and connect.
-This alpha has **no kill switch**; shared Windows DNS is direct in selected-app mode.
+Persistent WFP protection blocks protected public traffic outside the owned TUN during recovery. Shared public DNS captured by TUN uses HTTPS through VPN; LAN remains direct. Full existing-flow/IPv6/boot acceptance remains open.
 System/network acceptance is incomplete. See SECURITY.md and docs/VERIFICATION.md before relying on it.
 
 Alpha.3: библиотека с локальными иконками, автоматическое применение списка и проверяемое исправление TLS/IPv6. Подробности: [диагностика](docs/NETWORK_DIAGNOSIS.md).

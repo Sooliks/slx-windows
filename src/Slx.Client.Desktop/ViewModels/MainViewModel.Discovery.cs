@@ -12,15 +12,15 @@ public sealed partial class MainViewModel
     public bool Discovering {get=>discovering;private set{if(SetProperty(ref discovering,value))DiscoverCommand.NotifyCanExecuteChanged();}}
     public string DiscoverySearch {get=>discoverySearch;set{if(SetProperty(ref discoverySearch,value))RefreshDiscoveryProperties();}}
     public IEnumerable<AppRule> FilteredDiscovered=>Discovered.Where(app=>
-        !Applications.Any(added=>string.Equals(added.ExecutablePath,app.ExecutablePath,StringComparison.OrdinalIgnoreCase))
-        &&app.Name.Contains(DiscoverySearch,StringComparison.CurrentCultureIgnoreCase));
+        !Applications.Any(added=>string.Equals(added.Name.Trim(),app.Name.Trim(),StringComparison.CurrentCultureIgnoreCase))
+        &&app.Name.Contains(DiscoverySearch,StringComparison.CurrentCultureIgnoreCase)).GroupBy(x=>x.Name.Trim(),StringComparer.CurrentCultureIgnoreCase).Select(x=>x.First());
     public IEnumerable<LibraryEntry> FilteredLibrary
     {
         get
         {
             var names=Discovered.Select(x=>System.IO.Path.GetFileName(x.ExecutablePath))
-                .Concat(Applications.Select(x=>System.IO.Path.GetFileName(x.ExecutablePath))).ToHashSet(StringComparer.OrdinalIgnoreCase);
-            return FilteredDiscovered.Select(app=>new LibraryEntry(app.Name,app,null))
+                .Concat(Applications.SelectMany(x=>x.ToRules()).Select(x=>System.IO.Path.GetFileName(x.ExecutablePath))).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            return FilteredDiscovered.Select(app=>new LibraryEntry(app.Name,app,null,Discovered.Where(x=>string.Equals(x.Name.Trim(),app.Name.Trim(),StringComparison.CurrentCultureIgnoreCase)).ToArray()))
                 .Concat(CatalogEntries.Where(app=>!app.Executables.Any(names.Contains)
                     &&app.Name.Contains(DiscoverySearch,StringComparison.CurrentCultureIgnoreCase))
                     .Select(app=>new LibraryEntry(app.Name,null,app)));
@@ -46,10 +46,13 @@ public sealed partial class MainViewModel
         try
         {
             var apps=await Task.Run(()=>AppDiscovery.RunningApplications().Concat(AppDiscovery.InstalledApplications())
-                .Concat(CatalogApplications.Find(CatalogEntries)).DistinctBy(app=>app.ExecutablePath,StringComparer.OrdinalIgnoreCase)
+                .Concat(ShortcutApplications.Find()).Concat(ApplicationGroups.Discover()).Concat(CatalogApplications.Find(CatalogEntries)).Select(ApplicationGroups.Normalize).DistinctBy(app=>app.ExecutablePath,StringComparer.OrdinalIgnoreCase)
                 .OrderBy(app=>app.Name,StringComparer.CurrentCultureIgnoreCase).Take(300).ToArray(),current.Token);
             if(disposed||current.IsCancellationRequested)return;
-            Discovered.Clear();foreach(var app in apps)Discovered.Add(app);RefreshDiscoveryProperties();
+            Discovered.Clear();foreach(var app in apps)Discovered.Add(app);
+            bool changed=false;foreach(var app in apps){var added=Applications.FirstOrDefault(x=>string.Equals(x.Name.Trim(),app.Name.Trim(),StringComparison.CurrentCultureIgnoreCase));if(added!=null)changed|=added.AddPath(app);}
+            if(changed){SaveApplications();MarkRulesChanged();}
+            RefreshDiscoveryProperties();
             try
             {
                 var fresh=await CatalogClient.RefreshAsync(current.Token);

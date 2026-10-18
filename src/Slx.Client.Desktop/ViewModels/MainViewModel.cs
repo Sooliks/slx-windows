@@ -28,7 +28,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         catch (ClientFault) { messageKey = "FaultStorage"; }
         Text.Catalog.SetLanguage(preferences.Language);
         ThemeManager.Apply(preferences.Theme);
-        foreach (var rule in preferences.Applications ?? []) Attach(rule);
+        foreach (var group in (preferences.Applications ?? []).Select(ApplicationGroups.Normalize).GroupBy(x=>x.Name.Trim(),StringComparer.CurrentCultureIgnoreCase)) Attach(group);
         Profiles = new(saved?.Snapshot.Profiles ?? []);
         selectedProfile = Profiles.FirstOrDefault(x => x.Id == preferences.SelectedProfileId)
             ?? Profiles.FirstOrDefault(x => x.Kind == "hysteria2") ?? Profiles.FirstOrDefault();
@@ -79,7 +79,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public string SubscriptionUpdated => saved?.Snapshot.FetchedAt.ToLocalTime().ToString("g") ?? "—";
     public string SubscriptionExpiry => saved?.Snapshot.ExpiresAt?.ToLocalTime().ToString("d") ?? Text.Catalog["ExpiryUnknown"];
     public bool IsConnected => statusFresh && status?.Phase == TunnelPhase.Connected && status.ProbePassed;
-    public bool IsTunnelActive => status?.Phase is TunnelPhase.Connected or TunnelPhase.Connecting or TunnelPhase.Reconnecting;
+    public bool IsTunnelActive => status?.ProtectionActive == true || status?.Phase is TunnelPhase.Connected or TunnelPhase.Connecting or TunnelPhase.Reconnecting;
     public bool CanReconnect => statusFresh && HasSubscription && IsTunnelActive && !IsBusy;
     public bool CanEditRouting => !IsBusy;
     public bool CanConnect => (HasSubscription && statusFresh) || IsTunnelActive || IsBusy;
@@ -93,7 +93,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public string? LastServiceCode => lastServiceCode;
     public bool HasServiceCode => lastServiceCode != null;
     public string ServiceCodeLabel => lastServiceCode == null ? "" : $"{Text.Catalog["ErrorCode"]}: {lastServiceCode}";
-    public string StatusDetail => Text.Catalog[!statusFresh ? ServiceStateCopy.DetailKey(lastServiceCode) : "NoMetrics"];
+    public string StatusDetail => Text.Catalog[!statusFresh ? ServiceStateCopy.DetailKey(lastServiceCode) : status?.ProtectionActive == true ? "TrafficProtected" : "NoMetrics"];
     public string VersionLabel => "SLX VPN · " + (System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false).OfType<System.Reflection.AssemblyInformationalVersionAttribute>().FirstOrDefault()?.InformationalVersion.Split('+')[0] ?? "alpha");
     public RelayCommand<string> NavigateCommand { get; }
     public RelayCommand OpenImportCommand { get; }

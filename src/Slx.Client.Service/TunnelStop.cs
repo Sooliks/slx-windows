@@ -42,7 +42,7 @@ internal sealed partial class TunnelEngine
         catch (Exception error)
         {
             string code = error is ClientFault fault ? fault.Code : "CORE_STOP_FAILED";
-            state = new(TunnelPhase.Faulted, DateTimeOffset.UtcNow, state.ProfileName, code, Mode: state.Mode);
+            state = new(TunnelPhase.Faulted, DateTimeOffset.UtcNow, state.ProfileName, code, Mode: state.Mode,ProtectionActive:protectionActive);
             if (error is ClientFault) throw;
             throw new ClientFault(code);
         }

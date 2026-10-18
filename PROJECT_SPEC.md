@@ -52,4 +52,4 @@ A curated public catalog has an embedded fallback; local discovery supports prog
 No inventory collection. Dashboard app switches apply automatically and remain present when disabled.
 Connection facts derive from authoritative service observations; no invented speed or traffic counters.
 The catalog API is an additive public contract with schemaVersion 1; no client/server credentials or DB migration.
-Alpha.5: generic automatic-library uninstall filtering, Windows 10 installer threshold and shared Win10/11 manifest. No networking/configuration changes. See docs/COMPATIBILITY.md.
+Alpha.5: persistent WFP traffic protection, indefinite paced recovery, encrypted service resume intent, protected shared DNS, local shortcut discovery and exact-path Codex / ChatGPT group. Exclude uninstallers/Package Cache. Windows 10 target remains unaccepted. Optional additive ProtectionActive status field stays on IPC v2; update service/UI together. New service-local encrypted intent and owned WFP policy need explicit uninstall cleanup. No server/DB migration. See docs/NETWORK.md and docs/COMPATIBILITY.md.

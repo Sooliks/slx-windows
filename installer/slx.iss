@@ -78,7 +78,7 @@ begin
 end;
 function InitializeUninstall(): Boolean;
 begin
- Result := RunServiceAction('Stop');
+ Result := RunServiceAction('Remove');
  if not Result then MsgBox('Could not stop SLX network service. Uninstall cancelled.', mbError, MB_OK);
 end;
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);

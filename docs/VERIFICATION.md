@@ -1,8 +1,18 @@
 # Verification — 0.1.0-alpha.5
 
-STATUS: PARTIAL. Windows 10 / 11 target; actual execution here is Windows 11.
-scripts/verify.ps1: exit 0, 140 unit/Windows and one WPF scenario passed, zero warnings/errors. Twelve new policy cases cover uninstall variants and preserving genuine app names and parent directories.
-Installer admits Windows 10 build19041+; real Windows 10 installer, UI and TUN acceptance remain open. Source review is not OS execution. See docs/COMPATIBILITY.md. Historical evidence below.
+STATUS: PARTIAL. Actual Windows 11 execution; Windows 10 target remains unaccepted.
+
+- scripts/verify.ps1 exit 0: locked restore, Release build, zero warnings/errors; 156 unit/Windows checks and one WPF scenario; no skips/failures; source size contract passes.
+- Real pinned Xray isolated DNS A/B: plain DNS returns RCODE 3 / zero answers for youtube.com and www.youtube.com; DoH via HY2 and VLESS returns RCODE 0 / positive answers. No second TUN or server edits; configuration/credentials remain in memory.
+- Local discovery observed one registered OpenAI desktop group, three exact executable paths and 77 readable shortcut targets. Counts only; inventory is not published or uploaded.
+- Isolated real WFP two-EXE IPv4 TCP/UDP: before both pass; selected block fails both while control passes; owned TUN next-hop permit restores selected; persistent block survives engine close; explicit Remove restores both. Local-interface condition was insufficient; final code uses IP_NEXTHOP_INTERFACE.
+- Installed candidate: setup exit 0, file version 0.1.0.5. Connected/ProbePassed/ProtectionActive true; YouTube resolves. Owner confirmed YouTube works and Codex / ChatGPT appears.
+- Installed service stop: selected fresh IPv4 TCP and UDP fail, unselected control passes. Service start restores encrypted plan and protection. Three forced owned-core exits recover independently with ProtectionActive/ProbePassed true; VLESS also connects. Explicit off releases protection; original HY2/app plan restored.
+- Final installed rerun after DNS readiness: first selected TCP/UDP probes pass after resume; three more forced core exits recover with protection, HY2/VLESS pass. Already-open selected TCP/TLS and UDP sockets pass before stop and fail while service/TUN is stopped. In whole-computer mode both test EXEs pass connected and both fail while stopped. Explicit off restores both; original HY2 plan restored. Public DNS is also blocked for the unselected control during recovery, as required by the shared resolver protection.
+- Matching-name WPF scenario verifies one Claude card, two retained paths, both switched together and one card after settings reconstruction. Owner confirmed YouTube and OpenAI group in the earlier candidate.
+- SCM restart policy confirmed 3/10/30 seconds. Persistent filters and machine-DPAPI resume state are owned locally; explicit uninstall releases only SLX policy.
+
+Open: Windows 10/clean VM, full IPv6/ECH/HTTP3, existing flows, sleep/Wi-Fi/interface changes, reboot-before-BFE, multi-user packet isolation and all DPI/a11y combinations. Current native new-IPv4 socket evidence is not full packet-level/no-leak acceptance. Historical releases below retain their original limitations.
 
 # Verification — 0.1.0-alpha.4
 
@@ -98,3 +108,5 @@ Windows 10 is not claimed. No full kill switch or packet-level Windows SID isola
 Selected-app DNS uses the shared Windows resolver directly. Installation-ID first initialization across separate Windows sessions remains unverified.
 
 Production servers, Happ, DB/device records and subscription keys were not changed.
+
+Alpha.5 UI follow-up: the current WPF run verifies a 12px scrollbar hit area at the right frame edge (within 3px), successful scroll-to-bottom, and no horizontal overflow at 940x660. Current wide/narrow renders were inspected; thin thumb geometry remains fixed on hover.

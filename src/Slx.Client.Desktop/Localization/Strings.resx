@@ -152,4 +152,5 @@
 <data name="StatsProtocol" xml:space="preserve"><value>Connection method</value></data>
 <data name="StatsApps" xml:space="preserve"><value>Selected apps</value></data>
 <data name="StatsChecked" xml:space="preserve"><value>Last checked</value></data>
+  <data name="TrafficProtected" xml:space="preserve"><value>Protection is on. If VPN drops, protected traffic stays blocked until recovery. Use Disconnect to turn protection off.</value></data>
 </root>

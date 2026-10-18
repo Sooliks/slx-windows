@@ -5,6 +5,7 @@ namespace Slx.Client.Service;
 internal interface IControlTunnelEngine
 {
     TunnelStatus Status { get; }
+    string? OwnerSid => null;
     Task StartAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken);
     Task ReconnectAsync(CancellationToken cancellationToken);
     Task StopAsync(CancellationToken cancellationToken);

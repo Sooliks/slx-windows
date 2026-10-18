@@ -1,8 +1,5 @@
 using System.Diagnostics;
-using Slx.Client.Core;
-
 namespace Slx.Client.Service;
-
 internal sealed partial class TunnelEngine
 {
     private async Task HandleExitAsync(Process exited)
@@ -10,12 +7,10 @@ internal sealed partial class TunnelEngine
         await lifecycle.WaitAsync();
         try
         {
-            if (!ReferenceEquals(child, exited)) return;
-            string? name = state.ProfileName;
-            RoutingMode? mode = state.Mode;
-            if (!await BackgroundCleanup.TryAsync(StopChildAsync)) return;
-            state = new(TunnelPhase.Faulted, DateTimeOffset.UtcNow, name, "CORE_EXITED", Mode: mode);
+            if(!ReferenceEquals(child,exited))return;
+            await BackgroundCleanup.TryAsync(StopChildAsync);
+            if(desiredConnected)ScheduleRecovery("CORE_EXITED");
         }
-        finally { lifecycle.Release(); }
+        finally{lifecycle.Release();}
     }
 }

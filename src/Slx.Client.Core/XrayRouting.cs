@@ -17,7 +17,8 @@ internal static class XrayRouting
         {
             new { type = "field", ip = LocalNetworks, outboundTag = "direct" },
             // A real readiness probe must use VPN even though it originates in our service.
-            new { type = "field", inboundTag = new[] { "probe" }, outboundTag = "vpn" },
+            new { type = "field", inboundTag = new[] { "probe", "resolver" }, outboundTag = "vpn" },
+            new { type = "field", inboundTag = new[] { "tun" }, port = "53", outboundTag = "dns" },
             new { type = "field", process = new[] { "self/" }, outboundTag = "direct" }
         };
         if (IPAddress.TryParse(plan.Profile.Host, out var address))
@@ -26,8 +27,7 @@ internal static class XrayRouting
             rules.Add(new { type = "field", domain = new[] { "full:" + plan.Profile.Host }, outboundTag = "direct" });
         if (plan.Mode == RoutingMode.SelectedApplications)
         {
-            // Windows DNS Client is shared, so DNS cannot truthfully be attributed to the selected app.
-            rules.Add(new { type = "field", port = "53", outboundTag = "direct" });
+
             rules.Add(new
             {
                 type = "field",

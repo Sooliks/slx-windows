@@ -14,7 +14,7 @@ internal static class LibraryChecks
         var oldPage=model.Page;var oldTheme=model.Theme;
         model.CatalogEntries=[];
         model.Discovered.Clear();
-        foreach(var name in new[]{"Browser","Messenger","Music","Video","Editor","Game"})
+        foreach(var name in new[]{"Library Browser","Library Messenger","Library Music","Library Video","Library Editor","Library Game"})
             model.Discovered.Add(new(Guid.NewGuid(),name,@"C:\Synthetic Library\"+name+".exe"));
         model.DiscoverySearch="refresh";model.DiscoverySearch="";
         model.Page="applications";model.Theme="olive";window.Width=1200;window.Height=820;Sta.Pump();
@@ -30,6 +30,20 @@ internal static class LibraryChecks
         window.Width=940;window.Height=660;Sta.Pump();
         Assert.All(Sta.Descendants<ScrollViewer>(window),scroll=>Assert.True(scroll.ExtentWidth<=scroll.ViewportWidth+1));
         UiScreenshots.Save(window,"slx-library-narrow");
+        var first=new AppRule(Guid.NewGuid(),"Claude",@"C:\Synthetic Library\Claude\claude.exe");
+        var second=new AppRule(Guid.NewGuid(),"Claude",@"C:\Synthetic Library\Claude\app-2\claude.exe");
+        model.Discovered.Add(first);model.Discovered.Add(second);
+        Assert.Single(model.FilteredLibrary,x=>x.Name=="Claude");
+        model.AddDiscoveredCommand.Execute(first);
+        var combined=Assert.Single(model.Applications,x=>x.Name=="Claude");
+        Assert.Equal(2,combined.ToRules().Count());
+        Assert.Contains(combined.ToRules(),x=>x.ExecutablePath==first.ExecutablePath);
+        Assert.Contains(combined.ToRules(),x=>x.ExecutablePath==second.ExecutablePath);
+        combined.Enabled=false;Assert.All(combined.ToRules(),x=>Assert.False(x.Enabled));
+        combined.Enabled=true;Assert.All(combined.ToRules(),x=>Assert.True(x.Enabled));
+        using(var loaded=new MainViewModel(false,null,new ClientPreferences(Applications:combined.ToRules().ToList())))
+        {Assert.Single(loaded.Applications);Assert.Equal(2,loaded.Applications[0].ToRules().Count());}
+        model.RemoveAppCommand.Execute(combined);
         model.Page=oldPage;model.Theme=oldTheme;Sta.Pump();
     }
 }

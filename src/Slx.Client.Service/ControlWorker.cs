@@ -9,8 +9,9 @@ internal sealed class ControlWorker(ControlDispatcher dispatcher, TunnelEngine e
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        await engine.RestoreAsync(stoppingToken);
         try { await Task.WhenAll(RunPipeAsync(stoppingToken), MonitorAsync(stoppingToken)); }
-        finally { await engine.StopAsync(CancellationToken.None); }
+        finally { await engine.ShutdownAsync(); }
     }
 
     private async Task RunPipeAsync(CancellationToken stoppingToken)
@@ -38,7 +39,7 @@ internal sealed class ControlWorker(ControlDispatcher dispatcher, TunnelEngine e
 
     private async Task MonitorAsync(CancellationToken stoppingToken)
     {
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(15));
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
         try
         {
             while (await timer.WaitForNextTickAsync(stoppingToken))

@@ -20,6 +20,7 @@ internal sealed class ControlDispatcher(IControlTunnelEngine engine, ISessionGua
             if (request.Version != PipeContract.Version || request.RequestId == Guid.Empty
                 || request.Action is not ("status" or "connect" or "disconnect" or "reconnect"))
                 return Rejected("IPC_INVALID");
+            owner ??= engine.OwnerSid;
             if (owner is not null && owner != sid) return Rejected("CONTROLLER_OWNED");
             if (request.Action == "status")
                 return request.Plan is null ? new PipeReply(true, "OK", engine.Status) : Rejected("IPC_INVALID");

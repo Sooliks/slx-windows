@@ -1,35 +1,28 @@
-# Network model and limitations
+# Network model and limits — alpha.5
 
-The UI creates a typed ConnectPlan. The Windows service validates it again, validates all current DNS answers for the remote endpoint, and supplies a generated configuration to the pinned Xray core in memory. No server keys, production profiles or raw configurations are part of this repository.
-
-## Supported subscription profiles
-
-UTF-8 URI lists and base64-encoded UTF-8 URI lists are accepted. Supported profiles are Hysteria2 over TLS with h3, VLESS/XHTTP over TLS with h2 and stream-one, and legacy VLESS/REALITY over RAW/TCP. Unsupported transports, insecure certificate flags, duplicate/unknown query parameters and private literal endpoints fail closed. XHTTP fp=unsafe means native TLS; certificate and hostname validation remain enabled. Profile IDs are SHA-256 of the URI; they do not contain the original secret.
-
-TLS certificate checks are never disabled. REALITY requires its public key. Entitlement, expiry, active device slots and HWID binding remain enforced by the subscription server; importing a Happ-bound URL is not a device transfer.
+The unprivileged UI sends a typed, SID-authorized plan. The LocalSystem service validates public endpoint DNS answers, pins the selected IP and preserves TLS hostname validation. Only pinned Xray 26.9.9 and vendor-signed Wintun execute. No server/Happ/key/HWID changes.
 
 ## Traffic selection
+A dual-stack TUN handles IPv4/IPv6. Exact full executable paths select VPN; unmatched processes stay direct in selected mode. Whole-computer mode proxies public traffic. LAN/private and loopback remain direct. Application helpers need their own exact paths; the same display names merge into one card/toggle while preserving all exact EXE rules. The known OpenAI.Codex desktop family expands locally into ChatGPT.exe, codex.exe and codex-code-mode-host.exe. No wildcard shell/Node rules or application inventory upload.
 
-A dual-stack TUN receives IPv4 and IPv6 traffic. Xray automatically binds its outbound sockets to the physical interface. Local/private destinations and the core process bypass the proxy. The authenticated localhost readiness probe routes through the VPN before process rules. Selected application paths are exact full executable paths, not a process-name wildcard; disabled entries do not match. Xray's process matcher is case-sensitive, so paths should be obtained from the running process or native file picker.
-
-Selected-app mode routes selected processes to VPN and unmatched or unattributed traffic directly. This is not a fail-closed kill switch. Child processes with a different executable, browser helpers, service-hosted traffic and existing connections are not automatically attributed to the parent. Select the relevant helper executable and restart existing application connections when changing the list.
-
-Whole-computer mode routes public destinations through VPN; local/private network access remains direct. New connections only are classified. There is no per-app bandwidth/latency claim.
+## Protection and recovery
+WFP owns one persistent provider/sublayer, applied atomically before starting the core. At ALE_AUTH_CONNECT_V4/V6, protected applications are blocked except LAN/loopback and the owned TUN next-hop interface. Whole-computer protection exempts only the verified core and network service so they can reconnect. Soft permits do not override other providers' firewall blocks. Only provider-owned filters are replaced/deleted.
+The TUN permit is nonpersistent: an interface LUID from an earlier boot must not become an exception for another interface. Persistent blocking rules survive core/service exit; on service startup encrypted intent reapplies the protection before recovery. This is not a promise about packets before Windows BFE has initialized at boot.
+Health failure or core exit schedules retries with pauses 2/5/10/20/40/60 seconds, capped at 60, without a total attempt limit. The saved pinned public endpoint enables service recovery without depending on a working shared DNS path. The original hostname is retained in encrypted intent; a validated cached IP is reused for the same endpoint on reconnect. Changing endpoint addresses needs an explicit refreshed connection. Multiple interactive users prevent recovery while protection stays on. SCM also restarts a failed SLX service.
+Only explicit Disconnect writes off-intent and releases protection after the owned child/adapter stops. Service shutdown preserves protection and intent. Uninstall is an explicit removal and invokes the installed service's restricted release command. Encrypted intent under ProgramData/SLX.NetworkService is SYSTEM/Administrators-only with machine DPAPI; it contains the local plan and owner SID, never plaintext subscription/configuration.
+Changing app rules reconnects automatically; a short protected pause is expected. Existing flows, raw packets, IPv6 and network changes require broader acceptance; matching configuration and successful new IPv4 sockets do not prove every Windows flow is leak-free.
 
 ## DNS
+Windows shares its DNS service across applications. Public port 53 captured by TUN routes to Xray DNS, whose HTTPS resolvers (literal 1.1.1.1 / 8.8.8.8, normal certificate validation) route via VPN before self-process bypass. There is no plain UDP/system DNS fallback in this path. This also affects unselected applications using the shared public resolver while connected. Private/LAN DNS and initial bootstrap resolution remain direct; public port 53 is blocked outside TUN during recovery, including the shared Windows resolver. This can pause DNS for unselected apps while VPN is recovering; app-owned HTTPS DNS follows its process rule. Selected mode is not per-app DNS anonymity.
+The service flushes the Windows resolver cache and performs a real DNS exchange before Connected. Owner-reported YouTube NXDOMAIN was reproduced on plain DNS; the new DoH path returned valid answers on both live protocols. No physical DNS settings are persisted.
 
-Windows DNS Client may resolve for multiple applications from the same shared service. Selected-app mode routes port 53 directly, including DNS requests from selected applications. Consequently the alpha does not promise per-app DNS isolation or anonymity. Applications using their own HTTPS DNS follow their own process rule. Whole-computer mode routes public DNS over VPN, but physical-interface/bootstrap resolution of the VPN hostname is necessarily outside the tunnel. Local DNS/mDNS and LAN destinations remain direct. DNS and UDP behavior require real acceptance tests; configuration syntax is not proof of absence of leaks.
+## Acceptance
+Windows 11: isolated selected/unselected IPv4 TCP/UDP block, TUN permit, policy persistence, explicit removal; installed service-stop block and automatic resume; three forced core exits; HY2 and VLESS connectivity. One first DNS datagram timed out after the initial candidate restart, motivating the final readiness probe. Detailed final evidence is in VERIFICATION.md.
+Full IPv6/ECH/HTTP3, existing flows, sleep/network changes, clean VM, Windows 10, multi-user packet isolation and boot-time guarantees remain open. Do not describe these checks as full network/security acceptance.
 
-## Recovery and isolation
-
-Only one machine-wide tunnel can be owned at a time. Its user SID is the control owner; a different interactive user must not take over or read credentials. No network change should outlive its owned core/service lifecycle. Adapter cleanup after kill, sleep, network change and uninstall must be verified on a Windows VM before calling the release stable. Native IPv4 TCP/UDP process classification passed an isolated two-EXE test. Whole-computer routing, real VPN egress, IPv6 and lifecycle behavior remain unverified until system acceptance passes.
-
-## Upstream references
-
-- [Pinned Xray TUN parser](https://github.com/XTLS/Xray-core/blob/v26.9.9/infra/conf/tun.go)
-- [Pinned Hysteria parser](https://github.com/XTLS/Xray-core/blob/v26.9.9/infra/conf/hysteria.go)
-- [TUN interface routing](https://xtls.github.io/en/config/inbounds/tun.html)
-- [Process routing syntax](https://xtls.github.io/en/config/routing.html#ruleobject)
-- [XHTTP transport](https://xtls.github.io/en/config/transports/splithttp.html)
-
-No production website, Moscow/Amsterdam server, Happ installation, HWID record or existing subscription was changed by developing this client.
+## Primary references
+- https://github.com/XTLS/Xray-core/tree/v26.9.9
+- https://xtls.github.io/en/config/dns.html
+- https://learn.microsoft.com/en-us/windows/win32/fwp/filtering-condition-identifiers-
+- https://learn.microsoft.com/en-us/windows/win32/fwp/filter-arbitration
+- https://microsoft.github.io/CsWin32/

@@ -22,6 +22,10 @@ internal static class LayoutChecks
         UiScreenshots.Save(window, "slx-populated-whole");
         window.Width = 940; window.Height = 660; Sta.Pump();
         var scroll = Sta.Descendants<ScrollViewer>(window).Single(x => x.Name == "ConnectionScroll");
+        var bar=Sta.Descendants<System.Windows.Controls.Primitives.ScrollBar>(scroll).Single(x=>x.Orientation==Orientation.Vertical);
+        var edge=bar.TransformToAncestor(window).TransformBounds(new Rect(bar.RenderSize));
+        Assert.InRange(window.ActualWidth-edge.Right,0,3);Assert.InRange(bar.ActualWidth,10,12);
+        scroll.ScrollToBottom();Sta.Pump();Assert.True(scroll.VerticalOffset>0);scroll.ScrollToTop();Sta.Pump();
         Assert.True(scroll.ViewportWidth > 0); Assert.True(scroll.ExtentWidth <= scroll.ViewportWidth + 1);
         UiScreenshots.Save(window, "slx-populated-narrow");
         model.Page = "applications"; Sta.Pump();

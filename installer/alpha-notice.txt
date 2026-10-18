@@ -1,16 +1,14 @@
-SLX VPN 0.1.0 alpha — Windows 10 / 11
-Open-source client: https://github.com/Sooliks/slx-windows
+SLX VPN alpha.5 — Windows 10 / 11
+Open source: https://github.com/Sooliks/slx-windows
 
-This is an unsigned early test release, not a fully accepted production client.
-It installs the SLXVPN system service and the vendor-signed Wintun driver.
-There is no kill switch: traffic may go direct if the VPN core stops.
-Selected-app DNS uses the shared Windows resolver directly.
-Use a separate SLX device link; an existing Happ binding must be transferred through the website.
-Full TUN, sleep/resume, upgrade/uninstall and clean-machine acceptance is still pending.
-Do not disable Windows security to run this installer.
+Unsigned prerelease. Installs the SLXVPN service and vendor-signed Wintun.
+If VPN fails, protected public traffic stays blocked while SLX reconnects. Use Disconnect to release protection.
+LAN/loopback remain direct. Shared public DNS captured by TUN uses HTTPS via VPN; this is not per-app DNS isolation.
+Use your own SLX device link; Happ bindings require official website transfer.
+Full Windows 10, IPv6/HTTP3, existing-flow, sleep/network and clean-machine acceptance is pending.
+Do not disable Windows security.
 
-Это ранняя тестовая версия без подписи SLX.
-Она устанавливает системную службу SLXVPN и подписанный производителем Wintun.
-Блокировки трафика при сбое VPN пока нет; DNS выбранных приложений проходит напрямую.
-Для импорта используйте отдельную ссылку устройства SLX или штатно перенесите устройство из Happ.
-Системные проверки маршрутизации, сна, обновления и удаления ещё не завершены.
+Предварительная версия без подписи SLX; официальный Wintun сохраняет подпись производителя.
+При сбое защищённый публичный трафик блокируется до восстановления. Кнопка «Отключиться» снимает защиту.
+Локальная сеть доступна напрямую; публичный DNS из TUN использует HTTPS через VPN.
+Для Happ-ссылки нужен штатный перенос в кабинете. Полная системная приёмка ещё не завершена.

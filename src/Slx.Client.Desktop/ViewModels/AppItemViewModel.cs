@@ -6,16 +6,27 @@ namespace Slx.Client.Desktop.ViewModels;
 public sealed class AppItemViewModel : ObservableObject
 {
     private bool enabled;
-    public AppItemViewModel(AppRule rule)
+    private readonly List<AppRule> members=[];
+    public AppItemViewModel(AppRule rule):this(new[]{rule}){}
+    public AppItemViewModel(IEnumerable<AppRule> rules)
     {
-        Id = rule.Id; Name = rule.Name; ExecutablePath = rule.ExecutablePath; enabled = rule.Enabled;
-        Icon = LocalIcon.Load(rule.ExecutablePath);
+        var items=rules.ToArray();var primary=items[0];
+        Id=primary.Id;Name=primary.Name;ExecutablePath=primary.ExecutablePath;enabled=items.Any(x=>x.Enabled);
+        foreach(var rule in items)AddPath(rule);
+        Icon=LocalIcon.Load(primary.ExecutablePath);
     }
     public Guid Id { get; }
     public string Name { get; }
     public string ExecutablePath { get; }
+    public string ExecutablePaths=>string.Join(Environment.NewLine,members.Select(x=>x.ExecutablePath));
     public ImageSource? Icon { get; }
-    public bool Enabled { get => enabled; set { if (SetProperty(ref enabled, value)) RuleChanged?.Invoke(this, EventArgs.Empty); } }
+    public bool Enabled { get=>enabled;set{if(SetProperty(ref enabled,value))RuleChanged?.Invoke(this,EventArgs.Empty);} }
     public event EventHandler? RuleChanged;
-    public AppRule ToRule() => new(Id, Name, ExecutablePath, Enabled);
+    public bool AddPath(AppRule rule)
+    {
+        if(members.Any(x=>string.Equals(x.ExecutablePath,rule.ExecutablePath,StringComparison.OrdinalIgnoreCase)))return false;
+        members.Add(rule);OnPropertyChanged(nameof(ExecutablePaths));return true;
+    }
+    public AppRule ToRule()=>new(Id,Name,ExecutablePath,Enabled);
+    public IEnumerable<AppRule> ToRules()=>members.Select(x=>x with{Name=Name,Enabled=Enabled});
 }

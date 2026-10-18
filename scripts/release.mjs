@@ -50,7 +50,7 @@ try {
  }else if(reference.status!==404)throw Error('RELEASE_SCOPE');
  let release=await api('/repos/'+owner+'/'+repo+'/releases/tags/'+metadata.tag);
  if(release.status===404)release=await api('/repos/'+owner+'/'+repo+'/releases','POST',{
-  tag_name:metadata.tag,target_commitish:revision,name:'SLX VPN '+metadata.version+' — Windows x64',
+  tag_name:metadata.tag,target_commitish:revision,name:'SLX VPN '+metadata.version+' — Windows 10 / 11',
   body:await readFile(resolve(root,'docs/RELEASE_NOTES.md'),'utf8'),draft:true,prerelease:true});
  if(![200,201].includes(release.status)||!release.data.draft||release.data.tag_name!==metadata.tag
   ||release.data.target_commitish!==revision)throw Error('RELEASE_SCOPE');

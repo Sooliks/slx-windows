@@ -46,7 +46,7 @@ public sealed partial class MainViewModel
         CancelRoutingApply();
         if (action != "disconnect" && saved == null) { OpenImportCommand.Execute(null); return; }
         if (action != "disconnect" && IsSelectedMode && !HasSelectedApplications) { Notice("NoActiveApps"); Page = "applications"; return; }
-        ConnectPlan? plan = action == "disconnect" || SelectedProfile == null ? null : new(SelectedProfile, preferences.Mode, Applications.Select(x => x.ToRule()).ToList());
+        ConnectPlan? plan = null;
         var owner = ++generation;
         operation?.Cancel();
         using var current = new CancellationTokenSource(TimeSpan.FromSeconds(55));
@@ -56,6 +56,7 @@ public sealed partial class MainViewModel
         var entered = false;
         try
         {
+            if(action != "disconnect" && SelectedProfile != null)plan=new(SelectedProfile,preferences.Mode,Slx.Client.Windows.ApplicationGroups.Expand(Applications.SelectMany(x=>x.ToRules())));
             await mutationGate.WaitAsync(current.Token);
             entered = true;
             var reply = await SendControlAsync(new(PipeContract.Version, action, Guid.NewGuid(), plan), current.Token);

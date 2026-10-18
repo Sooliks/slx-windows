@@ -22,15 +22,19 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
     public async Task StartAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken)
     {
         PlanValidator.Validate(plan);
-        var pinned = await PinEndpointAsync(plan, cancellationToken);
+        var pinned = pinnedPlan is not null && currentPlan is not null
+            && (plan.Profile.Id==currentPlan.Profile.Id || string.Equals(plan.Profile.Host,currentPlan.Profile.Host,StringComparison.OrdinalIgnoreCase))
+            ? plan with{Profile=plan.Profile with{Host=pinnedPlan.Profile.Host}} : await PinEndpointAsync(plan, cancellationToken);
         string executable = RuntimeTrust.Verify();
         await lifecycle.WaitAsync(cancellationToken);
         try
         {
-            await StopChildAsync();
-            currentPlan = plan;
-            ownerSid = sid;
-            recoveryAttempts = 0;
+            ArmProtection(plan);
+            currentPlan=plan;ownerSid=sid;desiredConnected=true;pinnedPlan=pinned;retryAt=0;
+            state=new(TunnelPhase.Connecting,DateTimeOffset.UtcNow,plan.Profile.Name,Mode:plan.Mode,ProtectionActive:protectionActive);
+            try{intents.Save(new(sid,pinned,plan.Profile.Host));await StopChildAsync();}
+            catch(Exception error){ScheduleRecovery(error is ClientFault fault?fault.Code:"PROTECTION_STORAGE_FAILED");throw;}
+            recoveryAttempts=0;
             await LaunchAsync(pinned, executable, TunnelPhase.Connecting, cancellationToken);
         }
         finally { lifecycle.Release(); }
@@ -48,8 +52,13 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
         await lifecycle.WaitAsync(cancellationToken);
         try
         {
+            intents.Save(null);
+            desiredConnected=false;
             state = state with { Phase = TunnelPhase.Stopping, ObservedAt = DateTimeOffset.UtcNow, ProbePassed = false };
             await StopChildAsync();
+            trafficGuard ??= new(); trafficGuard.Remove(); protectionActive=false;
+            currentPlan=pinnedPlan=null;
+            DnsCache.Refresh();
             state = new(TunnelPhase.Disconnected, DateTimeOffset.UtcNow);
         }
         finally { lifecycle.Release(); }
@@ -57,7 +66,7 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
 
     private async Task LaunchAsync(ConnectPlan plan, string executable, TunnelPhase phase, CancellationToken cancellationToken)
     {
-        state = new(phase, DateTimeOffset.UtcNow, plan.Profile.Name, Mode: plan.Mode);
+        state = new(phase, DateTimeOffset.UtcNow, plan.Profile.Name, Mode: plan.Mode, ProtectionActive:protectionActive);
         try
         {
             if (LocalProbe.AdapterExists()) throw new ClientFault("TUN_ADAPTER_CONFLICT");
@@ -92,17 +101,22 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
             await LocalProbe.WaitAsync(probe.Port, probe.User, probe.Password, () => !process.HasExited, cancellationToken);
             ownedAdapterId = LocalProbe.AdapterIdentity() ?? throw new ClientFault("TUN_NOT_READY");
             TunnelSourcePolicy.Apply(ownedAdapterId);
+            ArmProtection(plan,ownedAdapterId);
+            DnsCache.Refresh();
+            await TunnelDnsProbe.CheckAsync(cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             if (process.HasExited || !LocalProbe.TunnelReady()) throw new ClientFault("CORE_EXITED");
             state = new(TunnelPhase.Connected, DateTimeOffset.UtcNow, plan.Profile.Name,
-                ConnectedAt: DateTimeOffset.UtcNow, Mode: plan.Mode, ProbePassed: true);
+                ConnectedAt: DateTimeOffset.UtcNow, Mode: plan.Mode, ProbePassed: true, ProtectionActive:protectionActive);
+            recoveryAttempts=0; healthAt=Stopwatch.GetTimestamp()+15*Stopwatch.Frequency;
         }
         catch (Exception error)
         {
             await StopChildAsync();
             string code = error is ClientFault fault ? fault.Code
                 : error is OperationCanceledException ? "OPERATION_INTERRUPTED" : "CORE_START_FAILED";
-            state = new(TunnelPhase.Faulted, DateTimeOffset.UtcNow, plan.Profile.Name, code, Mode: plan.Mode);
+            if(desiredConnected)ScheduleRecovery(code);
+            else state = new(TunnelPhase.Faulted, DateTimeOffset.UtcNow, plan.Profile.Name, code, Mode: plan.Mode, ProtectionActive:protectionActive);
             if (error is ClientFault or OperationCanceledException) throw;
             throw new ClientFault(code);
         }
