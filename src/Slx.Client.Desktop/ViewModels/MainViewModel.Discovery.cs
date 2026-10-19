@@ -52,7 +52,7 @@ public sealed partial class MainViewModel
             var apps=DiscoveryFetchOverride is not null?await DiscoveryFetchOverride(current.Token):await Task.Run(()=>
             {
                 var found=AppDiscovery.RunningApplications().Concat(AppDiscovery.InstalledApplications())
-                    .Concat(ShortcutApplications.Find()).Concat(ApplicationGroups.Discover()).Concat(CatalogApplications.Find(catalog))
+                    .Concat(ShortcutApplications.Find()).Concat(SteamApplications.Find()).Concat(ApplicationGroups.Discover()).Concat(CatalogApplications.Find(catalog))
                     .Select(ApplicationGroups.Normalize).DistinctBy(app=>app.ExecutablePath,StringComparer.OrdinalIgnoreCase)
                     .OrderBy(app=>app.Name,StringComparer.CurrentCultureIgnoreCase).Take(300).ToArray();
                 foreach(var app in found){current.Token.ThrowIfCancellationRequested();LocalIcon.Load(app.ExecutablePath);}

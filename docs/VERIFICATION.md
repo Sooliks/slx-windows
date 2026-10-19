@@ -1,3 +1,12 @@
+# Verification — 0.1.0-alpha.7
+
+STATUS: PARTIAL. Windows 11. scripts/verify.ps1: locked restore/Release build, 168 unit/Windows tests and one expanded WPF scenario; no skips/failures, source size passes.
+Local Steam discovery returned Counter-Strike 2 (cs2.exe) and Rust (RustClient.exe, Rust.exe), including a second drive.
+Twelve new cases cover URL allowlisting, ambiguous/argument rejection, VDF unescaping, traversal rejection and two-library exact EXE resolution.
+No game, Steam protocol handler or anti-cheat was launched; gameplay/network behavior is not accepted by discovery tests.
+The shared remote catalog stays at 18 entries. Steam discovery is local and does not upload app lists.
+Network/service/WFP source unchanged from alpha.5; its native evidence remains below. Alpha.6 loading indicator and tests are retained.
+
 # Verification — 0.1.0-alpha.6
 
 STATUS: PARTIAL. Windows 11; Windows 10 and complete system acceptance remain open.
