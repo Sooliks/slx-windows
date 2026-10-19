@@ -137,7 +137,7 @@
  <data name="QuickAppsHint" xml:space="preserve"><value>Popular apps and programs on this computer. Add apps before launching them. Your app inventory stays on this computer.</value></data>
  <data name="RefreshApps" xml:space="preserve"><value>Refresh list</value></data>
  <data name="FindRunningApp" xml:space="preserve"><value>Find an app</value></data>
- <data name="FindingApps" xml:space="preserve"><value>Finding running apps…</value></data>
+ <data name="FindingApps" xml:space="preserve"><value>Finding apps and loading icons…</value></data>
  <data name="QuickAppsEmpty" xml:space="preserve"><value>No matching apps. Open the app and refresh, or choose its .exe manually.</value></data>
  <data name="AddedApps" xml:space="preserve"><value>Added to SLX</value></data>
  <data name="DiscoveryUnavailable" xml:space="preserve"><value>Could not refresh the app list. You can choose an .exe manually.</value></data>

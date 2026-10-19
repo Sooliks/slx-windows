@@ -5,6 +5,8 @@ using Microsoft.Win32;
 namespace Slx.Client.Desktop.ViewModels;
 public sealed partial class MainViewModel
 {
+    internal Func<CancellationToken,Task<AppRule[]>>? DiscoveryFetchOverride {get;set;}
+    internal Func<CancellationToken,Task<IReadOnlyList<CatalogApplication>>>? CatalogFetchOverride {get;set;}
     private string discoverySearch="";
     private bool discovering;
     private CancellationTokenSource? discoveryCancellation;
@@ -45,9 +47,17 @@ public sealed partial class MainViewModel
         discoveryCancellation=current;
         try
         {
-            var apps=await Task.Run(()=>AppDiscovery.RunningApplications().Concat(AppDiscovery.InstalledApplications())
-                .Concat(ShortcutApplications.Find()).Concat(ApplicationGroups.Discover()).Concat(CatalogApplications.Find(CatalogEntries)).Select(ApplicationGroups.Normalize).DistinctBy(app=>app.ExecutablePath,StringComparer.OrdinalIgnoreCase)
-                .OrderBy(app=>app.Name,StringComparer.CurrentCultureIgnoreCase).Take(300).ToArray(),current.Token);
+            await System.Windows.Threading.Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.Background);
+            var catalog=CatalogEntries;
+            var apps=DiscoveryFetchOverride is not null?await DiscoveryFetchOverride(current.Token):await Task.Run(()=>
+            {
+                var found=AppDiscovery.RunningApplications().Concat(AppDiscovery.InstalledApplications())
+                    .Concat(ShortcutApplications.Find()).Concat(ApplicationGroups.Discover()).Concat(CatalogApplications.Find(catalog))
+                    .Select(ApplicationGroups.Normalize).DistinctBy(app=>app.ExecutablePath,StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(app=>app.Name,StringComparer.CurrentCultureIgnoreCase).Take(300).ToArray();
+                foreach(var app in found){current.Token.ThrowIfCancellationRequested();LocalIcon.Load(app.ExecutablePath);}
+                return found;
+            },current.Token);
             if(disposed||current.IsCancellationRequested)return;
             Discovered.Clear();foreach(var app in apps)Discovered.Add(app);
             bool changed=false;foreach(var app in apps){var added=Applications.FirstOrDefault(x=>string.Equals(x.Name.Trim(),app.Name.Trim(),StringComparison.CurrentCultureIgnoreCase));if(added!=null)changed|=added.AddPath(app);}
@@ -55,7 +65,7 @@ public sealed partial class MainViewModel
             RefreshDiscoveryProperties();
             try
             {
-                var fresh=await CatalogClient.RefreshAsync(current.Token);
+                var fresh=await (CatalogFetchOverride?.Invoke(current.Token)??CatalogClient.RefreshAsync(current.Token));
                 if(disposed||current.IsCancellationRequested)return;
                 CatalogEntries=fresh;RefreshDiscoveryProperties();
             }
@@ -63,7 +73,7 @@ public sealed partial class MainViewModel
             { /* The available local catalog remains; no claim that refresh succeeded. */ }
         }
         catch(Exception error) when(error is ClientFault or System.ComponentModel.Win32Exception or System.IO.IOException or UnauthorizedAccessException or OperationCanceledException)
-        {if(!disposed&&!current.IsCancellationRequested)Notice("DiscoveryUnavailable");}
+        {if(!disposed)Notice("DiscoveryUnavailable");}
         finally{if(ReferenceEquals(discoveryCancellation,current))discoveryCancellation=null;Discovering=false;}
     }
     private void RefreshDiscoveryProperties()

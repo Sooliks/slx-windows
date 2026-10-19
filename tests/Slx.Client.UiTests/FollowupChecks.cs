@@ -23,6 +23,7 @@ internal static class FollowupChecks
         Assert.Single(Sta.Descendants<AmbientBackdrop>(window));
         CheckQuickAdd();
         LibraryChecks.Run(window);
+        LibraryLoadingChecks.Run();
         AutoRoutingChecks.Run();
         DashboardChecks.Run(window);
         CheckStartupRefresh();

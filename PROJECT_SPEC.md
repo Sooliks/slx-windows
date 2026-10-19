@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.5. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.6. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -53,3 +53,5 @@ No inventory collection. Dashboard app switches apply automatically and remain p
 Connection facts derive from authoritative service observations; no invented speed or traffic counters.
 The catalog API is an additive public contract with schemaVersion 1; no client/server credentials or DB migration.
 Alpha.5: persistent WFP traffic protection, indefinite paced recovery, encrypted service resume intent, protected shared DNS, local shortcut discovery and exact-path Codex / ChatGPT group. Exclude uninstallers/Package Cache. Windows 10 target remains unaccepted. Optional additive ProtectionActive status field stays on IPC v2; update service/UI together. New service-local encrypted intent and owned WFP policy need explicit uninstall cleanup. No server/DB migration. See docs/NETWORK.md and docs/COMPATIBILITY.md.
+
+Alpha.6: visible discovery activity before scanning, background frozen-icon cache warmup, retained old results on failure. Networking, WFP, IPC and storage unchanged from alpha.5. See RELEASE_NOTES and VERIFICATION.

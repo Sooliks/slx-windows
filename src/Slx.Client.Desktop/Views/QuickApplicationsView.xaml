@@ -3,7 +3,7 @@
   <DockPanel><Button DockPanel.Dock="Right" Content="{l:Tr RefreshApps}" Command="{Binding DiscoverCommand}" Margin="12,0,0,0"/><StackPanel><TextBlock Text="{l:Tr QuickApps}" FontSize="18" FontWeight="SemiBold"/><TextBlock Text="{l:Tr QuickAppsHint}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,5,0,0"/></StackPanel></DockPanel>
   <Label Content="{l:Tr FindRunningApp}" Target="{Binding ElementName=QuickSearch}" Padding="0,15,0,7" Foreground="{DynamicResource Muted}"/>
   <TextBox x:Name="QuickSearch" Text="{Binding DiscoverySearch, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{l:Tr FindRunningApp}"/>
-  <TextBlock Text="{l:Tr FindingApps}" Style="{StaticResource MutedText}" Margin="0,12,0,0" Visibility="{Binding Discovering, Converter={StaticResource VisibleWhen}}"/>
+  <StackPanel x:Name="LibraryLoading" Margin="0,14,0,0" Visibility="{Binding Discovering, Converter={StaticResource VisibleWhen}}"><TextBlock Text="{l:Tr FindingApps}" Foreground="{DynamicResource Accent}" FontWeight="SemiBold" AutomationProperties.LiveSetting="Polite"/><ProgressBar IsIndeterminate="True" Height="3" Margin="0,9,0,0" Foreground="{DynamicResource Accent}" Background="{DynamicResource SurfaceRaised}" BorderThickness="0" AutomationProperties.Name="{l:Tr FindingApps}"/></StackPanel>
   <ItemsControl ItemsSource="{Binding FilteredLibrary}" Margin="0,16,0,0">
    <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
    <ItemsControl.ItemTemplate><DataTemplate>
@@ -16,6 +16,6 @@
     </Button>
    </DataTemplate></ItemsControl.ItemTemplate>
   </ItemsControl>
-  <TextBlock Text="{l:Tr QuickAppsEmpty}" FontSize="12" Margin="0,10,0,0"><TextBlock.Style><Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding HasDiscoveryResults}" Value="False"><Setter Property="Visibility" Value="Visible"/></DataTrigger><DataTrigger Binding="{Binding Discovering}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+  <TextBlock x:Name="LibraryEmpty" Text="{l:Tr QuickAppsEmpty}" FontSize="12" Margin="0,10,0,0"><TextBlock.Style><Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding HasDiscoveryResults}" Value="False"><Setter Property="Visibility" Value="Visible"/></DataTrigger><DataTrigger Binding="{Binding Discovering}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
  </StackPanel></Border>
 </UserControl>

@@ -1,3 +1,13 @@
+# Verification — 0.1.0-alpha.6
+
+STATUS: PARTIAL. Windows 11; Windows 10 and complete system acceptance remain open.
+UI-only follow-up to published alpha.5. scripts/verify.ps1 exit 0: locked restore, Release build,
+156 unit/Windows tests and one expanded WPF scenario, no skips/failures, zero warnings/errors, source size passes.
+The blocked-first-discovery WPF scenario renders a visible indeterminate progress indicator before completion,
+hides empty-state copy, disables refresh, then verifies success and retained results/message after failure.
+No real network is used by this UI fixture. Icons are warmed on the worker task as frozen cached sources.
+Network/service/WFP/IPC/storage source is unchanged from alpha.5; native evidence below belongs to alpha.5.
+
 # Verification — 0.1.0-alpha.5
 
 STATUS: PARTIAL. Actual Windows 11 execution; Windows 10 target remains unaccepted.

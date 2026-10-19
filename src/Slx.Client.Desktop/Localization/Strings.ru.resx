@@ -137,7 +137,7 @@
  <data name="QuickAppsHint" xml:space="preserve"><value>Каталог популярных программ и приложения на этом компьютере. Можно добавить программу до запуска. Список установленных приложений остаётся на компьютере.</value></data>
  <data name="RefreshApps" xml:space="preserve"><value>Обновить список</value></data>
  <data name="FindRunningApp" xml:space="preserve"><value>Найти приложение</value></data>
- <data name="FindingApps" xml:space="preserve"><value>Ищем запущенные программы…</value></data>
+ <data name="FindingApps" xml:space="preserve"><value>Ищем приложения и загружаем иконки…</value></data>
  <data name="QuickAppsEmpty" xml:space="preserve"><value>Нет подходящих программ. Откройте нужную программу и обновите список или выберите её .exe вручную.</value></data>
  <data name="AddedApps" xml:space="preserve"><value>Добавлены в SLX</value></data>
  <data name="DiscoveryUnavailable" xml:space="preserve"><value>Не удалось обновить список программ. Можно выбрать .exe вручную.</value></data>
