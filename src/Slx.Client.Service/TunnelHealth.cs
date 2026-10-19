@@ -13,14 +13,24 @@ internal sealed partial class TunnelEngine
             try
             {
                 InteractiveSessions.RequireSingleOwner(ownerSid??"");
-                if(state.Phase==TunnelPhase.Connected&&child is not null&&!child.HasExited&&LocalProbe.TunnelReady())
+                bool wasConnected = state.Phase == TunnelPhase.Connected;
+                if(wasConnected && child is not null && !child.HasExited && LocalProbe.TunnelReady())
                 {
                     if(Stopwatch.GetTimestamp()<healthAt)return;
                     healthAt=Stopwatch.GetTimestamp()+15*Stopwatch.Frequency;
-                    if(await LocalProbe.CheckOnceAsync(probe.Port,probe.User,probe.Password,cancellationToken))
-                    {state=state with{ObservedAt=DateTimeOffset.UtcNow,ProbePassed=true};return;}
+                    var result = await HealthConfirmation.CheckAsync(
+                        (target, token) => LocalProbe.ObserveAsync(probe.Port, probe.User, probe.Password, target, token),
+                        () => state = state with { Phase=TunnelPhase.Reconnecting,
+                            ObservedAt=DateTimeOffset.UtcNow, ProbePassed=false }, cancellationToken);
+                    bool retained = result.Passed && !child.HasExited && LocalProbe.TunnelReady();
+                    RecordHealthIncident(result, retained);
+                    if(retained)
+                    {
+                        state=state with { Phase=TunnelPhase.Connected, ObservedAt=DateTimeOffset.UtcNow, ProbePassed=true };
+                        return;
+                    }
                 }
-                if(state.Phase==TunnelPhase.Connected)
+                if(wasConnected)
                     RecordRecovery(child is null||child.HasExited?RecoveryCause.CoreExited
                         :LocalProbe.TunnelReady()?RecoveryCause.ProbeFailed:RecoveryCause.AdapterUnavailable);
                 state=state with{Phase=TunnelPhase.Reconnecting,ObservedAt=DateTimeOffset.UtcNow,ProbePassed=false,ProtectionActive=protectionActive};

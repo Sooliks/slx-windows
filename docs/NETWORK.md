@@ -26,3 +26,7 @@ Full IPv6/ECH/HTTP3, existing flows, sleep/network changes, clean VM, Windows 10
 - https://learn.microsoft.com/en-us/windows/win32/fwp/filtering-condition-identifiers-
 - https://learn.microsoft.com/en-us/windows/win32/fwp/filter-arbitration
 - https://microsoft.github.io/CsWin32/
+
+## Alpha.10 health confirmation
+A failed periodic request is not proof that the core or every VPN route is broken. The service immediately clears ProbePassed and shows Reconnecting while retaining the owned core/TUN and existing WFP policy. After a one-second pause it makes independent fresh HTTPS requests via the same authenticated proxy to gstatic generate_204 (exact 204) and SLX robots.txt (exact 200), concurrently with the existing five-second timeout each. Redirects and TLS errors are not accepted. Either valid response, plus a still-live owned core and ready TUN, restores success without changing ConnectedAt. If neither passes, the core is replaced with the existing protected recovery procedure. Core/adapter loss does not wait for confirmation. Startup readiness remains the original strict 204/TUN/DNS path.
+Optional HealthCheck IPC diagnostics retain only the last failed-primary incident and cumulative incident/retained counters until service restart. They contain enum categories, status codes, elapsed milliseconds and UTC time; no messages, credentials, URLs or app data. A caller cancellation propagates and is never accepted as health success.

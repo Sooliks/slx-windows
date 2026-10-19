@@ -10,7 +10,7 @@ public sealed class RecoveryObservationTests
     {
         const string old="{\"Phase\":2,\"ObservedAt\":\"2026-10-19T13:00:00Z\",\"ProbePassed\":true}";
         var status=JsonSerializer.Deserialize<TunnelStatus>(old)!;
-        Assert.Equal(TunnelPhase.Connected,status.Phase);Assert.True(status.ProbePassed);Assert.Null(status.Recovery);
+        Assert.Equal(TunnelPhase.Connected,status.Phase);Assert.True(status.ProbePassed);Assert.Null(status.Recovery);Assert.Null(status.HealthCheck);
     }
     [Fact]
     public void RecoveryReasonSurvivesStatusReadsWithoutClaimingConnectionSuccess()

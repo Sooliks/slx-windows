@@ -12,3 +12,5 @@ Connected means owned core + tunnel readiness + real proxy probe, not process st
 Alpha.5: Windows owns native WFP and protected resume storage; Service owns intent/lifecycle and retry. UI expands known application groups locally into ordinary validated exact-path AppRules. Persistent policy survives host/core stop; only explicit off/uninstall releases it. See NETWORK.md.
 
 Alpha.9: desktop initialization reconciles the stored startup preference through the Windows registration owner. Service recovery observations are independent of connection success; the optional IPC field contains only a counter, enum and timestamp. It remains available after recovery, without storing core logs or changing routing/recovery behavior.
+
+Alpha.10: LocalProbe owns authenticated proxy requests; ProbeRequest maps bounded HTTPS results to secret-free observations. HealthConfirmation owns the periodic confirmation policy, independently testable without network mutations. TunnelEngine retains lifecycle/WFP/core ownership and publishes no fresh success during an unresolved probe. Optional HealthCheck is additive to IPC v2; it does not grant any new command or pipe access.

@@ -17,7 +17,7 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
     private string? ownedAdapterId;
     private (int Port, string User, string Password) probe;
     private int recoveryAttempts;
-    public TunnelStatus Status => state with { Recovery = recovery };
+    public TunnelStatus Status => state with { Recovery = recovery, HealthCheck = healthCheck };
 
     public async Task StartAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken)
     {

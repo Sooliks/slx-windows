@@ -25,7 +25,8 @@ internal static class LocalProbe
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (!childAlive()) throw new ClientFault("CORE_EXITED");
-            if (await CheckOnceAsync(port, user, password, budget.Token) && TunnelReady()) return;
+            try { if (await CheckOnceAsync(port, user, password, budget.Token) && TunnelReady()) return; }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested) { break; }
             try { await Task.Delay(500, budget.Token); }
             catch (OperationCanceledException) { break; }
         }
@@ -34,6 +35,10 @@ internal static class LocalProbe
     }
 
     public static async Task<bool> CheckOnceAsync(int port, string user, string password, CancellationToken cancellationToken)
+        => (await ObserveAsync(port, user, password, ProbeTarget.Gstatic, cancellationToken)).Passed;
+
+    public static async Task<ProbeObservation> ObserveAsync(int port, string user, string password,
+        ProbeTarget target, CancellationToken cancellationToken)
     {
         using var handler = new SocketsHttpHandler
         {
@@ -42,15 +47,8 @@ internal static class LocalProbe
             UseProxy = true, AllowAutoRedirect = false, ConnectTimeout = TimeSpan.FromSeconds(3)
         };
         using var client = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(5) };
-        try
-        {
-            using var response = await client.GetAsync("https://www.gstatic.com/generate_204",
-                HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-            return response.StatusCode == HttpStatusCode.NoContent;
-        }
-        catch (Exception error) when (error is HttpRequestException or OperationCanceledException) { return false; }
+        return await ProbeRequest.ObserveAsync(client, target, cancellationToken);
     }
-
     public static string? AdapterIdentity() => NetworkInterface.GetAllNetworkInterfaces().FirstOrDefault(adapter => adapter.Name == "SLX VPN" && PresentAdapters.Contains(adapter.Id))?.Id;
     public static bool AdapterIdentityExists(string id) => PresentAdapters.Contains(id);
 

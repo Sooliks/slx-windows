@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.9. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.10. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -59,3 +59,5 @@ Alpha.6: visible discovery activity before scanning, background frozen-icon cach
 Alpha.7: resolve Desktop/CommonDesktop Steam URL shortcuts for installed CS2/Rust using bounded local VDF/ACF reads. Exact EXE rules; no launching, inventory upload or privileged network changes.
 
 Alpha.9: restore the saved per-user autostart choice on normal UI launch, repair obsolete executable paths and report registration failures in RU/EN. Render checks do not write startup registration. StartupApproved is not modified. Autostart means --tray, not a new VPN-connect command. Additive optional IPC v2 Recovery observation records the count, last reason enum and UTC time of service-observed automatic recoveries; it contains no paths/URLs/keys, survives successful tunnel launch in service memory and resets with the service. Update service/UI through the installer; no DB/server migration. Recovery timings, WFP, TUN and routing rules remain unchanged.
+
+Alpha.10: an isolated health-probe failure invalidates the success observation but retains the running core while confirming it. After one second, two fresh authenticated-proxy HTTPS requests check gstatic (204) and SLX robots.txt (200) concurrently, each within the existing five-second request budget. A valid response plus live owned core/TUN retains ConnectedAt; no response means normal protected recovery. Core exit/adapter loss still recovers immediately. WFP, DNS routing, explicit-off semantics and retry backoff do not change. Startup readiness remains gstatic 204 plus owned TUN/DNS checks. Optional IPC v2 HealthCheck adds only bounded in-memory counters, target/result enums, HTTP codes, durations and time, no error messages/keys/URLs/inventory; it survives launch until service restart. Update UI/service together with installer, no server or DB migration. Actual PC ProbeFailed trigger is established; transport root cause and Pixel sleep issue are not established.
