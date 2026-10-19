@@ -10,3 +10,5 @@ Xray and driver must have pinned provenance. Authenticated localhost proxy is on
 Connected means owned core + tunnel readiness + real proxy probe, not process start alone.
 
 Alpha.5: Windows owns native WFP and protected resume storage; Service owns intent/lifecycle and retry. UI expands known application groups locally into ordinary validated exact-path AppRules. Persistent policy survives host/core stop; only explicit off/uninstall releases it. See NETWORK.md.
+
+Alpha.9: desktop initialization reconciles the stored startup preference through the Windows registration owner. Service recovery observations are independent of connection success; the optional IPC field contains only a counter, enum and timestamp. It remains available after recovery, without storing core logs or changing routing/recovery behavior.

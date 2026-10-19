@@ -26,6 +26,12 @@ public sealed partial class MainViewModel
             catch (ClientFault fault) { ShowFault(fault.Code); }
         }
     }
+    private void ReconcileStartup()
+    {
+        if (!persistPreferences) return;
+        try { StartupRegistration.SetEnabled(preferences.AutoStart); }
+        catch (ClientFault fault) { ShowFault(fault.Code); }
+    }
     public bool MinimizeToTray
     {
         get => preferences.MinimizeToTray;

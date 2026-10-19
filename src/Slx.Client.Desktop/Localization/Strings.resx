@@ -77,7 +77,7 @@
 <data name="ThemeTerminal" xml:space="preserve"><value>Terminal</value></data>
 <data name="Behavior" xml:space="preserve"><value>App behavior</value></data>
 <data name="AutoStart" xml:space="preserve"><value>Launch SLX when I sign in to Windows</value></data>
-<data name="AutoStartHint" xml:space="preserve"><value>The app opens without automatically connecting.</value></data>
+<data name="AutoStartHint" xml:space="preserve"><value>SLX starts in the system tray. This setting only controls app startup.</value></data>
 <data name="MinimizeTray" xml:space="preserve"><value>Keep running in the tray when I close the window</value></data>
 <data name="MinimizeTrayHint" xml:space="preserve"><value>Use Exit in the tray menu to disconnect and quit.</value></data>
 <data name="SubscriptionSettings" xml:space="preserve"><value>Connection settings</value></data>
@@ -153,4 +153,5 @@
 <data name="StatsApps" xml:space="preserve"><value>Selected apps</value></data>
 <data name="StatsChecked" xml:space="preserve"><value>Last checked</value></data>
   <data name="TrafficProtected" xml:space="preserve"><value>Protection is on. If VPN drops, protected traffic stays blocked until recovery. Use Disconnect to turn protection off.</value></data>
+<data name="FaultStartup" xml:space="preserve"><value>Could not configure SLX startup. Check Windows startup settings and try again.</value></data>
 </root>

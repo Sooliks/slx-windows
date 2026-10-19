@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.8. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.9. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -57,3 +57,5 @@ Alpha.5: persistent WFP traffic protection, indefinite paced recovery, encrypted
 Alpha.6: visible discovery activity before scanning, background frozen-icon cache warmup, retained old results on failure. Networking, WFP, IPC and storage unchanged from alpha.5. See RELEASE_NOTES and VERIFICATION.
 
 Alpha.7: resolve Desktop/CommonDesktop Steam URL shortcuts for installed CS2/Rust using bounded local VDF/ACF reads. Exact EXE rules; no launching, inventory upload or privileged network changes.
+
+Alpha.9: restore the saved per-user autostart choice on normal UI launch, repair obsolete executable paths and report registration failures in RU/EN. Render checks do not write startup registration. StartupApproved is not modified. Autostart means --tray, not a new VPN-connect command. Additive optional IPC v2 Recovery observation records the count, last reason enum and UTC time of service-observed automatic recoveries; it contains no paths/URLs/keys, survives successful tunnel launch in service memory and resets with the service. Update service/UI through the installer; no DB/server migration. Recovery timings, WFP, TUN and routing rules remain unchanged.

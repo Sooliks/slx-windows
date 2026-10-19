@@ -9,6 +9,6 @@ public static class PipeContract
 public enum TunnelPhase { Disconnected, Connecting, Connected, Reconnecting, Stopping, Faulted }
 public sealed record TunnelStatus(TunnelPhase Phase, DateTimeOffset ObservedAt,
     string? ProfileName = null, string? Code = null, DateTimeOffset? ConnectedAt = null,
-    RoutingMode? Mode = null, bool ProbePassed = false, bool ProtectionActive = false);
+    RoutingMode? Mode = null, bool ProbePassed = false, bool ProtectionActive = false, RecoveryObservation? Recovery = null);
 public sealed record PipeRequest(int Version, string Action, Guid RequestId, ConnectPlan? Plan = null);
 public sealed record PipeReply(bool Success, string Code, TunnelStatus Status);

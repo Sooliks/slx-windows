@@ -15,6 +15,7 @@ public sealed partial class MainViewModel
     private bool polling, disposed;
     public void Initialize()
     {
+        ReconcileStartup();
         timer.Tick += PollTick;
         timer.Start();
         _ = PollAsync();
@@ -109,7 +110,7 @@ public sealed partial class MainViewModel
         "DEVICE_BOUND" => "FaultDeviceBound", "ACCESS_DENIED" or "EXPIRED" or "REVOKED" => "FaultAccess",
         "INVALID_URL" or "MISSING" => "FaultUrl", "NETWORK_UNAVAILABLE" or "SUBSCRIPTION_UNAVAILABLE" => "FaultNetwork",
         "INVALID_SUBSCRIPTION" => "FaultSubscription", "UNSUPPORTED_PROFILE" => "FaultProfile",
-        "STORAGE_UNAVAILABLE" => "FaultStorage", "SERVICE_UNAVAILABLE" => "ServiceHelp",
+        "STARTUP_UNAVAILABLE" => "FaultStartup", "STORAGE_UNAVAILABLE" => "FaultStorage", "SERVICE_UNAVAILABLE" => "ServiceHelp",
         "OWNER_MISMATCH" or "OTHER_USER" or "CONTROLLER_OWNED" => "FaultOwner",
         "MULTI_SESSION_UNSUPPORTED" => "FaultSessions", "TUN_ADAPTER_CONFLICT" => "FaultOtherVpn", "TUN_CLEANUP_PENDING" => "FaultCleanup", "CORE_STOP_FAILED" => "FaultCore",
         "SERVICE_IDENTITY_FAILED" or "SERVICE_ACCESS_DENIED" => "FaultServiceSecurity", "CANCELLED" => "FaultCancelled",

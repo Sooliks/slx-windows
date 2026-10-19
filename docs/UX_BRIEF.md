@@ -105,3 +105,6 @@ An existing saved subscription gets one bounded refresh at startup. Cached profi
 Refresh activity is separate from tunnel mutations; explicit import cancels the background fetch and late results cannot replace it.
 A running tunnel is never silently replaced. Startup auto-connect and periodic subscription retries are not introduced.
 Current installed HY2/VLESS and reconnect evidence belongs to docs/VERIFICATION.md; full network isolation acceptance remains incomplete.
+
+## Alpha.9 startup follow-up
+Saved startup opt-in repairs a missing/obsolete per-user Run entry on normal launch. Off remains off; render-only scenarios skip reconciliation. SLX starts in the tray with --tray; this does not issue a VPN-connect mutation. Registration failure has RU/EN actionable copy. Windows-disabled StartupApproved entries are not forcibly enabled.

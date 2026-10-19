@@ -20,6 +20,9 @@ internal sealed partial class TunnelEngine
                     if(await LocalProbe.CheckOnceAsync(probe.Port,probe.User,probe.Password,cancellationToken))
                     {state=state with{ObservedAt=DateTimeOffset.UtcNow,ProbePassed=true};return;}
                 }
+                if(state.Phase==TunnelPhase.Connected)
+                    RecordRecovery(child is null||child.HasExited?RecoveryCause.CoreExited
+                        :LocalProbe.TunnelReady()?RecoveryCause.ProbeFailed:RecoveryCause.AdapterUnavailable);
                 state=state with{Phase=TunnelPhase.Reconnecting,ObservedAt=DateTimeOffset.UtcNow,ProbePassed=false,ProtectionActive=protectionActive};
                 await StopChildAsync();
                 ArmProtection(currentPlan);

@@ -1,3 +1,7 @@
+# Verification — 0.1.0-alpha.9
+
+STATUS: PARTIAL. On 2026-10-19 scripts/verify.ps1 exited 0: locked restore, Release build with zero warnings/errors, 175 unit/Windows checks and one expanded WPF scenario; no failures/skips, source size passes. Five new isolated HKCU fixture cases cover missing/obsolete startup repair, opt-out, unrelated-value preservation and unsafe host/command rejection. Two recovery observation checks cover old IPC compatibility and diagnostic facts that do not manufacture connection success. RU/EN resources include a dedicated startup-registration error. Candidate installer exited 0 and installed file version 0.1.0.9. With the saved opt-in true and real Run entry absent, launching the installed EXE with --tray restored exactly the quoted installed path plus --tray. Shell_NotifyIconGetRect found one registered icon with its owning window hidden. The Xray PID stayed unchanged across this UI start; real service status remained Connected/ProbePassed=true and the installation ID hash matched before/after. This is startup-command acceptance, not an actual Windows sign-out/reboot. New recovery observations are unit/IPC checked; a natural failure on alpha.9 is not yet observed.
+
 # Verification — 0.1.0-alpha.8
 
 STATUS: PARTIAL. RU/EN help-copy correction only; network/IPC/storage unchanged from alpha.7.
