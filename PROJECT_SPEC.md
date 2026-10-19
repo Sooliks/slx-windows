@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.7. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.8. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.

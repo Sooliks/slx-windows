@@ -2,9 +2,9 @@
 
 **Открытый исходный код · Open source.** Самостоятельный Windows-клиент SLX с выбором приложений для VPN, в стиле сайта SLX.
 
-**0.1.0-alpha.7 — ранняя версия для Windows 10 / 11.** Восстановление VPN с защитой трафика, защищённый DNS и удобная библиотека приложений. Сборка установщика не означает завершённую системную приёмку. Проверки и ограничения: [docs/VERIFICATION.md](docs/VERIFICATION.md).
+**0.1.0-alpha.8 — ранняя версия для Windows 10 / 11.** Восстановление VPN с защитой трафика, защищённый DNS и удобная библиотека приложений. Сборка установщика не означает завершённую системную приёмку. Проверки и ограничения: [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
-[Скачать alpha.7](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.7) · [Предыдущая alpha.6](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.6) · [SLX](https://slxvpn.com) · [Поддержка](https://t.me/slxvpn?direct)
+[Скачать alpha.8](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.8) · [Предыдущая alpha.7](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.7) · [SLX](https://slxvpn.com) · [Поддержка](https://t.me/slxvpn?direct)
 
 ## Возможности
 
@@ -54,11 +54,11 @@ pwsh -File scripts/verify.ps1
 pwsh -File scripts/build.ps1 -Candidate
 # После приёмки, проверки и коммита исходников:
 pwsh -File scripts/build.ps1
-pwsh -File scripts/package-source.ps1 -BaseRef v0.1.0-alpha.6
+pwsh -File scripts/package-source.ps1 -BaseRef v0.1.0-alpha.7
 ```
 
-Версия берётся из Directory.Build.props. Установщик и архивы: artifacts/release/0.1.0-alpha.7/.
-Рабочие сборки: artifacts/work/0.1.0-alpha.7/. Предыдущие версии не перезаписываются.
+Версия берётся из Directory.Build.props. Установщик и архивы: artifacts/release/0.1.0-alpha.8/.
+Рабочие сборки: artifacts/work/0.1.0-alpha.8/. Предыдущие версии не перезаписываются.
 Кандидаты -Candidate изолированы в artifacts/candidates/<version>/<timestamp>/ и не допускаются к публикации.
 Самодостаточная сборка включает .NET 10.0.13; пользователю не нужна отдельная установка .NET.
 Файлы Xray загружаются из закреплённого официального релиза, SHA256 и подпись драйвера проверяются.

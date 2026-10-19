@@ -1,4 +1,4 @@
-SLX VPN alpha.7 — Windows 10 / 11
+SLX VPN alpha.8 — Windows 10 / 11
 Open source: https://github.com/Sooliks/slx-windows
 
 Unsigned prerelease. Installs the SLXVPN service and vendor-signed Wintun.

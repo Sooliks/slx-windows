@@ -1,3 +1,10 @@
+# Verification — 0.1.0-alpha.8
+
+STATUS: PARTIAL. RU/EN help-copy correction only; network/IPC/storage unchanged from alpha.7.
+168 unit/Windows checks and one expanded WPF scenario passed via scripts/verify.ps1; source size and locked restore passed.
+Owner confirmed CS2/Rust with icons in installed alpha.7, and Claude grouping/right-edge scrollbar in alpha.5.
+Historical native evidence and open system acceptance remain below.
+
 # Verification — 0.1.0-alpha.7
 
 STATUS: PARTIAL. Windows 11. scripts/verify.ps1: locked restore/Release build, 168 unit/Windows tests and one expanded WPF scenario; no skips/failures, source size passes.

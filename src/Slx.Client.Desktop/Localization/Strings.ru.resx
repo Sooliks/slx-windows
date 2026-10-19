@@ -94,7 +94,7 @@
 <data name="HelpBindingBody" xml:space="preserve"><value>Ссылка из Happ привязана к его установке. Создайте отдельное Windows-устройство или перенесите подключение в кабинете SLX. Мы не копируем идентификатор Happ.</value></data>
 <data name="Support" xml:space="preserve"><value>Написать в поддержку ↗</value></data>
 <data name="Website" xml:space="preserve"><value>Открыть сайт SLX ↗</value></data>
-<data name="SecurityNote" xml:space="preserve"><value>Без телеметрии посещений. Данные подключения зашифрованы средствами Windows. В alpha нет kill switch: при остановке сетевого модуля трафик может пойти напрямую. В режиме отдельных приложений общий DNS Windows тоже идёт напрямую.</value></data>
+<data name="SecurityNote" xml:space="preserve"><value>Без телеметрии посещений. Данные подключения зашифрованы средствами Windows. При сбое VPN защищённый публичный трафик блокируется до восстановления. Кнопка «Отключиться» снимает защиту. Локальная сеть остаётся доступной; изоляция DNS по приложениям не обещается.</value></data>
 <data name="VersionLabel" xml:space="preserve"><value>SLX VPN</value></data>
 <data name="AlphaNotice" xml:space="preserve"><value>Предварительная версия. Реальные маршруты, DNS, восстановление после сна и чистая установка ещё проходят проверку.</value></data>
 <data name="ServiceHelp" xml:space="preserve"><value>Установите SLX через установщик и повторите попытку. Запускать приложение от администратора не нужно.</value></data>
