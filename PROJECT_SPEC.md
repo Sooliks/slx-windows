@@ -36,7 +36,9 @@ Native WPF stays olive/lime and Terminal, with static vector cut-X geometry and 
 buttons collapse from 204 to 76px below 1080px window width; supported minimum remains 940x660. Tooltips, UIA names,
 selected-section announcements and keyboard focus remain. No ambient timers, fake activity or network telemetry.
 Owner's Full HD / 27-inch feedback requires denser native typography: Medium body, stronger captions and Bold headings,
-readable small labels and Display/ClearType formatting on the opaque WPF window, without bundling replacement fonts.
+readable small labels, without bundling replacement fonts. Subsequent owner feedback rejected pixel-snapped text;
+the final renderer uses Ideal/Grayscale throughout, with 13px secondary text and 14px simple mode choices:
+«Приложения» / «Весь ПК» (Apps / Whole PC), preserving routing semantics and accessible names.
 Help copies only local safe state/version/codes at explicit request. See docs/UPDATES.md and docs/RELEASE_NOTES_ALPHA11.md.
 
 Migration: install UI and service together using the new-version installer; optional preference fields default safely.

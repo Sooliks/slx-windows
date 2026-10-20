@@ -42,11 +42,11 @@
 <data name="Profile" xml:space="preserve"><value>Connection method</value></data>
 <data name="AutoProfile" xml:space="preserve"><value>Hysteria2 is preferred; VLESS is an alternative.</value></data>
 <data name="ProfileAdvanced" xml:space="preserve"><value>If a method does not work, select another here.</value></data>
-<data name="RoutingTitle" xml:space="preserve"><value>Where to use VPN</value></data>
-<data name="ModeSelected" xml:space="preserve"><value>Selected apps</value></data>
-<data name="ModeWhole" xml:space="preserve"><value>Entire computer</value></data>
-<data name="ModeSelectedDescription" xml:space="preserve"><value>Selected apps use SLX. Other apps connect directly.</value></data>
-<data name="ModeWholeDescription" xml:space="preserve"><value>Internet traffic from this computer uses SLX. Local networks remain direct.</value></data>
+<data name="RoutingTitle" xml:space="preserve"><value>VPN mode</value></data>
+<data name="ModeSelected" xml:space="preserve"><value>Apps</value></data>
+<data name="ModeWhole" xml:space="preserve"><value>Whole PC</value></data>
+<data name="ModeSelectedDescription" xml:space="preserve"><value>Only enabled apps use VPN.</value></data>
+<data name="ModeWholeDescription" xml:space="preserve"><value>Internet on your whole PC uses VPN. Local networks stay available.</value></data>
 <data name="SelectedApps" xml:space="preserve"><value>Apps using VPN</value></data>
 <data name="NoAppsTitle" xml:space="preserve"><value>Choose your first app</value></data>
 <data name="NoAppsDescription" xml:space="preserve"><value>Add a browser, messenger or another .exe. Nothing is selected automatically.</value></data>

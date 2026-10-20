@@ -42,11 +42,11 @@
 <data name="Profile" xml:space="preserve"><value>Способ подключения</value></data>
 <data name="AutoProfile" xml:space="preserve"><value>Hysteria2 — основной, VLESS — запасной.</value></data>
 <data name="ProfileAdvanced" xml:space="preserve"><value>Если один способ не работает, выберите другой здесь.</value></data>
-<data name="RoutingTitle" xml:space="preserve"><value>Где использовать VPN</value></data>
-<data name="ModeSelected" xml:space="preserve"><value>Выбранные приложения</value></data>
-<data name="ModeWhole" xml:space="preserve"><value>Весь компьютер</value></data>
-<data name="ModeSelectedDescription" xml:space="preserve"><value>Выбранные приложения используют SLX. Остальные выходят напрямую.</value></data>
-<data name="ModeWholeDescription" xml:space="preserve"><value>Интернет-трафик компьютера идёт через SLX. Локальная сеть остаётся прямой.</value></data>
+<data name="RoutingTitle" xml:space="preserve"><value>Режим VPN</value></data>
+<data name="ModeSelected" xml:space="preserve"><value>Приложения</value></data>
+<data name="ModeWhole" xml:space="preserve"><value>Весь ПК</value></data>
+<data name="ModeSelectedDescription" xml:space="preserve"><value>Только включённые приложения используют VPN.</value></data>
+<data name="ModeWholeDescription" xml:space="preserve"><value>Интернет на всём ПК через VPN. Локальная сеть доступна.</value></data>
 <data name="SelectedApps" xml:space="preserve"><value>Приложения через VPN</value></data>
 <data name="NoAppsTitle" xml:space="preserve"><value>Выберите первое приложение</value></data>
 <data name="NoAppsDescription" xml:space="preserve"><value>Добавьте браузер, мессенджер или другой .exe. Мы ничего не выбираем автоматически.</value></data>

@@ -4,8 +4,8 @@
   <Label Content="{l:Tr LinkLabel}" Target="{Binding ElementName=LinkInput}" Foreground="{DynamicResource Text}" Padding="0,0,0,8"/>
   <TextBox x:Name="LinkInput" Text="{Binding ImportLink, UpdateSourceTrigger=PropertyChanged}" SpellCheck.IsEnabled="False" AutomationProperties.Name="{l:Tr LinkLabel}" ToolTip="{l:Tr LinkPlaceholder}" MaxLength="2048" Margin="0,0,0,15"><TextBox.Style><Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}"><Style.Triggers><DataTrigger Binding="{Binding IsBusy}" Value="True"><Setter Property="IsReadOnly" Value="True"/></DataTrigger></Style.Triggers></Style></TextBox.Style></TextBox>
   <TextBlock Text="{Binding Message}" Visibility="{Binding ShowMessage, Converter={StaticResource VisibleWhen}}" Foreground="{DynamicResource Danger}" Margin="0,0,0,14" AutomationProperties.LiveSetting="Polite"/>
-  <TextBlock Text="{l:Tr ImportFootnote}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,0,0,24"/>
+  <TextBlock Text="{l:Tr ImportFootnote}" Style="{StaticResource MutedText}" FontSize="13" Margin="0,0,0,24"/>
   <WrapPanel HorizontalAlignment="Right"><Button Content="{l:Tr Cancel}" Command="{Binding CancelOverlayCommand}" Margin="0,0,10,0"/><Button Content="{l:Tr ImportAction}" Command="{Binding ImportCommand}" Style="{StaticResource PrimaryButton}" MinWidth="130" IsDefault="True"/></WrapPanel>
-  <TextBlock Text="{l:Tr Busy}" Foreground="{DynamicResource Muted}" FontSize="12" Margin="0,15,0,0" Visibility="{Binding IsBusy, Converter={StaticResource VisibleWhen}}"/>
+  <TextBlock Text="{l:Tr Busy}" Foreground="{DynamicResource Muted}" FontSize="13" Margin="0,15,0,0" Visibility="{Binding IsBusy, Converter={StaticResource VisibleWhen}}"/>
  </StackPanel></Border></Grid>
 </UserControl>

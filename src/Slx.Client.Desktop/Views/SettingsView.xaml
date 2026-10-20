@@ -5,8 +5,8 @@
   <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><StackPanel Margin="0,0,16,0"><Label Content="{l:Tr Language}" Foreground="{DynamicResource Muted}" Target="{Binding ElementName=LanguageSelect}" Padding="0,0,0,8"/><ComboBox x:Name="LanguageSelect" SelectedValue="{Binding Language}" SelectedValuePath="Tag" AutomationProperties.Name="{l:Tr Language}"><ComboBoxItem Content="{l:Tr LanguageRu}" Tag="ru"/><ComboBoxItem Content="{l:Tr LanguageEn}" Tag="en"/></ComboBox></StackPanel><StackPanel Grid.Column="1"><Label Content="{l:Tr Theme}" Foreground="{DynamicResource Muted}" Target="{Binding ElementName=ThemeSelect}" Padding="0,0,0,8"/><ComboBox x:Name="ThemeSelect" SelectedValue="{Binding Theme}" SelectedValuePath="Tag" AutomationProperties.Name="{l:Tr Theme}"><ComboBoxItem Content="{l:Tr ThemeOlive}" Tag="olive"/><ComboBoxItem Content="{l:Tr ThemeTerminal}" Tag="terminal"/></ComboBox></StackPanel></Grid>
   <Border Style="{StaticResource Separator}"/>
   <TextBlock Text="{l:Tr Behavior}" FontSize="18" FontWeight="Bold" Margin="0,0,0,20"/>
-  <CheckBox IsChecked="{Binding AutoStart}"><TextBlock Text="{l:Tr AutoStart}"/></CheckBox><TextBlock Text="{l:Tr AutoStartHint}" Style="{StaticResource MutedText}" FontSize="12" Margin="48,7,0,24"/>
-  <CheckBox IsChecked="{Binding MinimizeToTray}"><TextBlock Text="{l:Tr MinimizeTray}"/></CheckBox><TextBlock Text="{l:Tr MinimizeTrayHint}" Style="{StaticResource MutedText}" FontSize="12" Margin="48,7,0,0"/>
+  <CheckBox IsChecked="{Binding AutoStart}"><TextBlock Text="{l:Tr AutoStart}"/></CheckBox><TextBlock Text="{l:Tr AutoStartHint}" Style="{StaticResource MutedText}" FontSize="13" Margin="48,7,0,24"/>
+  <CheckBox IsChecked="{Binding MinimizeToTray}"><TextBlock Text="{l:Tr MinimizeTray}"/></CheckBox><TextBlock Text="{l:Tr MinimizeTrayHint}" Style="{StaticResource MutedText}" FontSize="13" Margin="48,7,0,0"/>
   <Border Style="{StaticResource Separator}"/>
   <v:UpdateSettings DataContext="{Binding Updates}"/>
   <Border Style="{StaticResource Separator}"/>
@@ -14,7 +14,7 @@
   <TextBlock Text="{l:Tr AutoProfile}" Style="{StaticResource MutedText}" Margin="0,0,0,15"/>
   <Label Content="{l:Tr Profile}" Target="{Binding ElementName=ProfileSelect}" Foreground="{DynamicResource Muted}" Padding="0,0,0,8"/>
   <ComboBox IsEnabled="{Binding CanEditRouting}" x:Name="ProfileSelect" ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}" ItemTemplate="{StaticResource ProfileNameTemplate}" AutomationProperties.Name="{l:Tr Profile}" Margin="0,0,0,8"/>
-  <TextBlock Text="{l:Tr ProfileAdvanced}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,0,0,18"/>
+  <TextBlock Text="{l:Tr ProfileAdvanced}" Style="{StaticResource MutedText}" FontSize="13" Margin="0,0,0,18"/>
   <WrapPanel><Button Content="{l:Tr UpdateSubscription}" Command="{Binding RefreshCommand}" Margin="0,0,9,8"/><Button Content="{l:Tr ReplaceSubscription}" Command="{Binding OpenImportCommand}" Margin="0,0,9,8"/><Button Content="{l:Tr RemoveSubscription}" Command="{Binding AskRemoveCommand}" Style="{StaticResource DangerButton}" Margin="0,0,0,8"/></WrapPanel>
   <StackPanel Orientation="Horizontal" Margin="0,6,0,0"><TextBlock Text="{l:Tr Freshness}" Style="{StaticResource MonoLabel}" Margin="0,0,8,0"/><TextBlock Text="{Binding SubscriptionUpdated}" Style="{StaticResource MonoLabel}"/></StackPanel>
  </StackPanel></ScrollViewer>

@@ -12,6 +12,9 @@ After the owner's denser Full HD typography request, the complete `scripts/verif
 264 unit/Windows checks plus one WPF scenario, zero warnings/errors/failures/skips. Current 1200x820/940x660
 WPF snapshots were re-rendered and inspected, including sidebar/routing text-fit assertions, status, update banner,
 long app names, import, Help and settings. This is 96-DPI rendered evidence, not a physical 27-inch monitor measurement.
+The subsequent owner feedback changed the final text renderer to Ideal/Grayscale, raised secondary text to 13px and
+simplified routing captions to «Приложения» / «Весь ПК» at 14px. Wide/narrow WPF renders were inspected again; the earlier
+Display/ClearType binaries remain preserved only as unpublished intermediate outputs and are not the production delivery.
 
 A temporary isolated .NET console called the real ReleaseUpdateClient against public GitHub for installed alpha.9:
 exit 0, Available / 0.1.0-alpha.10 / checksum validated / no error. Only metadata/checksums were read; no installer launch.

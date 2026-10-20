@@ -2,7 +2,7 @@
  <StackPanel>
   <TextBlock Text="{l:Tr UpdatesTitle}" FontSize="18" FontWeight="Bold" Margin="0,0,0,16"/>
   <CheckBox IsChecked="{Binding Automatic}"><TextBlock Text="{l:Tr UpdatesAutomatic}" TextWrapping="Wrap"/></CheckBox>
-  <TextBlock Text="{l:Tr UpdatesPrivacy}" Style="{StaticResource MutedText}" FontSize="12" Margin="48,7,0,16"/>
+  <TextBlock Text="{l:Tr UpdatesPrivacy}" Style="{StaticResource MutedText}" FontSize="13" Margin="48,7,0,16"/>
   <TextBlock Text="{Binding Status}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" Margin="0,0,0,10"/>
   <Button Content="{l:Tr UpdateCheck}" Command="{Binding CheckCommand}" HorizontalAlignment="Left"/>
   <TextBlock Text="{Binding CurrentVersion}" Style="{StaticResource MonoLabel}" Margin="0,10,0,0"/>
