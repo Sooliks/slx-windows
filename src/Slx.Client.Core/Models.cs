@@ -23,7 +23,8 @@ public sealed record StoredSubscription(string Url, SubscriptionSnapshot Snapsho
 }
 public sealed record ClientPreferences(string Language = "ru", string Theme = "olive",
     RoutingMode Mode = RoutingMode.SelectedApplications, List<AppRule>? Applications = null,
-    bool MinimizeToTray = true, bool AutoStart = false, string? SelectedProfileId = null)
+    bool MinimizeToTray = true, bool AutoStart = false, string? SelectedProfileId = null,
+    bool CheckUpdatesAutomatically = true, DateTimeOffset? UpdateReminderUntil = null)
 {
     public override string ToString() => "ClientPreferences { Private settings = [redacted] }";
 }

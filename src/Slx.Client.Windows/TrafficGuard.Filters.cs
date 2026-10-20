@@ -38,17 +38,15 @@ public sealed unsafe partial class TrafficGuard
             }
         }
     }
-    private void ApplicationFilter(Guid layer,string path,bool permit)
+    private void ApplicationFilter(Guid layer,TrafficApplicationId app)
     {
-        FWP_BYTE_BLOB* application=null;
-        Check(PInvoke.FwpmGetAppIdFromFileName0(path,out application));
-        try
+        fixed(byte* identity=app.Identity)
         {
+            var application=new FWP_BYTE_BLOB{size=(uint)app.Identity.Length,data=identity};
             var condition=new FWPM_FILTER_CONDITION0{fieldKey=PInvoke.FWPM_CONDITION_ALE_APP_ID,matchType=FWP_MATCH_TYPE.FWP_MATCH_EQUAL,
-                conditionValue=new(){type=FWP_DATA_TYPE.FWP_BYTE_BLOB_TYPE,byteBlob=application}};
-            Add(layer,permit,[condition]);
+                conditionValue=new(){type=FWP_DATA_TYPE.FWP_BYTE_BLOB_TYPE,byteBlob=&application}};
+            Add(layer,app.Permit,[condition]);
         }
-        finally{PInvoke.FwpmFreeMemory0((void**)&application);}
     }
     private void Add(Guid layer,bool permit,ReadOnlySpan<FWPM_FILTER_CONDITION0> conditions,bool persistent=true)
     {
@@ -64,7 +62,7 @@ public sealed unsafe partial class TrafficGuard
                 action=new(){type=permit?FWP_ACTION_TYPE.FWP_ACTION_PERMIT:FWP_ACTION_TYPE.FWP_ACTION_BLOCK},
                 numFilterConditions=(uint)conditions.Length,filterCondition=entries
             };
-            Check(PInvoke.FwpmFilterAdd0(engine,&filter,default,null));
+            Check(PInvoke.FwpmFilterAdd0(engine,&filter,default,null),layer==PInvoke.FWPM_LAYER_ALE_AUTH_CONNECT_V4?TrafficOperation.FilterV4:TrafficOperation.FilterV6);
         }
     }
 }

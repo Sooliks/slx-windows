@@ -154,4 +154,36 @@
 <data name="StatsChecked" xml:space="preserve"><value>Last checked</value></data>
   <data name="TrafficProtected" xml:space="preserve"><value>Protection is on. If VPN drops, protected traffic stays blocked until recovery. Use Disconnect to turn protection off.</value></data>
 <data name="FaultStartup" xml:space="preserve"><value>Could not configure SLX startup. Check Windows startup settings and try again.</value></data>
+<data name="UpdatesTitle" xml:space="preserve"><value>App updates</value></data>
+<data name="UpdatesAutomatic" xml:space="preserve"><value>Check for updates automatically</value></data>
+<data name="UpdatesPrivacy" xml:space="preserve"><value>Checks at startup and every 6 hours. Only public SLX releases; your app list and subscription are never sent.</value></data>
+<data name="UpdateNotChecked" xml:space="preserve"><value>New versions have not been checked yet.</value></data>
+<data name="UpdateChecking" xml:space="preserve"><value>Checking for new versions…</value></data>
+<data name="UpdateCheck" xml:space="preserve"><value>Check for updates</value></data>
+<data name="UpdateAvailable" xml:space="preserve"><value>Version {0} is available</value></data>
+<data name="UpdateFound" xml:space="preserve"><value>A new version is ready to download.</value></data>
+<data name="UpdateCurrent" xml:space="preserve"><value>You have the latest available version.</value></data>
+<data name="UpdateCheckFailed" xml:space="preserve"><value>Could not check for new versions. Try again later.</value></data>
+<data name="UpdateDownloading" xml:space="preserve"><value>Downloading and verifying the update…</value></data>
+<data name="UpdateDownload" xml:space="preserve"><value>Download update</value></data>
+<data name="UpdateInstall" xml:space="preserve"><value>Install update</value></data>
+<data name="UpdateLater" xml:space="preserve"><value>Remind me tomorrow</value></data>
+<data name="UpdateInstallHint" xml:space="preserve"><value>Installation requires your confirmation in Windows. Your settings and installation ID are preserved.</value></data>
+<data name="UpdateDisconnectFirst" xml:space="preserve"><value>The update is downloaded. Disconnect VPN and wait for confirmation before installing.</value></data>
+<data name="UpdateReady" xml:space="preserve"><value>Downloaded file matches the published release SHA-256. Ready to install.</value></data>
+<data name="UpdateStarting" xml:space="preserve"><value>Opening the installer…</value></data>
+<data name="UpdateInstallerOpened" xml:space="preserve"><value>Installer started. SLX is closing; reopen the app if you cancel installation.</value></data>
+<data name="UpdateInstallCancelled" xml:space="preserve"><value>Installation was cancelled in Windows. You can start it later.</value></data>
+<data name="UpdateIntegrityFailed" xml:space="preserve"><value>File verification failed. Installation is blocked; download the update again.</value></data>
+<data name="UpdateActionFailed" xml:space="preserve"><value>Could not prepare or open the update. Try again later.</value></data>
+<data name="FaultTrafficProtection" xml:space="preserve"><value>Could not apply traffic protection rules. Try again; if this persists, copy diagnostics from Help.</value></data>
+<data name="FaultTrafficMissing" xml:space="preserve"><value>A selected app executable is missing. Open Applications, remove its old entry and add the current app. Discord and Roblox paths are checked automatically before connecting.</value></data>
+<data name="FaultTrafficDenied" xml:space="preserve"><value>Windows denied access to a selected app executable. Check that it is accessible or add its current .exe in Applications.</value></data>
+<data name="DiagnosticsTitle" xml:space="preserve"><value>Connection diagnostics</value></data>
+<data name="DiagnosticsPrivacy" xml:space="preserve"><value>Only Windows and SLX versions, service state and error codes. No private link, servers or app list.</value></data>
+<data name="DiagnosticsCopy" xml:space="preserve"><value>Copy diagnostics</value></data>
+<data name="DiagnosticsCopied" xml:space="preserve"><value>Diagnostics copied. You can send them to support.</value></data>
+<data name="DiagnosticsFailed" xml:space="preserve"><value>Could not access the clipboard. Try again.</value></data>
+<data name="CurrentPage" xml:space="preserve"><value>Current page</value></data>
+<data name="StatusOperationUnconfirmed" xml:space="preserve"><value>Action not completed. Checking the connection state.</value></data>
 </root>

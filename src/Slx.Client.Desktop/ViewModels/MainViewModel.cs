@@ -50,6 +50,8 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         OpenWebsiteCommand = new RelayCommand(() => OpenLink("https://slxvpn.com"));
         AskRemoveCommand = new RelayCommand(() => RemoveVisible = true, () => saved != null && !IsBusy);
         ConfirmRemoveCommand = new AsyncRelayCommand(RemoveSubscriptionAsync);
+        InitializeUpdates();
+        InitializeDiagnostics();
         Text.Catalog.PropertyChanged += LanguageChanged;
     }
     public ObservableCollection<AppItemViewModel> Applications { get; } = [];
@@ -80,20 +82,21 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public string SubscriptionExpiry => saved?.Snapshot.ExpiresAt?.ToLocalTime().ToString("d") ?? Text.Catalog["ExpiryUnknown"];
     public bool IsConnected => statusFresh && status?.Phase == TunnelPhase.Connected && status.ProbePassed;
     public bool IsTunnelActive => status?.ProtectionActive == true || status?.Phase is TunnelPhase.Connected or TunnelPhase.Connecting or TunnelPhase.Reconnecting;
-    public bool CanReconnect => statusFresh && HasSubscription && IsTunnelActive && !IsBusy;
-    public bool CanEditRouting => !IsBusy;
-    public bool CanConnect => (HasSubscription && statusFresh) || IsTunnelActive || IsBusy;
+    public bool CanReconnect => !UpdateInProgress && statusFresh && HasSubscription && IsTunnelActive && !IsBusy;
+    public bool CanEditRouting => !UpdateInProgress && !IsBusy;
+    public bool CanConnect => !UpdateInProgress && ((HasSubscription && statusFresh) || IsTunnelActive || IsBusy);
     public string ConnectionAction => Text.Catalog[IsTunnelActive || IsBusy ? "Disconnect" : "Connect"];
-    public string StatusText => Text.Catalog[!statusFresh ? lastServiceCode == null ? "StatusUnknown" : status == null ? "StatusUnavailable" : "StatusStale" : status?.Phase switch
+    public string StatusText => Text.Catalog[!statusFresh ? ServiceStateCopy.IsTrafficFault(lastServiceCode) ? "StatusOperationUnconfirmed" : lastServiceCode == null ? "StatusUnknown" : status == null ? "StatusUnavailable" : "StatusStale" : status?.Phase switch
     {
         TunnelPhase.Connected when status.ProbePassed => "Connected", TunnelPhase.Connecting => "Connecting",
         TunnelPhase.Reconnecting => "Reconnecting", TunnelPhase.Stopping => "Stopping",
         TunnelPhase.Faulted => "ConnectionFailed", _ => "NotConnected"
     }];
-    public string? LastServiceCode => lastServiceCode;
-    public bool HasServiceCode => lastServiceCode != null;
-    public string ServiceCodeLabel => lastServiceCode == null ? "" : $"{Text.Catalog["ErrorCode"]}: {lastServiceCode}";
-    public string StatusDetail => Text.Catalog[!statusFresh ? ServiceStateCopy.DetailKey(lastServiceCode) : status?.ProtectionActive == true ? "TrafficProtected" : "NoMetrics"];
+    public string? LastServiceCode => lastServiceCode ?? (statusFresh && status?.Code != null ? ServiceStateCopy.SafeCode(status.Code) : null);
+    public bool HasServiceCode => LastServiceCode != null;
+    public string ServiceCodeLabel => LastServiceCode == null ? "" : $"{Text.Catalog["ErrorCode"]}: {LastServiceCode}";
+    public string StatusDetail => Text.Catalog[!statusFresh || ServiceStateCopy.IsTrafficFault(LastServiceCode)
+        ? ServiceStateCopy.DetailKey(LastServiceCode) : status?.ProtectionActive == true ? "TrafficProtected" : "NoMetrics"];
     public string VersionLabel => "SLX VPN · " + (System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false).OfType<System.Reflection.AssemblyInformationalVersionAttribute>().FirstOrDefault()?.InformationalVersion.Split('+')[0] ?? "alpha");
     public RelayCommand<string> NavigateCommand { get; }
     public RelayCommand OpenImportCommand { get; }
@@ -121,5 +124,6 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         foreach (var name in new[] { nameof(ConnectionDuration), nameof(ActiveProtocol), nameof(LastConnectionCheck), nameof(RoutingUpdateText), nameof(IsConnected), nameof(CanEditRouting), nameof(CanConnect), nameof(CanReconnect), nameof(ConnectionAction), nameof(StatusText), nameof(StatusDetail), nameof(LastServiceCode), nameof(HasServiceCode), nameof(ServiceCodeLabel), nameof(HasSubscription), nameof(NoSubscription) }) OnPropertyChanged(name);
         ImportCommand?.NotifyCanExecuteChanged(); RefreshCommand?.NotifyCanExecuteChanged();
         ReconnectCommand?.NotifyCanExecuteChanged(); AskRemoveCommand?.NotifyCanExecuteChanged();
+        Updates?.RefreshInstallAvailability();
     }
 }

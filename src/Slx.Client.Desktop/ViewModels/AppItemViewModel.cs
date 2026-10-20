@@ -17,15 +17,24 @@ public sealed class AppItemViewModel : ObservableObject
     }
     public Guid Id { get; }
     public string Name { get; }
-    public string ExecutablePath { get; }
+    public string ExecutablePath { get; private set; }
     public string ExecutablePaths=>string.Join(Environment.NewLine,members.Select(x=>x.ExecutablePath));
-    public ImageSource? Icon { get; }
+    public ImageSource? Icon { get; private set; }
     public bool Enabled { get=>enabled;set{if(SetProperty(ref enabled,value))RuleChanged?.Invoke(this,EventArgs.Empty);} }
     public event EventHandler? RuleChanged;
     public bool AddPath(AppRule rule)
     {
         if(members.Any(x=>string.Equals(x.ExecutablePath,rule.ExecutablePath,StringComparison.OrdinalIgnoreCase)))return false;
         members.Add(rule);OnPropertyChanged(nameof(ExecutablePaths));return true;
+    }
+    public bool ApplyRefreshedPaths(IReadOnlyList<AppRule> refreshed)
+    {
+        if (members.Select(x => x.ExecutablePath).SequenceEqual(refreshed.Select(x => x.ExecutablePath), StringComparer.OrdinalIgnoreCase)) return false;
+        members.Clear(); members.AddRange(refreshed);
+        ExecutablePath = members[0].ExecutablePath;
+        Icon = LocalIcon.Load(ExecutablePath); OnPropertyChanged(nameof(Icon));
+        OnPropertyChanged(nameof(ExecutablePath)); OnPropertyChanged(nameof(ExecutablePaths));
+        return true;
     }
     public AppRule ToRule()=>new(Id,Name,ExecutablePath,Enabled);
     public IEnumerable<AppRule> ToRules()=>members.Select(x=>x with{Name=Name,Enabled=Enabled});

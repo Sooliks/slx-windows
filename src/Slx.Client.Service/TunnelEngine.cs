@@ -56,10 +56,11 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
             desiredConnected=false;
             state = state with { Phase = TunnelPhase.Stopping, ObservedAt = DateTimeOffset.UtcNow, ProbePassed = false };
             await StopChildAsync();
-            trafficGuard ??= new(); trafficGuard.Remove(); protectionActive=false;
+            ReleaseProtection();
             currentPlan=pinnedPlan=null;
             DnsCache.Refresh();
             state = new(TunnelPhase.Disconnected, DateTimeOffset.UtcNow);
+            ownerSid=null;
         }
         finally { lifecycle.Release(); }
     }

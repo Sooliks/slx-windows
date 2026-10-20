@@ -1,3 +1,36 @@
+# Verification — 0.1.0-alpha.11 candidate (2026-10-20)
+
+STATUS: PARTIAL. `pwsh -NoProfile -File scripts/verify.ps1` outside the restricted sandbox exited 0:
+locked restore, Release build with 0 warnings/errors, 264 unit/Windows checks and one expanded WPF scenario,
+0 failures/skips, <=200 nonblank source gate. The first sandbox invocation exited 1 at locked restore because
+the existing user NuGet.Config was inaccessible. The same gate was rerun with ordinary host access, not weakened.
+An intermediate repeat had one success-fixture download hit its artificial 2s test deadline during real ACL/ADS disk I/O;
+263 checks and the WPF scenario passed. Ordinary fixture budgets now use 15s; dedicated 100ms timeout/cancellation cases
+and production 15s check / 5min download limits remain unchanged. The final complete rerun after this correction exited 0:
+264 checks plus the expanded WPF scenario, zero failures/skips and zero build warnings/errors.
+
+A temporary isolated .NET console called the real ReleaseUpdateClient against public GitHub for installed alpha.9:
+exit 0, Available / 0.1.0-alpha.10 / checksum validated / no error. Only metadata/checksums were read; no installer launch.
+`scripts/build.ps1 -Candidate` exited 0 and checked official Xray 26.9.9 SHA-256 and Valid vendor Wintun signature.
+That intermediate candidate predates the final update-handoff review and is not a final-binary acceptance claim.
+
+New evidence covers native existing/missing application ID behavior (read-only), stage-code preservation,
+preflight rejection before policy mutation, explicit-off receipt capacity, ownership release only on confirmed off,
+versioned Discord/Roblox exact-path repair, public update metadata/SemVer/HTTP bounds, staging ACL/MOTW/hash/launch locking,
+and UI update states/install blocking. Updater launch fixtures do not execute an installer or UAC.
+
+`--render-check` via a hidden, isolated desktop process exited 0. Current WPF snapshots were inspected:
+1200x820 and 940x660 sidebar/connection/update offers, fault detail, long app names, narrow library/loading,
+EN settings, import modal and Terminal Help. artifacts/ui contains actual current generated PNGs.
+These are WPF renders/fixtures, not a real imported subscription, browser E2E or installed VPN proof.
+
+The friend's screenshot and report establish alpha.10 TRAFFIC_PROTECTION_FAILED after reboot/Connect.
+Removed version paths reproduce one failure mechanism; the exact friend's native error and ExitLag conflict remain unknown.
+No installed service, live VPN, BFE/firewall/adapter, production account, server or DB mutation was performed.
+Required open acceptance: installed service/UI, real TUN/egress/isolation, actual reboot/ExitLag coexistence,
+installer upgrade/UAC/cancel/rollback, clean VM, Windows 10, boot/sleep/network changes, full IPv6,
+multi-user packet isolation, DPI/High Contrast and live accessibility/input.
+
 # Verification — 0.1.0-alpha.10
 
 STATUS: PARTIAL. On 2026-10-19 scripts/verify.ps1 exited 0: locked restore, Release build with zero warnings/errors, 193 unit/Windows checks and one WPF scenario; no failures/skips, source size passes. New cases cover first success, primary/alternate confirmation permutations, cancellation, exact HTTP codes, safe error categories and retained diagnostic facts. These fixtures do not prove a working VPN.

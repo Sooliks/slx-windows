@@ -5,7 +5,7 @@ using Xunit;
 namespace Slx.Client.Tests;
 
 /// <summary>Pure dispatcher contracts, not Windows ACL, service or real TUN acceptance.</summary>
-public sealed class ServiceControlTests
+public sealed partial class ServiceControlTests
 {
     [Fact]
     public async Task SecondSidCannotReadOrControlProfile()
@@ -100,10 +100,15 @@ public sealed class ServiceControlTests
     {
         public int Starts { get; private set; }
         public int Stops { get; private set; }
+        public string? OwnerSid { get; private set; }
+        public bool StopFails { get; set; }
+        public bool ReportUnownedAfterStop { get; set; }
+        public TunnelStatus? StopObservation { get; set; }
         public TunnelStatus Status { get; private set; } = new(TunnelPhase.Disconnected, DateTimeOffset.UtcNow);
         public Task StartAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken)
         {
             Starts++;
+            OwnerSid=sid;
             Status = new(TunnelPhase.Connected, DateTimeOffset.UtcNow, plan.Profile.Name, Mode: plan.Mode);
             return Task.CompletedTask;
         }
@@ -111,7 +116,9 @@ public sealed class ServiceControlTests
         public Task StopAsync(CancellationToken cancellationToken)
         {
             Stops++;
-            Status = new(TunnelPhase.Disconnected, DateTimeOffset.UtcNow);
+            Status = StopObservation??new(TunnelPhase.Disconnected, DateTimeOffset.UtcNow);
+            if(ReportUnownedAfterStop||Status.Phase==TunnelPhase.Disconnected&&!Status.ProtectionActive)OwnerSid=null;
+            if(StopFails)throw new ClientFault("CORE_STOP_FAILED");
             return Task.CompletedTask;
         }
     }

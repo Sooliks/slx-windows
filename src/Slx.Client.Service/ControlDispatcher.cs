@@ -31,7 +31,10 @@ internal sealed class ControlDispatcher(IControlTunnelEngine engine, ISessionGua
             if (request.Action == "connect" && request.Plan is null
                 || request.Action == "disconnect" && request.Plan is not null)
                 return Rejected("IPC_INVALID");
-            if (receipts.Count >= 4096) return Rejected("IPC_RECEIPT_LIMIT");
+            bool receiptAvailable = receipts.Count < 4096;
+            // Explicit off is idempotent and must remain available when the replay cache is full.
+            // Existing receipt fingerprints were checked first; no new connect/reconnect can bypass the cap.
+            if (!receiptAvailable && request.Action != "disconnect") return Rejected("IPC_RECEIPT_LIMIT");
             if (request.Plan is not null)
             {
                 try { PlanValidator.Validate(request.Plan); }
@@ -57,7 +60,9 @@ internal sealed class ControlDispatcher(IControlTunnelEngine engine, ISessionGua
             catch (ClientFault fault) { result = new(false, fault.Code, engine.Status); }
             catch (OperationCanceledException) { result = new(false, "OPERATION_INTERRUPTED", engine.Status); }
             catch (Exception) { result = new(false, "SERVICE_FAILURE", engine.Status); }
-            receipts.Add(request.RequestId, new(fingerprint, result));
+            if (request.Action == "disconnect" && result.Success
+                && result.Status.Phase == TunnelPhase.Disconnected && !result.Status.ProtectionActive) owner = null;
+            if (receiptAvailable) receipts.Add(request.RequestId, new(fingerprint, result));
             return result;
         }
         finally { gate.Release(); }

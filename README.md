@@ -1,52 +1,77 @@
+<p align="center"><img src="assets/slx.svg" width="76" height="76" alt="SLX"></p>
+
 # SLX VPN для Windows
 
-Открытый клиент SLX: VPN для выбранных приложений или всего компьютера.
+VPN для выбранных приложений или всего компьютера. Нативный клиент для вашей подписки SLX: добавьте личную ссылку, выберите программы и подключитесь.
 
-[Сайт SLX](https://slxvpn.com) · [Скачать приложение](https://slxvpn.com/download/windows) · [Поддержка](https://t.me/slxvpn?direct)
+[Скачать для Windows](https://slxvpn.com/download/windows) · [Личный кабинет](https://slxvpn.com/account/devices) · [GitHub Releases](https://github.com/Sooliks/slx-windows/releases) · [Поддержка](https://t.me/slxvpn?direct)
 
-## Возможности
+## Ваш маршрут — ваш выбор
 
-- Hysteria2 и VLESS/XHTTP, импорт личной ссылки из кабинета SLX.
-- Библиотека установленных программ и игр с иконками, поиск по ярлыкам, ручной выбор файла.
-- Переключатели VPN для отдельных приложений; изменения применяются автоматически.
-- Блокировка защищённого трафика при обрыве и автоматическое восстановление подключения.
-- Русский и английский интерфейс, две темы, системный трей и автозапуск при входе в Windows.
-- Список программ остаётся на компьютере; личная ссылка хранится с защитой Windows DPAPI.
+- **Выбранные приложения.** Отправляйте через VPN нужные программы и игры; остальные используют прямое подключение. Локальная сеть остаётся доступной.
+- **Весь компьютер.** Подключайте публичный трафик через SLX одним переключением режима.
+- **Приложения под рукой.** Библиотека установленных программ с иконками, поиск и ручной выбор `.exe`. Изменения маршрутов применяются автоматически.
+- **Восстановление связи.** Защита выбранного трафика при обрыве и автоматическое восстановление подключения с понятным состоянием в интерфейсе.
+- **Привычная Windows.** Русский и английский языки, темы Olive и Terminal, системный трей и настраиваемый автозапуск.
+- **Два способа подключения.** Hysteria2 и VLESS/XHTTP из вашей подписки SLX.
 
-## Установка
+## Начать пользоваться
 
-1. Скачайте и запустите установщик. Установка сетевой службы требует подтверждения Windows.
-2. В [кабинете SLX](https://slxvpn.com/account/devices) добавьте устройство Windows и скопируйте личную ссылку.
-3. Вставьте ссылку в приложение и нажмите «Добавить подписку».
-4. Выберите приложения или режим «Весь компьютер», затем нажмите «Подключиться».
+1. [Скачайте установщик](https://slxvpn.com/download/windows) и запустите его. Установка сетевой службы требует подтверждения Windows; обычный запуск приложения обходится без повышения прав.
+2. Откройте [устройства в кабинете SLX](https://slxvpn.com/account/devices), добавьте Windows и скопируйте личную ссылку подключения. Для работы нужна действующая подписка SLX.
+3. Вставьте ссылку в приложение и нажмите **«Добавить подписку»**.
+4. Выберите приложения или режим **«Весь компьютер»**, затем нажмите **«Подключиться»**.
 
-Для ссылки, уже привязанной к Happ, используйте перенос устройства в кабинете. Обновление приложения сохраняет настройки и ID установки.
+Если ссылка уже привязана к Happ, выполните официальный перенос устройства в кабинете SLX. Личная ссылка предназначена только вам — не публикуйте её в сообщениях об ошибках.
 
-## Совместимость
+## Обновления без неожиданностей
 
-Alpha.10 — предварительная версия. Целевые системы: Windows 10 (сборка 19041+) и Windows 11; проверка на Windows 10 ещё не завершена. Приложение и установщик пока без подписи, драйвер Wintun сохраняет подпись производителя.
+Начиная с alpha.11, приложение проверяет новые версии при запуске и затем раз в шесть часов, пока работает. Автопроверку можно отключить в настройках; ручная проверка остаётся доступной. Напоминание об обновлении можно отложить на сутки.
 
-При обрыве VPN выбранный публичный трафик блокируется до восстановления. Общий публичный DNS Windows также защищается; локальная сеть остаётся прямой. Полная системная приёмка ещё не завершена: [проверки](docs/VERIFICATION.md), [совместимость](docs/COMPATIBILITY.md), [безопасность](SECURITY.md).
+Скачивание и установка запускаются отдельными действиями пользователя. Установка доступна после отключения VPN и повторного подтверждения этого состояния службой SLX. После запуска установщика SLX закрывается; если отмените мастер установки, откройте приложение снова. Установщик обновляет приложение и службу вместе; настройки и ID установки сохраняются.
 
-## Сборка из исходников
+Файлы поступают только из [публичных выпусков этого репозитория](https://github.com/Sooliks/slx-windows/releases) по HTTPS. Перед предложением обновления проверяется `SHA256SUMS.txt`, перед запуском — размер и SHA-256 самого установщика. Это проверка целостности в рамках доверия к этому GitHub-репозиторию; цифровая подпись издателя у приложения и установщика пока отсутствует.
 
-C# / .NET 10, WPF, Windows Service, Xray, Wintun, Inno Setup 6.
-Нужны Windows, SDK из [global.json](global.json), PowerShell 7 и Inno Setup 6. Готовый установщик включает .NET — пользователю устанавливать его отдельно не нужно.
+**Переход с alpha.10 и более ранних версий:** один раз скачайте новый опубликованный установщик вручную и установите поверх существующей версии. В старых сборках встроенной проверки обновлений ещё нет.
+
+## Локальные данные и защита трафика
+
+Список программ и выбранные пути остаются на вашем компьютере. Личная ссылка хранится с защитой Windows DPAPI для текущего пользователя; диагностика не содержит ссылок и ключей. Для импорта SLX использует собственный ID этой установки Windows.
+
+При обрыве защищённый публичный трафик блокируется до восстановления связи или явного отключения VPN. Windows использует общий DNS: его публичные запросы также защищаются, поэтому восстановление VPN может временно влиять на DNS остальных приложений. Подробнее: [сеть](docs/NETWORK.md) и [безопасность](SECURITY.md).
+
+## Совместимость и статус
+
+Текущий код: **0.1.0-alpha.11, предварительная версия**. Опубликованные установщики доступны в GitHub Releases; сборка кандидата сама по себе не означает публикацию.
+
+Целевые системы — **Windows 10, сборка 19041+, и Windows 11**. Приёмка на Windows 10 ещё не завершена. Приложение и установщик распространяются без подписи; драйвер Wintun сохраняет подпись производителя. Готовый установщик включает .NET, отдельно устанавливать его пользователю не требуется.
+
+STATUS: **PARTIAL** до завершения обязательных системных проверок. Текущее подтверждение и оставшиеся ограничения: [проверки](docs/VERIFICATION.md), [совместимость](docs/COMPATIBILITY.md), [изменения версии](docs/RELEASE_NOTES.md).
+
+## Для разработчиков
+
+C# / .NET 10, WPF, Windows Service, Xray и Wintun. Для сборки нужны Windows, SDK из [global.json](global.json), PowerShell 7 и Inno Setup 6.
 
 ```powershell
+# Locked restore, Release build, тесты и проверка размера исходников.
 pwsh -File scripts/verify.ps1
+
+# Установщик кандидата из рабочего дерева; публикация запрещена.
 pwsh -File scripts/build.ps1 -Candidate
-# Для выпуска: проверенный чистый коммит, затем сборка без -Candidate.
+
+# Выпуск: проверенный чистый коммит и предыдущий опубликованный тег.
 pwsh -File scripts/build.ps1
-pwsh -File scripts/package-source.ps1 -BaseRef v0.1.0-alpha.9
+pwsh -File scripts/package-source.ps1 -BaseRef v0.1.0-alpha.10
 ```
 
-Результат — `artifacts/release/<version>/`. Запуск из `bin/Debug` не заменяет установку службы. [Архитектура](docs/ARCHITECTURE.md) · [Сеть](docs/NETWORK.md) · [Правила разработки](AGENTS.md).
+Кандидаты: `artifacts/candidates/<version>/<timestamp>/output/`. Чистая сборка выпуска: `artifacts/release/<version>/`. Упаковка создаёт полный и изменённый архивы исходников, отдельный список удалений, provenance и контрольные суммы. Команды сборки и упаковки не публикуют выпуск. Запуск из `bin/Debug` не заменяет установку службы.
 
-Исходники SLX — MIT. Лицензии зависимостей: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+[Архитектура](docs/ARCHITECTURE.md) · [Правила разработки](AGENTS.md) · [Лицензия MIT](LICENSE) · [Лицензии зависимостей](THIRD_PARTY_NOTICES.md)
 
 ## English
 
-[SLX VPN](https://slxvpn.com/?lang=en) is an open-source Windows client with selected-app and whole-computer modes, Hysteria2/VLESS, an app library and automatic recovery. [Download](https://slxvpn.com/download/windows), install, add a personal device link from your SLX account, choose your apps and connect.
+SLX VPN is a native Windows client for your SLX subscription, with selected-app and whole-computer modes, Hysteria2/VLESS, a local app library and automatic connection recovery. [Download](https://slxvpn.com/download/windows), install and add a personal Windows device link from your [SLX account](https://slxvpn.com/account/devices).
 
-This is an unsigned prerelease. Windows 10 is a compatibility target with acceptance still pending. See [verification](docs/VERIFICATION.md) and [security](SECURITY.md) for current limits.
+From alpha.11, optional update checks run at startup and every six hours while the app is running. Download and installation require explicit actions; installation requires a confirmed disconnected VPN. Installer integrity is checked against SHA-256 from this repository's HTTPS releases. The app and installer are unsigned; Wintun retains its vendor signature. Older versions need one manual installer upgrade to enable update checks.
+
+This is a prerelease targeting Windows 10 build 19041+ and Windows 11; Windows 10 acceptance is pending. App inventory stays local, and the personal subscription link uses Windows DPAPI protection. See [verification](docs/VERIFICATION.md) and [security](SECURITY.md) for current limits.

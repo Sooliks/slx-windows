@@ -154,4 +154,36 @@
 <data name="StatsChecked" xml:space="preserve"><value>Последняя проверка</value></data>
   <data name="TrafficProtected" xml:space="preserve"><value>Защита включена. При обрыве VPN выбранный трафик блокируется до восстановления. Отключить защиту можно кнопкой «Отключиться».</value></data>
 <data name="FaultStartup" xml:space="preserve"><value>Не удалось настроить автозапуск SLX. Проверьте настройки автозагрузки Windows и попробуйте ещё раз.</value></data>
+<data name="UpdatesTitle" xml:space="preserve"><value>Обновления приложения</value></data>
+<data name="UpdatesAutomatic" xml:space="preserve"><value>Проверять обновления автоматически</value></data>
+<data name="UpdatesPrivacy" xml:space="preserve"><value>Проверка при запуске и раз в 6 часов. Только публичные релизы SLX; список программ и подписка не передаются.</value></data>
+<data name="UpdateNotChecked" xml:space="preserve"><value>Новые версии ещё не проверялись.</value></data>
+<data name="UpdateChecking" xml:space="preserve"><value>Проверяем новые версии…</value></data>
+<data name="UpdateCheck" xml:space="preserve"><value>Проверить обновления</value></data>
+<data name="UpdateAvailable" xml:space="preserve"><value>Доступна версия {0}</value></data>
+<data name="UpdateFound" xml:space="preserve"><value>Новая версия готова к скачиванию.</value></data>
+<data name="UpdateCurrent" xml:space="preserve"><value>У вас последняя доступная версия.</value></data>
+<data name="UpdateCheckFailed" xml:space="preserve"><value>Не удалось проверить новые версии. Повторите позже.</value></data>
+<data name="UpdateDownloading" xml:space="preserve"><value>Скачиваем и проверяем обновление…</value></data>
+<data name="UpdateDownload" xml:space="preserve"><value>Скачать обновление</value></data>
+<data name="UpdateInstall" xml:space="preserve"><value>Установить обновление</value></data>
+<data name="UpdateLater" xml:space="preserve"><value>Напомнить завтра</value></data>
+<data name="UpdateInstallHint" xml:space="preserve"><value>Установка — только с вашего подтверждения Windows. Настройки и ID установки сохраняются.</value></data>
+<data name="UpdateDisconnectFirst" xml:space="preserve"><value>Обновление скачано. Сначала отключите VPN и дождитесь подтверждения, затем установите его.</value></data>
+<data name="UpdateReady" xml:space="preserve"><value>Файл скачан, SHA-256 совпадает с опубликованным релизом. Можно установить.</value></data>
+<data name="UpdateStarting" xml:space="preserve"><value>Открываем установщик…</value></data>
+<data name="UpdateInstallerOpened" xml:space="preserve"><value>Установщик запущен. SLX закрывается; при отмене установки откройте приложение снова.</value></data>
+<data name="UpdateInstallCancelled" xml:space="preserve"><value>Установка отменена в Windows. Можно запустить её позже.</value></data>
+<data name="UpdateIntegrityFailed" xml:space="preserve"><value>Проверка файла не пройдена. Установка заблокирована; скачайте обновление заново.</value></data>
+<data name="UpdateActionFailed" xml:space="preserve"><value>Не удалось подготовить или открыть обновление. Повторите попытку позже.</value></data>
+<data name="FaultTrafficProtection" xml:space="preserve"><value>Не удалось применить правила защиты трафика. Повторите попытку; если ошибка остаётся, скопируйте диагностику из раздела «Помощь».</value></data>
+<data name="FaultTrafficMissing" xml:space="preserve"><value>Файл выбранного приложения больше не найден. Откройте «Приложения», удалите старую запись и добавьте актуальную программу. Discord и Roblox проверяются автоматически перед подключением.</value></data>
+<data name="FaultTrafficDenied" xml:space="preserve"><value>Windows не разрешила прочитать файл выбранного приложения. Проверьте его доступность или добавьте актуальный .exe в разделе «Приложения».</value></data>
+<data name="DiagnosticsTitle" xml:space="preserve"><value>Диагностика подключения</value></data>
+<data name="DiagnosticsPrivacy" xml:space="preserve"><value>Только версия Windows и SLX, состояние службы и коды ошибок. Без личной ссылки, серверов и списка программ.</value></data>
+<data name="DiagnosticsCopy" xml:space="preserve"><value>Скопировать диагностику</value></data>
+<data name="DiagnosticsCopied" xml:space="preserve"><value>Диагностика скопирована. Её можно отправить в поддержку.</value></data>
+<data name="DiagnosticsFailed" xml:space="preserve"><value>Не удалось открыть буфер обмена. Повторите попытку.</value></data>
+<data name="CurrentPage" xml:space="preserve"><value>Текущий раздел</value></data>
+<data name="StatusOperationUnconfirmed" xml:space="preserve"><value>Действие не завершено. Уточняем состояние подключения.</value></data>
 </root>

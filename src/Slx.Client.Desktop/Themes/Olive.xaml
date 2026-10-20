@@ -1,7 +1,11 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
  <SolidColorBrush x:Key="Background" Color="#0F110E"/><SolidColorBrush x:Key="Surface" Color="#171A15"/>
- <SolidColorBrush x:Key="SurfaceRaised" Color="#20251C"/><SolidColorBrush x:Key="Border" Color="#343C2C"/>
- <SolidColorBrush x:Key="Text" Color="#EEF1E9"/><SolidColorBrush x:Key="Muted" Color="#A3AA98"/>
+ <SolidColorBrush x:Key="SurfaceRaised" Color="#21261E"/><SolidColorBrush x:Key="Border" Color="#353B30"/>
+ <SolidColorBrush x:Key="Text" Color="#F2F3ED"/><SolidColorBrush x:Key="Muted" Color="#A5AB9B"/>
+ <SolidColorBrush x:Key="ControlBorder" Color="#81897A"/><SolidColorBrush x:Key="SurfaceInset" Color="#0A0C09"/>
+ <SolidColorBrush x:Key="AccentWash" Color="#24291A"/>
+ <LinearGradientBrush x:Key="SignalSurface" StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#202619" Offset="0"/><GradientStop Color="#171A15" Offset="0.7"/></LinearGradientBrush>
+ <SolidColorBrush x:Key="AmbientFace" Color="#8B9568"/><SolidColorBrush x:Key="AmbientEdge" Color="#CBD0BD"/>
  <SolidColorBrush x:Key="Accent" Color="#E6F35A"/><SolidColorBrush x:Key="AccentText" Color="#15180D"/>
- <SolidColorBrush x:Key="Danger" Color="#F59A98"/><SolidColorBrush x:Key="Success" Color="#A6DBA3"/>
+ <SolidColorBrush x:Key="Danger" Color="#F09292"/><SolidColorBrush x:Key="Success" Color="#87CBA2"/>
 </ResourceDictionary>

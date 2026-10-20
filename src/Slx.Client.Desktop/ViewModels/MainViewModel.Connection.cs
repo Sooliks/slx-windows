@@ -20,6 +20,7 @@ public sealed partial class MainViewModel
         timer.Start();
         _ = PollAsync();
         _ = RefreshOnStartupAsync();
+        Updates.Start();
     }
     private async void PollTick(object? sender, EventArgs e) => await PollAsync();
     internal async Task PollAsync()
@@ -34,7 +35,8 @@ public sealed partial class MainViewModel
             if (owner != generation || disposed) return;
             if (!reply.Success) { MarkStatusUnknown(reply.Code); ShowFault(reply.Code); return; }
             status = reply.Status;
-            statusFresh = true; lastServiceCode = null;
+            statusFresh = true;
+            if (!ServiceStateCopy.IsTrafficFault(lastServiceCode) || status.Phase == TunnelPhase.Connected && status.ProbePassed) lastServiceCode = null;
             if (status.Phase == TunnelPhase.Faulted && status.Code != null) ShowFault(status.Code);
         }
         catch (Exception error) when (error is ClientFault or OperationCanceledException or IOException)
@@ -44,6 +46,7 @@ public sealed partial class MainViewModel
     private Task ToggleAsync() => IsTunnelActive || IsBusy ? ChangeTunnelAsync("disconnect") : ChangeTunnelAsync("connect");
     private async Task ChangeTunnelAsync(string action)
     {
+        if (UpdateInProgress) return;
         CancelRoutingApply();
         if (action != "disconnect" && saved == null) { OpenImportCommand.Execute(null); return; }
         if (action != "disconnect" && IsSelectedMode && !HasSelectedApplications) { Notice("NoActiveApps"); Page = "applications"; return; }
@@ -57,6 +60,7 @@ public sealed partial class MainViewModel
         var entered = false;
         try
         {
+            if (action != "disconnect") await RepairVersionedApplicationsAsync(current.Token);
             if(action != "disconnect" && SelectedProfile != null)plan=new(SelectedProfile,preferences.Mode,Slx.Client.Windows.ApplicationGroups.Expand(Applications.SelectMany(x=>x.ToRules())));
             await mutationGate.WaitAsync(current.Token);
             entered = true;
@@ -99,7 +103,7 @@ public sealed partial class MainViewModel
     }
     private void ShowFault(string code)
     {
-        if (ServiceStateCopy.IsControlFault(code))
+        if (ServiceStateCopy.IsControlFault(code) || ServiceStateCopy.IsTrafficFault(code))
         {
             lastServiceCode = ServiceStateCopy.SafeCode(code);
             if (Page == "connection") ClearMessage(); else Notice(ServiceStateCopy.DetailKey(lastServiceCode));
@@ -133,6 +137,7 @@ public sealed partial class MainViewModel
     {
         if (disposed) return;
         disposed = true; discoveryCancellation?.Cancel(); CancelRoutingApply(); CancelStartupRefresh(); timer.Stop(); timer.Tick -= PollTick; operation?.Cancel();
+        Updates.Dispose();
         Text.Catalog.PropertyChanged -= LanguageChanged;
         GC.SuppressFinalize(this);
     }

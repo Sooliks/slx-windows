@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.10. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.11 candidate. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,35 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.11 — restart recovery, updates and native UI
+
+Owner requested broader stabilization, automatic update offers and site-aligned native UI with adaptive icon navigation.
+The friend's alpha.10 screenshot establishes TRAFFIC_PROTECTION_FAILED after Connect, reported after a reboot;
+the exact native cause remains unconfirmed. Missing versioned executable paths are a reproduced failure mechanism.
+Resolve the full native application-ID set before replacing any WFP policy, retain stage/native codes without paths,
+include disabled owned rules in scoped cleanup, and keep IPC/recovery available when startup restore fails.
+Only exact verified Discord/Roblox sibling executable paths are refreshed before connect; unresolved paths fail closed.
+Explicit off remains available when receipt capacity is reached; ownership releases only after confirmed complete off.
+
+Updates use the existing public Sooliks/slx-windows releases over bounded HTTPS. Auto checks at startup/6h are optional,
+with a persisted 24h reminder. Download and install are separate explicit actions. SHA-256 matches the published
+same-repository checksum; this does not add publisher signing. Protected per-user staging, MOTW and launch-time hash
+verification preserve Windows UAC. Installation requires a fresh disconnected/unprotected service observation and
+holds the local connection mutation gate through the installer handoff. It never disconnects the VPN automatically.
+After successful handoff the UI exits so it cannot reconnect during the installer's welcome screen; wizard cancellation
+requires reopening SLX. UAC cancellation keeps the current UI and verified installer available for explicit retry.
+Old clients need one manual installer update; no new provider, updater service, dependency, server or DB change.
+
+Native WPF stays olive/lime and Terminal, with static vector cut-X geometry and translucent surfaces. The same sidebar
+buttons collapse from 204 to 76px below 1080px window width; supported minimum remains 940x660. Tooltips, UIA names,
+selected-section announcements and keyboard focus remain. No ambient timers, fake activity or network telemetry.
+Help copies only local safe state/version/codes at explicit request. See docs/UPDATES.md and docs/RELEASE_NOTES_ALPHA11.md.
+
+Migration: install UI and service together using the new-version installer; optional preference fields default safely.
+Retain installation ID, encrypted subscription and protection intent. Rollback: explicitly disconnect, install alpha.10;
+new preference fields are ignored. No provider-ID migration or destructive cleanup. Reboot/ExitLag/clean-VM acceptance
+is still required; a build or fixture is not proof of the friend's repair or working installed traffic isolation.
 
 ## Alpha.2 scope
 

@@ -19,6 +19,7 @@ public sealed class PopulatedUiTests
         {
             ComboChecks.Run(window, model);
             LayoutChecks.Run(window, model);
+            AdaptiveNavigationChecks.Run(window, model);
             Assert.NotEqual("ServiceHelp", ServiceStateCopy.DetailKey("IPC_INVALID"));
             Assert.Equal("ServiceRequestHelp", ServiceStateCopy.DetailKey("IPC_INVALID"));
             Assert.Equal("ServiceUnknownHelp", ServiceStateCopy.DetailKey("SERVICE_TIMEOUT"));
@@ -27,6 +28,7 @@ public sealed class PopulatedUiTests
             CheckTrayMenu(window);
             CheckUnknownExit(window);
             FollowupChecks.Run(window);
+            UpdateChecks.Run(window);
         }
         finally { window.Close(); Sta.Pump(); }
     });

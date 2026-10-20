@@ -14,26 +14,50 @@ internal sealed partial class TunnelEngine
         await lifecycle.WaitAsync(cancellationToken);
         try
         {
-            trafficGuard??=new();
             var saved=intents.Load();
-            if(saved==null){trafficGuard.Remove();return;}
+            if(saved==null){ReleaseProtection();return;}
             pinnedPlan=saved.Plan;currentPlan=saved.EndpointHost is null?saved.Plan:saved.Plan with{Profile=saved.Plan.Profile with{Host=saved.EndpointHost}};ownerSid=saved.OwnerSid;desiredConnected=true;
             ArmProtection(saved.Plan);
             state=new(TunnelPhase.Reconnecting,DateTimeOffset.UtcNow,saved.Plan.Profile.Name,Mode:saved.Plan.Mode,ProtectionActive:true);
+        }
+        catch(Exception error) when(error is ClientFault or System.IO.IOException or UnauthorizedAccessException
+            or System.Security.Cryptography.CryptographicException)
+        {
+            // Keep the intent and previous persistent rules. A failed restore must not prevent local
+            // status/disconnect access or the existing paced recovery loop from ever starting.
+            string code=error is ClientFault fault?fault.Code:"PROTECTION_STORAGE_FAILED";
+            if(desiredConnected)ScheduleRecovery(code);
+            else state=new(TunnelPhase.Faulted,DateTimeOffset.UtcNow,Code:code,ProtectionActive:protectionActive);
         }
         finally{lifecycle.Release();}
     }
     private void ArmProtection(ConnectPlan plan,string? adapter=null)
     {
         trafficGuard??=new();
-        trafficGuard.Apply(plan,RuntimeTrust.Verify(),Environment.ProcessPath??throw new ClientFault("SERVICE_IDENTITY_FAILED"),adapter);
-        protectionActive=true;
+        try
+        {
+            trafficGuard.Apply(plan,RuntimeTrust.Verify(),Environment.ProcessPath??throw new ClientFault("SERVICE_IDENTITY_FAILED"),adapter);
+            protectionActive=true;
+        }
+        catch{CloseProtectionSession();throw;}
+    }
+    private void ReleaseProtection()
+    {
+        trafficGuard??=new();
+        try{trafficGuard.Remove();protectionActive=false;}
+        catch{CloseProtectionSession();throw;}
+    }
+    private void CloseProtectionSession()
+    {
+        // A BFE restart can invalidate the RPC session. The next attempt opens a new one;
+        // closing a session never removes the persistent provider-owned blocking policy.
+        trafficGuard?.Dispose();trafficGuard=null;
     }
     public async Task ShutdownAsync()
     {
         await lifecycle.WaitAsync();
         try{await StopChildAsync();}
-        finally{trafficGuard?.Dispose();trafficGuard=null;lifecycle.Release();}
+        finally{CloseProtectionSession();lifecycle.Release();}
         // Persistent WFP policy and encrypted intent survive host shutdown. Only explicit StopAsync releases them.
     }
     private void ScheduleRecovery(string code)

@@ -1,5 +1,27 @@
 # Windows client UX brief
 
+## Alpha.11 acceptance contract
+
+Given a removed Discord/Roblox version path, Connect refreshes verified exact sibling paths before sending the plan;
+unresolved or inaccessible selected executables stop protection changes with a specific safe explanation.
+Given a restore failure after restart, the service exposes status/explicit off and preserves recovery intent.
+The friend's exact reboot/ExitLag failure still needs installed evidence; the screenshot is not a native error trace.
+
+Given a new complete public release, automatic optional checking offers a nonmodal banner; Download verifies bytes,
+and Install requires a fresh confirmed disconnected/unprotected status. Connected, stale and unknown observations block
+install. During the explicit install handoff Connect/routing cannot race the installer. Cancellation remains retryable;
+starting the installer never claims the upgrade is complete. Language changes preserve the offer/download state.
+
+Given a 1200x820 window, navigation has icons/labels; at 940x660 the same buttons become a compact 76px sidebar.
+Names, tooltips, focus and current-section UIA status remain available; resizing preserves profile/app selection.
+Static vector graphics remain decorative, without timers or status meaning. High contrast maps semantic brushes to Windows.
+
+Current evidence: scripts/verify.ps1 passed 264 unit/Windows tests and one expanded WPF scenario on 2026-10-20;
+actual WPF RenderTargetBitmap snapshots inspected at 1200x820/940x660 in artifacts/ui. Covered connection, long names,
+wide/compact menus, update offer and simulated handoff, settings EN, protected-fault copy, library/loading, import and
+Terminal Help. These are synthetic isolated WPF fixtures, not installed service/TUN or full keyboard/screen-reader acceptance.
+Actual UAC/upgrade, Windows 10, multi-instance update, reboot, ExitLag, DPI 125/150/200 and system High Contrast remain open.
+
 ## Audience and primary outcome
 A Windows user copies their own SLX connection link, imports it explicitly,
 chooses selected apps or the entire computer, and connects. They do not name a

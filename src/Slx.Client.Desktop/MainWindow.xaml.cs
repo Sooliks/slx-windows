@@ -17,13 +17,21 @@ public partial class MainWindow : Window
         InitializeComponent(); DataContext = model;
         SourceInitialized += (_, _) => { if (!renderOnly) tray = new TrayIcon(this, model); };
         Closing += ClosingWindow;
-        Closed += (_, _) => { tray?.Dispose(); model.Dispose(); };
+        Closed += (_, _) => { model.Updates.PropertyChanged -= UpdateChanged; tray?.Dispose(); model.Dispose(); };
         model.PropertyChanged += ModelChanged;
+        model.Updates.PropertyChanged += UpdateChanged;
         PreviewKeyDown += (_, args) =>
         {
             if (args.Key == Key.Escape && model.IsOverlayVisible)
             { model.CancelOverlayCommand.Execute(null); args.Handled = true; }
         };
+    }
+    private void UpdateChanged(object? sender, PropertyChangedEventArgs args)
+    {
+        if (renderOnly || exiting || !model.Updates.InstallerOpened) return;
+        // The user explicitly handed off an already disconnected app to its interactive installer.
+        // Close this UI so it cannot reconnect while the installer waits on its welcome screen.
+        exiting = true; model.Dispose(); Close(); Application.Current.Shutdown();
     }
     private void ModelChanged(object? sender, PropertyChangedEventArgs args)
     {
