@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.11 candidate. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.11. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -16,11 +16,15 @@ Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no
 ## Alpha.11 — restart recovery, updates and native UI
 
 Owner requested broader stabilization, automatic update offers and site-aligned native UI with adaptive icon navigation.
+Owner explicitly requested production distribution in this iteration: publish the verified installer and source artifacts
+through the existing GitHub release channel, preserving prerelease status while required system acceptance stays open.
 The friend's alpha.10 screenshot establishes TRAFFIC_PROTECTION_FAILED after Connect, reported after a reboot;
 the exact native cause remains unconfirmed. Missing versioned executable paths are a reproduced failure mechanism.
 Resolve the full native application-ID set before replacing any WFP policy, retain stage/native codes without paths,
 include disabled owned rules in scoped cleanup, and keep IPC/recovery available when startup restore fails.
-Only exact verified Discord/Roblox sibling executable paths are refreshed before connect; unresolved paths fail closed.
+Only exact verified Discord/Roblox sibling executable paths are refreshed before connect and during service startup
+resume; unresolved paths fail closed. One repaired list feeds protection/core launch, and encrypted intent changes
+only after the complete native-ID preflight and WFP replacement commit succeed.
 Explicit off remains available when receipt capacity is reached; ownership releases only after confirmed complete off.
 
 Updates use the existing public Sooliks/slx-windows releases over bounded HTTPS. Auto checks at startup/6h are optional,
@@ -39,7 +43,26 @@ Owner's Full HD / 27-inch feedback requires denser native typography: Medium bod
 readable small labels, without bundling replacement fonts. Subsequent owner feedback rejected pixel-snapped text;
 the final renderer uses Ideal/Grayscale throughout, with 13px secondary text and 14px simple mode choices:
 «Приложения» / «Весь ПК» (Apps / Whole PC), preserving routing semantics and accessible names.
+Connection facts appear only with confirmed connection and a known connection start; off/unknown/recovery/first-use
+screens omit the statistics block rather than display dash placeholders. Unknown protocol is omitted independently.
 Help copies only local safe state/version/codes at explicit request. See docs/UPDATES.md and docs/RELEASE_NOTES_ALPHA11.md.
+
+Owner's explicit alpha.11 override: Windows autostart may automatically connect VPN, replacing the historical alpha.9
+startup-only behavior below. AutoStart remains opt-in/default false. New optional AutoConnectOnStartup defaults true
+and is separately switchable; it applies only to an actual --tray startup with saved AutoStart enabled and a subscription.
+Normal launch and render/test initialization never connect automatically. Wait for local network readiness, bounded
+subscription refresh (valid cached profiles survive failure) and successful idle service observation. Consume one attempt
+before submitting; unknown/rejected replies are never auto-replayed. Manual off/connect/import/remove/exit, opt-out and
+update installation cancel the pending attempt. Existing active/protected/recovering service intent is respected.
+If a successfully loaded empty startup intent encounters a transient WFP cleanup failure, the service retries only that
+owned off-cleanup with pacing. SERVICE_STARTUP_CLEANUP_PENDING is a distinct unprotected fault: the UI waits without
+sending a connection and publishes a preparation state. Successful cleanup confirms Disconnected; unreadable intent
+never authorizes removal, and explicit Stop cancels this startup-only retry even when the stop itself fails.
+
+Additive local IPC v2 action connect-if-idle is guarded atomically inside the dispatcher: only Disconnected/unprotected
+can start; other phases return a recorded no-op without replacement/owner claim. Update UI/service together by installer;
+old services reject the new action, with no ordinary-connect fallback. Actor, plan, session, fingerprint and capacity
+guards remain. Preference addition and repaired encrypted intent keep the existing shapes; no DB/server migration.
 
 Migration: install UI and service together using the new-version installer; optional preference fields default safely.
 Retain installation ID, encrypted subscription and protection intent. Rollback: explicitly disconnect, install alpha.10;

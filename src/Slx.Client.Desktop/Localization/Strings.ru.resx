@@ -77,7 +77,7 @@
 <data name="ThemeTerminal" xml:space="preserve"><value>Терминал</value></data>
 <data name="Behavior" xml:space="preserve"><value>Поведение приложения</value></data>
 <data name="AutoStart" xml:space="preserve"><value>Запускать SLX при входе в Windows</value></data>
-<data name="AutoStartHint" xml:space="preserve"><value>SLX запустится в трее. Эта настройка отвечает только за запуск приложения.</value></data>
+<data name="AutoStartHint" xml:space="preserve"><value>SLX запустится в трее. Автоподключение VPN настраивается ниже.</value></data>
 <data name="MinimizeTray" xml:space="preserve"><value>Оставлять в трее при закрытии окна</value></data>
 <data name="MinimizeTrayHint" xml:space="preserve"><value>Чтобы отключить VPN и выйти, выберите «Выход» в меню трея.</value></data>
 <data name="SubscriptionSettings" xml:space="preserve"><value>Настройки подключения</value></data>
@@ -186,4 +186,9 @@
 <data name="DiagnosticsFailed" xml:space="preserve"><value>Не удалось открыть буфер обмена. Повторите попытку.</value></data>
 <data name="CurrentPage" xml:space="preserve"><value>Текущий раздел</value></data>
 <data name="StatusOperationUnconfirmed" xml:space="preserve"><value>Действие не завершено. Уточняем состояние подключения.</value></data>
+<data name="AutoConnectStartup" xml:space="preserve"><value>Подключать VPN при автозапуске</value></data>
+<data name="AutoConnectStartupHint" xml:space="preserve"><value>SLX дождётся службы и сохранённой подписки, затем подключится. После ручного отключения повторного подключения не будет.</value></data>
+<data name="AutoConnectNetworkWait" xml:space="preserve"><value>Автоподключение ожидает доступную сеть. Если ожидание затянулось, проверьте интернет.</value></data>
+<data name="StatusPreparing" xml:space="preserve"><value>Подготовка подключения</value></data>
+<data name="ServiceStartupHelp" xml:space="preserve"><value>Windows ещё готовит сеть. SLX проверит готовность службы автоматически. Если ожидание затянулось, откройте «Помощь».</value></data>
 </root>

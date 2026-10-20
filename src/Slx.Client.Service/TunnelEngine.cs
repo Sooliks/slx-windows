@@ -30,6 +30,7 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
         try
         {
             ArmProtection(plan);
+            startupOffCleanup.Cancel();
             currentPlan=plan;ownerSid=sid;desiredConnected=true;pinnedPlan=pinned;retryAt=0;
             state=new(TunnelPhase.Connecting,DateTimeOffset.UtcNow,plan.Profile.Name,Mode:plan.Mode,ProtectionActive:protectionActive);
             try{intents.Save(new(sid,pinned,plan.Profile.Host));await StopChildAsync();}
@@ -52,6 +53,8 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
         await lifecycle.WaitAsync(cancellationToken);
         try
         {
+            startupOffCleanup.Cancel();
+            if(state.Code==StartupOffCleanup.PendingCode)state=state with{Code=null};
             intents.Save(null);
             desiredConnected=false;
             state = state with { Phase = TunnelPhase.Stopping, ObservedAt = DateTimeOffset.UtcNow, ProbePassed = false };

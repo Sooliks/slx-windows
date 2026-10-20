@@ -13,8 +13,9 @@ public sealed partial class MainViewModel
     private CancellationTokenSource? operation;
     private long generation;
     private bool polling, disposed;
-    public void Initialize()
+    public void Initialize(bool startupLaunch = false)
     {
+        if (persistPreferences) ArmStartupConnection(startupLaunch);
         ReconcileStartup();
         timer.Tick += PollTick;
         timer.Start();
@@ -42,10 +43,12 @@ public sealed partial class MainViewModel
         catch (Exception error) when (error is ClientFault or OperationCanceledException or IOException)
         { if (owner == generation) MarkStatusUnknown(error is ClientFault fault ? fault.Code : "SERVICE_TIMEOUT"); }
         finally { polling = false; NotifyState(); }
+        await TryStartupConnectionAsync();
     }
     private Task ToggleAsync() => IsTunnelActive || IsBusy ? ChangeTunnelAsync("disconnect") : ChangeTunnelAsync("connect");
     private async Task ChangeTunnelAsync(string action)
     {
+        if (action != "connect-if-idle") CancelStartupConnection();
         if (UpdateInProgress) return;
         CancelRoutingApply();
         if (action != "disconnect" && saved == null) { OpenImportCommand.Execute(null); return; }
@@ -55,6 +58,7 @@ public sealed partial class MainViewModel
         operation?.Cancel();
         using var current = new CancellationTokenSource(TimeSpan.FromSeconds(55));
         operation = current;
+        if (action == "connect-if-idle") startupConnectionOperation = current;
         IsBusy = true;
         ClearMessage();
         var entered = false;
@@ -81,11 +85,13 @@ public sealed partial class MainViewModel
         finally
         {
             if (entered) mutationGate.Release();
+            if (ReferenceEquals(startupConnectionOperation, current)) startupConnectionOperation = null;
             if (owner == generation) { operation = null; IsBusy = false; }
         }
     }
     public async Task<bool> ExitAsync()
     {
+        CancelStartupConnection();
         if (disposed) return true;
         timer.Stop();
         if (HasSubscription || IsTunnelActive || IsBusy)

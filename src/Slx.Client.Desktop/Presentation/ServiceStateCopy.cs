@@ -17,6 +17,7 @@ public static class ServiceStateCopy
     {
         null => "ServiceCheckingHelp",
         "SERVICE_NOT_INSTALLED" => "ServiceHelp",
+        "SERVICE_STARTUP_CLEANUP_PENDING" => "ServiceStartupHelp",
         "SERVICE_ACCESS_DENIED" or "SERVICE_IDENTITY_FAILED" => "FaultServiceSecurity",
         "IPC_INVALID" or "IPC_VERSION_MISMATCH" or "IPC_REPLAY_MISMATCH" => "ServiceRequestHelp",
         "SERVICE_TIMEOUT" or "OPERATION_INTERRUPTED" or "CANCELLED" => "ServiceUnknownHelp",

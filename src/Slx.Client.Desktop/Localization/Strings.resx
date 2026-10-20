@@ -77,7 +77,7 @@
 <data name="ThemeTerminal" xml:space="preserve"><value>Terminal</value></data>
 <data name="Behavior" xml:space="preserve"><value>App behavior</value></data>
 <data name="AutoStart" xml:space="preserve"><value>Launch SLX when I sign in to Windows</value></data>
-<data name="AutoStartHint" xml:space="preserve"><value>SLX starts in the system tray. This setting only controls app startup.</value></data>
+<data name="AutoStartHint" xml:space="preserve"><value>SLX starts in the system tray. Set VPN startup behavior below.</value></data>
 <data name="MinimizeTray" xml:space="preserve"><value>Keep running in the tray when I close the window</value></data>
 <data name="MinimizeTrayHint" xml:space="preserve"><value>Use Exit in the tray menu to disconnect and quit.</value></data>
 <data name="SubscriptionSettings" xml:space="preserve"><value>Connection settings</value></data>
@@ -186,4 +186,9 @@
 <data name="DiagnosticsFailed" xml:space="preserve"><value>Could not access the clipboard. Try again.</value></data>
 <data name="CurrentPage" xml:space="preserve"><value>Current page</value></data>
 <data name="StatusOperationUnconfirmed" xml:space="preserve"><value>Action not completed. Checking the connection state.</value></data>
+<data name="AutoConnectStartup" xml:space="preserve"><value>Connect VPN when SLX starts with Windows</value></data>
+<data name="AutoConnectStartupHint" xml:space="preserve"><value>SLX waits for its service and saved subscription, then connects. A manual disconnect prevents another automatic attempt.</value></data>
+<data name="AutoConnectNetworkWait" xml:space="preserve"><value>Automatic connection is waiting for an available network. Check your internet connection if the wait continues.</value></data>
+<data name="StatusPreparing" xml:space="preserve"><value>Preparing the connection</value></data>
+<data name="ServiceStartupHelp" xml:space="preserve"><value>Windows is still preparing the network. SLX will check its service automatically. If the wait continues, open Help.</value></data>
 </root>

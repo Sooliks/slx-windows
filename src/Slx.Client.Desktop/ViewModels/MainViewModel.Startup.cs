@@ -4,14 +4,15 @@ namespace Slx.Client.Desktop.ViewModels;
 public sealed partial class MainViewModel
 {
     private CancellationTokenSource? startupRefresh;
-    private bool startupRefreshStarted, subscriptionRefreshing, startupRefreshFailed;
+    private bool startupRefreshStarted, subscriptionRefreshing, startupRefreshFailed, startupRefreshFinished;
     internal Func<string, CancellationToken, Task<SubscriptionSnapshot>>? StartupFetchOverride { get; set; }
     public bool IsSubscriptionRefreshing { get => subscriptionRefreshing; private set { if (SetProperty(ref subscriptionRefreshing, value)) OnPropertyChanged(nameof(SubscriptionRefreshHint)); } }
     public string SubscriptionRefreshHint => Text.Catalog[IsSubscriptionRefreshing ? "RefreshingProfiles" : startupRefreshFailed ? "CachedProfiles" : "ProfilesAutoRefresh"];
     internal async Task RefreshOnStartupAsync()
     {
-        if (startupRefreshStarted || saved is null || disposed) return;
+        if (startupRefreshStarted || disposed) return;
         startupRefreshStarted = true;
+        if (saved is null) { startupRefreshFinished = true; return; }
         var source = saved;
         using var budget = new CancellationTokenSource(TimeSpan.FromSeconds(20));
         startupRefresh = budget;
@@ -29,9 +30,11 @@ public sealed partial class MainViewModel
         {
             if (ReferenceEquals(startupRefresh, budget)) startupRefresh = null;
             IsSubscriptionRefreshing = false;
+            startupRefreshFinished = true;
+            await TryStartupConnectionAsync();
         }
     }
-    private void CancelStartupRefresh() { startupRefresh?.Cancel(); startupRefresh = null; }
+    private void CancelStartupRefresh() { CancelStartupConnection(); startupRefresh?.Cancel(); startupRefresh = null; }
     private void ApplySubscription(string url, SubscriptionSnapshot snapshot)
     {
         var next = new StoredSubscription(url, snapshot);

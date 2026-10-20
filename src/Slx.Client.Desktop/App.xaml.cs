@@ -17,7 +17,7 @@ public partial class App : Application
             return;
         }
         window.Show();
-        model.Initialize();
+        model.Initialize(e.Args.Contains("--tray", StringComparer.Ordinal));
         if (e.Args.Contains("--tray", StringComparer.Ordinal)) window.OpenToTray();
     }
 }

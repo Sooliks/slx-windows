@@ -18,7 +18,7 @@ internal sealed class ControlDispatcher(IControlTunnelEngine engine, ISessionGua
         try
         {
             if (request.Version != PipeContract.Version || request.RequestId == Guid.Empty
-                || request.Action is not ("status" or "connect" or "disconnect" or "reconnect"))
+                || request.Action is not ("status" or "connect" or "connect-if-idle" or "disconnect" or "reconnect"))
                 return Rejected("IPC_INVALID");
             owner ??= engine.OwnerSid;
             if (owner is not null && owner != sid) return Rejected("CONTROLLER_OWNED");
@@ -28,7 +28,7 @@ internal sealed class ControlDispatcher(IControlTunnelEngine engine, ISessionGua
             if (receipts.TryGetValue(request.RequestId, out var prior))
                 return prior.Fingerprint == fingerprint ? prior.Reply with { Status = engine.Status }
                     : Rejected("IPC_REPLAY_MISMATCH");
-            if (request.Action == "connect" && request.Plan is null
+            if ((request.Action is "connect" or "connect-if-idle") && request.Plan is null
                 || request.Action == "disconnect" && request.Plan is not null)
                 return Rejected("IPC_INVALID");
             bool receiptAvailable = receipts.Count < 4096;
@@ -40,10 +40,18 @@ internal sealed class ControlDispatcher(IControlTunnelEngine engine, ISessionGua
                 try { PlanValidator.Validate(request.Plan); }
                 catch (ClientFault fault) { return Rejected(fault.Code); }
             }
-            if (request.Action is "connect" or "reconnect")
+            if (request.Action is "connect" or "connect-if-idle" or "reconnect")
             {
                 try { sessions.RequireOwner(sid); }
                 catch (ClientFault fault) { return Rejected(fault.Code); }
+            }
+            var observed=engine.Status;
+            if(request.Action=="connect-if-idle"&&(observed.Phase!=TunnelPhase.Disconnected||observed.ProtectionActive))
+            {
+                // Remember the no-op too: replaying this request after explicit off must never connect later.
+                var unchanged=new PipeReply(true,"OK",observed);
+                receipts.Add(request.RequestId,new(fingerprint,unchanged));
+                return unchanged;
             }
             if (request.Plan is not null) owner ??= sid;
             PipeReply result;

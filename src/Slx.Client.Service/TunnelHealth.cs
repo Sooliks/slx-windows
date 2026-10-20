@@ -8,6 +8,7 @@ internal sealed partial class TunnelEngine
         await lifecycle.WaitAsync(cancellationToken);
         try
         {
+            if(TryStartupOffCleanup())return;
             if(!desiredConnected||currentPlan==null)return;
             if(Stopwatch.GetTimestamp()<retryAt)return;
             try

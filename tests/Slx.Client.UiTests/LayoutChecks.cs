@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using Slx.Client.Core;
 using Slx.Client.Desktop;
 using Slx.Client.Desktop.ViewModels;
 using Xunit;
@@ -20,6 +21,10 @@ internal static class LayoutChecks
         var liveDividers = Sta.Descendants<Border>(window).Where(x => x.Height == 1 && x.IsVisible).ToList();
         Assert.Empty(liveDividers);
         UiScreenshots.Save(window, "slx-populated-whole");
+        model.IsSelectedMode = true;
+        var original = model.Applications.ToHashSet();
+        foreach (var name in new[] { "Design Studio", "Code Editor", "Music Player", "Video Player", "Research Browser", "Team Messenger" })
+            model.AddDiscoveredCommand.Execute(new AppRule(Guid.NewGuid(), name, @"C:\SLX UI Fixture\" + name + ".exe"));
         window.Width = 940; window.Height = 660; Sta.Pump();
         var scroll = Sta.Descendants<ScrollViewer>(window).Single(x => x.Name == "ConnectionScroll");
         var bar=Sta.Descendants<System.Windows.Controls.Primitives.ScrollBar>(scroll).Single(x=>x.Orientation==Orientation.Vertical);
@@ -28,6 +33,8 @@ internal static class LayoutChecks
         scroll.ScrollToBottom();Sta.Pump();Assert.True(scroll.VerticalOffset>0);scroll.ScrollToTop();Sta.Pump();
         Assert.True(scroll.ViewportWidth > 0); Assert.True(scroll.ExtentWidth <= scroll.ViewportWidth + 1);
         UiScreenshots.Save(window, "slx-populated-narrow");
+        foreach (var item in model.Applications.Where(item => !original.Contains(item)).ToArray()) model.RemoveAppCommand.Execute(item);
+        model.IsWholeMode = true;
         model.Page = "applications"; Sta.Pump();
         Assert.All(Sta.Descendants<TextBlock>(window).Where(x => x.Text == UiFixtures.Preferences(Slx.Client.Core.RoutingMode.SelectedApplications).Applications![1].Name), x => Assert.Equal(TextTrimming.CharacterEllipsis, x.TextTrimming));
         UiScreenshots.Save(window, "slx-populated-apps-narrow");

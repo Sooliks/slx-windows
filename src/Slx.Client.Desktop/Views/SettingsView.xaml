@@ -6,6 +6,7 @@
   <Border Style="{StaticResource Separator}"/>
   <TextBlock Text="{l:Tr Behavior}" FontSize="18" FontWeight="Bold" Margin="0,0,0,20"/>
   <CheckBox IsChecked="{Binding AutoStart}"><TextBlock Text="{l:Tr AutoStart}"/></CheckBox><TextBlock Text="{l:Tr AutoStartHint}" Style="{StaticResource MutedText}" FontSize="13" Margin="48,7,0,24"/>
+  <CheckBox x:Name="AutoConnectStartupOption" IsChecked="{Binding AutoConnectOnStartup}" IsEnabled="{Binding AutoStart}" AutomationProperties.Name="{l:Tr AutoConnectStartup}" AutomationProperties.HelpText="{l:Tr AutoConnectStartupHint}"><TextBlock Text="{l:Tr AutoConnectStartup}"/></CheckBox><TextBlock Text="{l:Tr AutoConnectStartupHint}" Style="{StaticResource MutedText}" FontSize="13" Margin="48,7,0,24"/>
   <CheckBox IsChecked="{Binding MinimizeToTray}"><TextBlock Text="{l:Tr MinimizeTray}"/></CheckBox><TextBlock Text="{l:Tr MinimizeTrayHint}" Style="{StaticResource MutedText}" FontSize="13" Margin="48,7,0,0"/>
   <Border Style="{StaticResource Separator}"/>
   <v:UpdateSettings DataContext="{Binding Updates}"/>

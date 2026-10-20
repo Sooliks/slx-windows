@@ -1,42 +1,43 @@
-# Verification — 0.1.0-alpha.11 candidate (2026-10-20)
+# Verification — 0.1.0-alpha.11 (2026-10-20)
 
-STATUS: PARTIAL. `pwsh -NoProfile -File scripts/verify.ps1` outside the restricted sandbox exited 0:
-locked restore, Release build with 0 warnings/errors, 264 unit/Windows checks and one expanded WPF scenario,
-0 failures/skips, <=200 nonblank source gate. The first sandbox invocation exited 1 at locked restore because
-the existing user NuGet.Config was inaccessible. The same gate was rerun with ordinary host access, not weakened.
-An intermediate repeat had one success-fixture download hit its artificial 2s test deadline during real ACL/ADS disk I/O;
-263 checks and the WPF scenario passed. Ordinary fixture budgets now use 15s; dedicated 100ms timeout/cancellation cases
-and production 15s check / 5min download limits remain unchanged. The final complete rerun after this correction exited 0:
-264 checks plus the expanded WPF scenario, zero failures/skips and zero build warnings/errors.
-After the owner's denser Full HD typography request, the complete `scripts/verify.ps1` rerun also exited 0:
-264 unit/Windows checks plus one WPF scenario, zero warnings/errors/failures/skips. Current 1200x820/940x660
-WPF snapshots were re-rendered and inspected, including sidebar/routing text-fit assertions, status, update banner,
-long app names, import, Help and settings. This is 96-DPI rendered evidence, not a physical 27-inch monitor measurement.
-The subsequent owner feedback changed the final text renderer to Ideal/Grayscale, raised secondary text to 13px and
-simplified routing captions to «Приложения» / «Весь ПК» at 14px. Wide/narrow WPF renders were inspected again; the earlier
-Display/ClearType binaries remain preserved only as unpublished intermediate outputs and are not the production delivery.
+STATUS: PARTIAL. Final `pwsh -NoProfile -File scripts/verify.ps1` outside the restricted sandbox exited 0:
+locked restore, Release build with 0 warnings/errors, 285 unit/Windows checks and one expanded WPF scenario,
+0 failures/skips, <=200 nonblank source gate. The initial sandbox restore could not access user NuGet.Config;
+the host rerun used the same gate without weakening it. An earlier updater success fixture exceeded its artificial
+2s disk-I/O budget; ordinary fixtures now use 15s, with dedicated 100ms timeout tests and production limits unchanged.
 
-A temporary isolated .NET console called the real ReleaseUpdateClient against public GitHub for installed alpha.9:
-exit 0, Available / 0.1.0-alpha.10 / checksum validated / no error. Only metadata/checksums were read; no installer launch.
-`scripts/build.ps1 -Candidate` exited 0 and checked official Xray 26.9.9 SHA-256 and Valid vendor Wintun signature.
-That intermediate candidate predates the final update-handoff review and is not a final-binary acceptance claim.
+New isolated evidence covers complete native application-ID preflight, missing EXE/directory results 2/3,
+safe stage-code preservation, scoped owned-filter cleanup, explicit-off receipt capacity and ownership release,
+Discord/Roblox exact-path repair before connect and encrypted service resume, and atomic connect-if-idle no-op/replay.
+Startup checks cover normal/manual launch guards, delayed network/service/profile readiness, cached refresh failure,
+unknown acknowledgement without replay, manual/setup/update cancellation and existing protected intent.
+Known-off startup cleanup pacing/cancellation is checked without WFP mutation; unreadable intent never authorizes cleanup.
+The UI waits only for the distinct unprotected startup-cleanup code and cannot connect until confirmed ready.
 
-New evidence covers native existing/missing application ID behavior (read-only), stage-code preservation,
-preflight rejection before policy mutation, explicit-off receipt capacity, ownership release only on confirmed off,
-versioned Discord/Roblox exact-path repair, public update metadata/SemVer/HTTP bounds, staging ACL/MOTW/hash/launch locking,
-and UI update states/install blocking. Updater launch fixtures do not execute an installer or UAC.
+Updater checks cover SemVer, complete same-repository release assets, bounded HTTP and redirects, staging ACL/MOTW,
+size/SHA-256 verification, launch locking, cancellation and download/install state handling. Launcher fixtures never run
+an installer or UAC. A temporary isolated console called the real public ReleaseUpdateClient for installed alpha.9:
+exit 0, Available / 0.1.0-alpha.10 / checksum validated. It read metadata/checksums only.
 
-`--render-check` via a hidden, isolated desktop process exited 0. Current WPF snapshots were inspected:
-1200x820 and 940x660 sidebar/connection/update offers, fault detail, long app names, narrow library/loading,
-EN settings, import modal and Terminal Help. artifacts/ui contains actual current generated PNGs.
-These are WPF renders/fixtures, not a real imported subscription, browser E2E or installed VPN proof.
+Current real WPF RenderTargetBitmap snapshots were inspected at 1200x820 and 940x660: wide/compact navigation,
+connection/fault/update states, import, long app names, library/loading, Terminal Help and RU/EN settings.
+The disconnected/unknown/recovery/first-use facts block is absent; confirmed synthetic connection shows actual fixture
+values and unknown protocol is omitted. Routing labels are «Приложения» / «Весь ПК» at 14px with Ideal/Grayscale,
+13px secondary text and stronger native weights. Settings UIA toggles the new auto-connect preference; disabled startup
+preserves its saved choice. These fixtures do not read real subscriptions or change Windows startup registration.
+The hidden `--render-check` process exited 0. artifacts/ui contains generated images; 96-DPI evidence is not a physical
+27-inch monitor, live screen-reader or 125/150/200% DPI acceptance.
 
-The friend's screenshot and report establish alpha.10 TRAFFIC_PROTECTION_FAILED after reboot/Connect.
-Removed version paths reproduce one failure mechanism; the exact friend's native error and ExitLag conflict remain unknown.
+An earlier unpublished `scripts/build.ps1 -Candidate` exited 0 and checked official Xray 26.9.9 SHA-256 and Valid vendor
+Wintun signature. Intermediate typography binaries are preserved outside the final release directory; they are not
+final installed-binary evidence. Final clean source/installer identity is recorded separately in artifact provenance.
+
+The friend's screenshot/report establish alpha.10 TRAFFIC_PROTECTION_FAILED after reboot/Connect. Removed version
+paths reproduce one mechanism; the exact friend's native error and ExitLag conflict remain unknown.
 No installed service, live VPN, BFE/firewall/adapter, production account, server or DB mutation was performed.
-Required open acceptance: installed service/UI, real TUN/egress/isolation, actual reboot/ExitLag coexistence,
-installer upgrade/UAC/cancel/rollback, clean VM, Windows 10, boot/sleep/network changes, full IPv6,
-multi-user packet isolation, DPI/High Contrast and live accessibility/input.
+Open acceptance: installed service/UI, real TUN/egress/isolation, actual reboot/ExitLag coexistence, installer
+upgrade/UAC/cancel/rollback, clean VM, Windows 10, sleep/network changes, full IPv6, multi-user packet isolation,
+physical-monitor rendering, system High Contrast and live accessibility/input. GitHub publication is not this acceptance.
 
 # Verification — 0.1.0-alpha.10
 

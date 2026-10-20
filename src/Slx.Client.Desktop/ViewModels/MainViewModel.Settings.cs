@@ -22,8 +22,24 @@ public sealed partial class MainViewModel
         set
         {
             if (value == AutoStart) return;
-            try { StartupRegistration.SetEnabled(value); preferences = preferences with { AutoStart = value }; SavePreferences(); OnPropertyChanged(); }
+            if (!value) CancelStartupConnection();
+            try
+            {
+                StartupRegistration.SetEnabled(value); preferences = preferences with { AutoStart = value };
+                SavePreferences(); OnPropertyChanged();
+            }
             catch (ClientFault fault) { ShowFault(fault.Code); }
+        }
+    }
+    public bool AutoConnectOnStartup
+    {
+        get => preferences.AutoConnectOnStartup;
+        set
+        {
+            if (value == AutoConnectOnStartup) return;
+            preferences = preferences with { AutoConnectOnStartup = value };
+            if (!value) CancelStartupConnection();
+            SavePreferences(); OnPropertyChanged();
         }
     }
     private void ReconcileStartup()

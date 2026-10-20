@@ -2,6 +2,16 @@
 
 ## Alpha.11 acceptance contract
 
+Owner explicitly requested startup VPN connection, superseding older startup-only statements in historical sections.
+With Windows autostart enabled, the separate Connect VPN on startup preference defaults on. A --tray login waits for
+network/service/saved-profile readiness and performs at most one guarded connect-if-idle. Normal manual launch does not
+connect. An existing active/protected/recovering service owns its intent; manual off or setup/update action cancels the
+pending startup attempt. Uncertain replies require normal status reconciliation and never create another auto mutation.
+Old preferences keep AutoStart=false by default; existing AutoStart=true installations get the newly requested behavior
+unless the new preference is switched off. This is a documented owner decision, not an implicit reinterpretation.
+While Windows startup cleanup is pending, show preparation copy, disable Connect and retain the startup intent until
+a fresh Disconnected observation. Other fault/active/protected states do not acquire this exception.
+
 Given a removed Discord/Roblox version path, Connect refreshes verified exact sibling paths before sending the plan;
 unresolved or inaccessible selected executables stop protection changes with a specific safe explanation.
 Given a restore failure after restart, the service exposes status/explicit off and preserves recovery intent.
@@ -19,8 +29,11 @@ For the owner's 27-inch Full HD screen, text uses denser native weights and read
 uses WPF Ideal/Grayscale after the owner rejected the earlier Display/ClearType pixel-snapped preview. Secondary text
 is at least 13px, mode labels are 14px «Приложения» / «Весь ПК» with simple RU/EN explanations and unchanged routing.
 Heading/body hierarchy remains, with no redistributed fonts or decorative font swap.
+The statistics block and its last-check timestamp are absent while disconnected, unknown, connecting or recovering,
+and on first use. Only confirmed connection with a known ConnectedAt shows actual duration/selected-app facts;
+an unresolved protocol is omitted rather than shown as a dash or invented name. Setup and the primary action remain.
 
-Current evidence: scripts/verify.ps1 passed 264 unit/Windows tests and one expanded WPF scenario on 2026-10-20;
+Current evidence: scripts/verify.ps1 passed 285 unit/Windows tests and one expanded WPF scenario on 2026-10-20;
 actual WPF RenderTargetBitmap snapshots inspected at 1200x820/940x660 in artifacts/ui. Covered connection, long names,
 wide/compact menus, update offer and simulated handoff, settings EN, protected-fault copy, library/loading, import and
 Terminal Help. These are synthetic isolated WPF fixtures, not installed service/TUN or full keyboard/screen-reader acceptance.
@@ -49,8 +62,8 @@ No copied ExitLag composition, fake latency, app counters or simulated activity.
   A blank selected-app list cannot silently turn into whole-computer routing.
 - Connected rule/profile changes need explicit reconnect. Edits are disabled during
   an outstanding mutation so the selected plan cannot drift behind an acknowledgement.
-- Language/theme changes do not disconnect or recreate the tunnel. Autostart is
-  opt-in and does not imply automatic VPN connection.
+- Language/theme changes do not disconnect or recreate the tunnel. Autostart is opt-in;
+  its separate VPN connection option waits for readiness and can be switched off.
 - Close may use the real native tray. If tray creation fails the app stays reachable
   in the taskbar. Tray Exit requests disconnect; an unknown stop is reconciled before exit.
 

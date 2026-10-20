@@ -1,5 +1,10 @@
 # Network model and limits — alpha.11
 
+Startup resume also refreshes recognized exact versioned paths before native-ID preflight. One validated application
+list feeds WFP and Xray; changed encrypted intent is saved after committed protection. Unresolved paths remain fail-closed.
+Configured Windows autostart can send one atomic connect-if-idle after readiness; it never replaces an active/recovering
+intent or blindly retries an unknown command. This is source/contract evidence, not a real reboot or packet capture.
+
 The unprivileged UI sends a typed, SID-authorized plan. The LocalSystem service validates public endpoint DNS answers, pins the selected IP and preserves TLS hostname validation. Only pinned Xray 26.9.9 and vendor-signed Wintun execute. No server/Happ/key/HWID changes.
 
 ## Traffic selection
@@ -19,6 +24,11 @@ Alpha.11 resolves the complete enabled application-ID set with Windows before op
 Replacement/removal enumerates only the SLX provider on its two ALE layers, includes disabled filters and additionally checks the SLX sublayer before deletion. Foreign providers, their filters and adapters are not deleted. The persistent blocking and nonpersistent TUN-permit model is unchanged. A failed native session is closed without removing persistent protection; the next attempt opens a new BFE RPC session. A recoverable restore failure no longer prevents the control pipe and monitor from starting: a loaded desired-on plan retains its intent and enters the existing paced retry path, while an unreadable intent produces a fault instead of an invented connection result. These changes do not establish boot-time or BFE-restart packet guarantees.
 
 The 4096-entry replay receipt limit still rejects new connect/reconnect operations. Valid explicit disconnect remains available at capacity without adding another receipt; existing request fingerprints are checked first, and invalid off payloads remain rejected. Ownership is released only after a successful explicit stop reports Disconnected with protection inactive. Failed, protected or uncertain stop results retain the owner. A subsequent single Windows user can then establish their own connection; concurrent multi-session routing is still unsupported.
+
+If startup successfully reads no saved on-intent but owned WFP cleanup fails, startup-only paced cleanup retries
+without starting a tunnel. The service reports SERVICE_STARTUP_CLEANUP_PENDING until removal succeeds and then
+confirms Disconnected. Unreadable intent never enables this cleanup. New connection protection supersedes it;
+an explicit Stop cancels it, including a failed stop. This does not add a boot-time packet guarantee.
 
 ## DNS
 Windows shares its DNS service across applications. Public port 53 captured by TUN routes to Xray DNS, whose HTTPS resolvers (literal 1.1.1.1 / 8.8.8.8, normal certificate validation) route via VPN before self-process bypass. There is no plain UDP/system DNS fallback in this path. This also affects unselected applications using the shared public resolver while connected. Private/LAN DNS and initial bootstrap resolution remain direct; public port 53 is blocked outside TUN during recovery, including the shared Windows resolver. This can pause DNS for unselected apps while VPN is recovering; app-owned HTTPS DNS follows its process rule. Selected mode is not per-app DNS anonymity.

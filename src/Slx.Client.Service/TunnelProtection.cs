@@ -4,6 +4,7 @@ namespace Slx.Client.Service;
 internal sealed partial class TunnelEngine
 {
     private readonly TunnelIntentStore intents=new();
+    private readonly StartupOffCleanup startupOffCleanup=new();
     private TrafficGuard? trafficGuard;
     private ConnectPlan? pinnedPlan;
     private bool desiredConnected,protectionActive;
@@ -15,10 +16,16 @@ internal sealed partial class TunnelEngine
         try
         {
             var saved=intents.Load();
-            if(saved==null){ReleaseProtection();return;}
+            if(saved==null){startupOffCleanup.Begin();TryStartupOffCleanup();return;}
+            startupOffCleanup.Cancel();
             pinnedPlan=saved.Plan;currentPlan=saved.EndpointHost is null?saved.Plan:saved.Plan with{Profile=saved.Plan.Profile with{Host=saved.EndpointHost}};ownerSid=saved.OwnerSid;desiredConnected=true;
-            ArmProtection(saved.Plan);
-            state=new(TunnelPhase.Reconnecting,DateTimeOffset.UtcNow,saved.Plan.Profile.Name,Mode:saved.Plan.Mode,ProtectionActive:true);
+            var restored=RestoredTunnelPlan.Refresh(saved);
+            pinnedPlan=restored.Plan;
+            currentPlan=restored.EndpointHost is null?restored.Plan:restored.Plan with{Profile=restored.Plan.Profile with{Host=restored.EndpointHost}};
+            // Preserve old rules until the complete refreshed native-ID set passes and replacement commits.
+            ArmProtection(restored.Plan);
+            if(!ReferenceEquals(restored,saved))intents.Save(restored);
+            state=new(TunnelPhase.Reconnecting,DateTimeOffset.UtcNow,restored.Plan.Profile.Name,Mode:restored.Plan.Mode,ProtectionActive:true);
         }
         catch(Exception error) when(error is ClientFault or System.IO.IOException or UnauthorizedAccessException
             or System.Security.Cryptography.CryptographicException)
@@ -40,6 +47,22 @@ internal sealed partial class TunnelEngine
             protectionActive=true;
         }
         catch{CloseProtectionSession();throw;}
+    }
+    private bool TryStartupOffCleanup()
+    {
+        if(!startupOffCleanup.Pending)return false;
+        // A new connection owns protection as soon as its intent is adopted. Startup cleanup
+        // must never release that policy, even if later connection readiness fails.
+        if(desiredConnected||currentPlan is not null){startupOffCleanup.Cancel();return false;}
+        try
+        {
+            if(startupOffCleanup.TryRelease(ReleaseProtection))state=new(TunnelPhase.Disconnected,DateTimeOffset.UtcNow);
+        }
+        catch(ClientFault)
+        {
+            state=new(TunnelPhase.Faulted,DateTimeOffset.UtcNow,Code:StartupOffCleanup.PendingCode,ProtectionActive:protectionActive);
+        }
+        return true;
     }
     private void ReleaseProtection()
     {

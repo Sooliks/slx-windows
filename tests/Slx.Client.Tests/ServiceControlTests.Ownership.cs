@@ -52,6 +52,7 @@ public sealed partial class ServiceControlTests
         await dispatcher.DispatchAsync("owner",first,default);
         for(int i=1;i<4096;i++)Assert.True((await dispatcher.DispatchAsync("owner",Request("reconnect",CoreFixtures.Plan()),default)).Success);
         Assert.Equal("IPC_RECEIPT_LIMIT",(await dispatcher.DispatchAsync("owner",Request("connect",CoreFixtures.Plan()),default)).Code);
+        Assert.Equal("IPC_RECEIPT_LIMIT",(await dispatcher.DispatchAsync("owner",Request("connect-if-idle",CoreFixtures.Plan()),default)).Code);
         Assert.Equal("IPC_REPLAY_MISMATCH",(await dispatcher.DispatchAsync("owner",first with{Action="disconnect",Plan=null},default)).Code);
         Assert.Equal("IPC_INVALID",(await dispatcher.DispatchAsync("owner",Request("disconnect",CoreFixtures.Plan()),default)).Code);
         Assert.Equal(0,engine.Stops);
@@ -61,6 +62,7 @@ public sealed partial class ServiceControlTests
         Assert.True((await dispatcher.DispatchAsync("owner",off,default)).Success);
         Assert.Equal(2,engine.Stops); // Uncached explicit off remains safe and idempotent.
         Assert.Equal("IPC_RECEIPT_LIMIT",(await dispatcher.DispatchAsync("other",Request("connect",CoreFixtures.Plan()),default)).Code);
+        Assert.Equal("IPC_RECEIPT_LIMIT",(await dispatcher.DispatchAsync("other",Request("connect-if-idle",CoreFixtures.Plan()),default)).Code);
         Assert.Equal("IPC_REPLAY_MISMATCH",(await dispatcher.DispatchAsync("other",first,default)).Code);
     }
 }

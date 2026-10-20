@@ -16,6 +16,7 @@ internal static class DashboardChecks
         var first=switches[0];first.IsChecked=false;Sta.Pump();
         Assert.Contains(first,Sta.Descendants<CheckBox>(section));Assert.False(model.Applications[0].Enabled);
         first.IsChecked=true;
+        ConnectionFactsChecks.Run(window,model);
         model.SendOverride=(request,_)=>Task.FromResult(new PipeReply(true,"OK",new(TunnelPhase.Connected,DateTimeOffset.UtcNow,
             ProfileName:UiFixtures.Primary.Name,ConnectedAt:DateTimeOffset.UtcNow.AddMinutes(-2),Mode:RoutingMode.SelectedApplications,ProbePassed:true)));
         model.PollAsync().GetAwaiter().GetResult();Sta.Pump();

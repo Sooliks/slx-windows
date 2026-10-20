@@ -17,6 +17,7 @@ internal static class RenderCheck
             (Name: "slx-desktop-empty", Page: "connection", Language: "ru", Theme: "olive", Width: 1200d, Height: 820d),
             (Name: "slx-apps-narrow", Page: "applications", Language: "ru", Theme: "olive", Width: 940d, Height: 660d),
             (Name: "slx-settings", Page: "settings", Language: "ru", Theme: "olive", Width: 1200d, Height: 820d),
+            (Name: "slx-settings-narrow", Page: "settings", Language: "ru", Theme: "olive", Width: 940d, Height: 660d),
             (Name: "slx-help-terminal-en", Page: "help", Language: "en", Theme: "terminal", Width: 1200d, Height: 820d),
             (Name: "slx-import", Page: "connection", Language: "ru", Theme: "olive", Width: 940d, Height: 660d)
         };

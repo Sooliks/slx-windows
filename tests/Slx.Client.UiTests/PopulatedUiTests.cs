@@ -29,6 +29,8 @@ public sealed class PopulatedUiTests
             CheckUnknownExit(window);
             FollowupChecks.Run(window);
             UpdateChecks.Run(window);
+            StartupAutoConnectChecks.Run();
+            SettingsStartupChecks.Run(window);
         }
         finally { window.Close(); Sta.Pump(); }
     });

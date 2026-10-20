@@ -19,6 +19,7 @@ public sealed partial class MainViewModel
     }
     private async Task<IDisposable> AcquireUpdateInstallAsync(CancellationToken cancellationToken)
     {
+        CancelStartupConnection();
         await mutationGate.WaitAsync(cancellationToken);
         updateInstalling = true; NotifyState();
         try
