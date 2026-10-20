@@ -15,6 +15,8 @@ starting the installer never claims the upgrade is complete. Language changes pr
 Given a 1200x820 window, navigation has icons/labels; at 940x660 the same buttons become a compact 76px sidebar.
 Names, tooltips, focus and current-section UIA status remain available; resizing preserves profile/app selection.
 Static vector graphics remain decorative, without timers or status meaning. High contrast maps semantic brushes to Windows.
+For the owner's 27-inch Full HD screen, text uses denser native weights and readable secondary labels; the opaque window
+uses WPF Display/ClearType. Heading/body hierarchy remains, with no redistributed fonts or decorative font swap.
 
 Current evidence: scripts/verify.ps1 passed 264 unit/Windows tests and one expanded WPF scenario on 2026-10-20;
 actual WPF RenderTargetBitmap snapshots inspected at 1200x820/940x660 in artifacts/ui. Covered connection, long names,

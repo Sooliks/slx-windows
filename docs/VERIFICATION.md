@@ -8,6 +8,10 @@ An intermediate repeat had one success-fixture download hit its artificial 2s te
 263 checks and the WPF scenario passed. Ordinary fixture budgets now use 15s; dedicated 100ms timeout/cancellation cases
 and production 15s check / 5min download limits remain unchanged. The final complete rerun after this correction exited 0:
 264 checks plus the expanded WPF scenario, zero failures/skips and zero build warnings/errors.
+After the owner's denser Full HD typography request, the complete `scripts/verify.ps1` rerun also exited 0:
+264 unit/Windows checks plus one WPF scenario, zero warnings/errors/failures/skips. Current 1200x820/940x660
+WPF snapshots were re-rendered and inspected, including sidebar/routing text-fit assertions, status, update banner,
+long app names, import, Help and settings. This is 96-DPI rendered evidence, not a physical 27-inch monitor measurement.
 
 A temporary isolated .NET console called the real ReleaseUpdateClient against public GitHub for installed alpha.9:
 exit 0, Available / 0.1.0-alpha.10 / checksum validated / no error. Only metadata/checksums were read; no installer launch.

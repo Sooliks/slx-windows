@@ -35,6 +35,8 @@ Old clients need one manual installer update; no new provider, updater service, 
 Native WPF stays olive/lime and Terminal, with static vector cut-X geometry and translucent surfaces. The same sidebar
 buttons collapse from 204 to 76px below 1080px window width; supported minimum remains 940x660. Tooltips, UIA names,
 selected-section announcements and keyboard focus remain. No ambient timers, fake activity or network telemetry.
+Owner's Full HD / 27-inch feedback requires denser native typography: Medium body, stronger captions and Bold headings,
+readable small labels and Display/ClearType formatting on the opaque WPF window, without bundling replacement fonts.
 Help copies only local safe state/version/codes at explicit request. See docs/UPDATES.md and docs/RELEASE_NOTES_ALPHA11.md.
 
 Migration: install UI and service together using the new-version installer; optional preference fields default safely.

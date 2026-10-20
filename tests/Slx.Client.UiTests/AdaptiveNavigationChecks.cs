@@ -19,6 +19,9 @@ internal static class AdaptiveNavigationChecks
         window.Width = 1200; window.Height = 820; Sta.Pump();
         Assert.Equal(204, sidebar.ActualWidth);
         Assert.All(navigation, button => Assert.True(Assert.Single(Sta.Descendants<TextBlock>(button)).IsVisible));
+        foreach (var button in Sta.Descendants<Button>(sidebar))
+            Assert.All(Sta.Descendants<TextBlock>(button), text => AssertTextFits(text, button));
+        CheckRoutingCaptions(window);
         UiScreenshots.Save(window, "slx-navigation-wide");
         window.Width = 940; window.Height = 660; Sta.Pump();
         Assert.Equal(76, sidebar.ActualWidth);
@@ -31,6 +34,7 @@ internal static class AdaptiveNavigationChecks
         });
         Assert.Same(profile, model.SelectedProfile);
         Assert.Same(application, model.Applications[0]);
+        CheckRoutingCaptions(window);
         var connection = navigation.Single(button => Equals(button.CommandParameter, "connection"));
         var applications = navigation.Single(button => Equals(button.CommandParameter, "applications"));
         Assert.False(string.IsNullOrEmpty(AutomationProperties.GetItemStatus(connection)));
@@ -47,5 +51,16 @@ internal static class AdaptiveNavigationChecks
         window.Width = 1200; window.Height = 820; Sta.Pump();
         UiScreenshots.Save(window, "slx-connection-unknown-wide");
         model.SendOverride = null;
+    }
+    private static void CheckRoutingCaptions(MainWindow window)
+    {
+        foreach (var option in Sta.Descendants<RadioButton>(window).Where(option => option.GroupName == "ConnectionMode"))
+            Assert.All(Sta.Descendants<TextBlock>(option), text => AssertTextFits(text, option));
+    }
+    private static void AssertTextFits(TextBlock text, FrameworkElement control)
+    {
+        var bounds = text.TransformToAncestor(control).TransformBounds(new Rect(text.RenderSize));
+        Assert.True(bounds.Right <= control.ActualWidth + 1 && bounds.Bottom <= control.ActualHeight + 1,
+            $"Caption clipped by {control.GetType().Name}: {text.Text}");
     }
 }
