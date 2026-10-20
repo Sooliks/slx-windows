@@ -5,7 +5,7 @@ using Slx.Client.Core;
 
 namespace Slx.Client.Windows;
 
-public sealed class UserSettingsStore
+public sealed partial class UserSettingsStore
 {
     private const int MaxVaultBytes = 1048576;
     private const int MaxPreferencesBytes = 262144;

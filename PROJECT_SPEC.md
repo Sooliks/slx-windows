@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.11. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.12. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,23 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.12 — responsive application library
+
+Returning users see the previous local discovery snapshot before rescanning. Persist only bounded validated exact-path
+AppRules/timestamp in a separate CurrentUser-DPAPI cache owned by UserSettingsStore; no account, profile, installation-ID
+or server migration. Missing/corrupt cache is optional and must not prevent preferences/subscription use.
+Independent discovery sources run with concurrency capped at three and publish completed batches without waiting for
+the slowest source or icons. Keep previous results usable during refresh/failure; only a complete successful scan prunes
+old rows and replaces the durable snapshot. Distinguish saved content, active request and verified observation time.
+Automatic revisits reuse a recent successful in-process scan; manual Refresh remains available. Search, selected rules,
+scroll/focus and navigation remain usable during background discovery. Revalidate cached paths before explicit Add;
+discovery/cache alone never enables an application or triggers routing changes. Selected paths still use existing
+explicit addition and connection-time repair/validation. Cancellation/disposal reject late results and duplicate scans.
+Shell icon extraction is asynchronous, coalesced and capped at two; frozen fallback displays immediately, no native
+extraction under a shared cache lock or on the UI thread. Preserve SLX themes, routing semantics and all service guards.
+Distribution follows the previously authorized production GitHub channel with prerelease/PARTIAL acceptance status.
+Rollback: install alpha.11 after explicit disconnect; the optional discovery cache is ignored by older clients.
 
 ## Alpha.11 — restart recovery, updates and native UI
 

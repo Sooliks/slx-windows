@@ -41,8 +41,9 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         ReconnectCommand = new AsyncRelayCommand(() => ChangeTunnelAsync("reconnect"), () => CanReconnect);
         AddExecutableCommand = new RelayCommand(AddExecutable);
         DiscoverCommand = new RelayCommand(() => _ = DiscoverApplicationsAsync(), () => !Discovering);
-        AddDiscoveredCommand = new RelayCommand<AppRule>(AddDiscovered);
-        AddLibraryCommand = new RelayCommand<LibraryEntry>(AddLibrary);
+        AddDiscoveredCommand = new AsyncRelayCommand<AppRule>(AddDiscoveredAsync);
+        AddLibraryCommand = new AsyncRelayCommand<LibraryEntry>(AddLibraryAsync);
+        ShowMoreApplicationsCommand = new RelayCommand(ShowMoreApplications);
         RemoveAppCommand = new RelayCommand<AppItemViewModel>(RemoveApp);
         OpenAccountCommand = new RelayCommand(() => OpenLink("https://slxvpn.com/account"));
         OpenSupportCommand = new RelayCommand(() => OpenLink("https://t.me/slxvpn?direct"));
@@ -52,6 +53,8 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         ConfirmRemoveCommand = new AsyncRelayCommand(RemoveSubscriptionAsync);
         InitializeUpdates();
         InitializeDiagnostics();
+        Discovered.CollectionChanged += (_,_)=>{if(!changingDiscovery)RefreshDiscoveryProperties();};
+        RefreshDiscoveryProperties();
         Text.Catalog.PropertyChanged += LanguageChanged;
     }
     public ObservableCollection<AppItemViewModel> Applications { get; } = [];
@@ -64,7 +67,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public bool HasSelectedApplications => Applications.Any(x => x.Enabled);
     public bool HasSearchResults => FilteredApplications.Any();
     public bool HasDiscovered => Discovered.Count > 0;
-    public string Page { get => page; set { if (SetProperty(ref page, value) && value == "applications" && persistPreferences) _ = DiscoverApplicationsAsync(); } }
+    public string Page { get => page; set { if (SetProperty(ref page, value) && value == "applications" && persistPreferences) _ = RefreshLibraryIfNeededAsync(); } }
     public string Search { get => search; set { if (SetProperty(ref search, value)) { OnPropertyChanged(nameof(FilteredApplications)); OnPropertyChanged(nameof(HasSearchResults)); } } }
     public string ImportLink { get => importLink; set => SetProperty(ref importLink, value); }
     public bool ImportVisible { get => importVisible; set { if (SetProperty(ref importVisible, value)) OnPropertyChanged(nameof(IsOverlayVisible)); } }
@@ -108,8 +111,9 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public AsyncRelayCommand ReconnectCommand { get; }
     public RelayCommand AddExecutableCommand { get; }
     public RelayCommand DiscoverCommand { get; }
-    public RelayCommand<AppRule> AddDiscoveredCommand { get; }
-    public RelayCommand<LibraryEntry> AddLibraryCommand { get; }
+    public AsyncRelayCommand<AppRule> AddDiscoveredCommand { get; }
+    public AsyncRelayCommand<LibraryEntry> AddLibraryCommand { get; }
+    public RelayCommand ShowMoreApplicationsCommand { get; }
     public RelayCommand<AppItemViewModel> RemoveAppCommand { get; }
     public RelayCommand OpenAccountCommand { get; }
     public RelayCommand OpenSupportCommand { get; }
@@ -117,7 +121,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public RelayCommand OpenWebsiteCommand { get; }
     public RelayCommand AskRemoveCommand { get; }
     public AsyncRelayCommand ConfirmRemoveCommand { get; }
-    private void LanguageChanged(object? sender, PropertyChangedEventArgs e) => OnPropertyChanged("");
+    private void LanguageChanged(object? sender, PropertyChangedEventArgs e) {foreach(var entry in libraryEntries.Values)entry.RefreshLanguage();OnPropertyChanged("");}
     private void ClearMessage() { messageKey = ""; OnPropertyChanged(nameof(Message)); OnPropertyChanged(nameof(ShowMessage)); }
     private void Notice(string key) { messageKey = key; OnPropertyChanged(nameof(Message)); OnPropertyChanged(nameof(ShowMessage)); }
     private void NotifyState()

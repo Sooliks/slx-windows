@@ -8,8 +8,9 @@ public sealed class Text : INotifyPropertyChanged
 {
     public static Text Catalog { get; } = new();
     private readonly ResourceManager resources = new("Slx.Client.Desktop.Localization.Strings", typeof(Text).Assembly);
+    private readonly ResourceManager libraryResources = new("Slx.Client.Desktop.Localization.LibraryStrings", typeof(Text).Assembly);
     private CultureInfo culture = CultureInfo.GetCultureInfo("ru");
-    public string this[string key] => resources.GetString(key, culture) ?? key;
+    public string this[string key] => resources.GetString(key, culture) ?? libraryResources.GetString(key, culture) ?? key;
     public string Language => culture.TwoLetterISOLanguageName;
     public event PropertyChangedEventHandler? PropertyChanged;
     public void SetLanguage(string language)

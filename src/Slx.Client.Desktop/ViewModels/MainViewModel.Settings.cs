@@ -73,20 +73,21 @@ public sealed partial class MainViewModel
         preferences = preferences with { Applications = Applications.SelectMany(x => x.ToRules()).ToList() };
         SavePreferences();
         foreach (var name in new[] { nameof(SelectedAppCount), nameof(FilteredApplications), nameof(HasApplications), nameof(HasSelectedApplications), nameof(HasSearchResults) }) OnPropertyChanged(name);
+        RefreshDiscoveryProperties();
     }
 
     private void AddExecutable()
     {
         var picker = new OpenFileDialog { Filter = Text.Catalog["ExecutableFilter"], CheckFileExists = true, Multiselect = false };
         if (picker.ShowDialog() != true) return;
-        try { AddDiscovered(AppDiscovery.FromExecutable(picker.FileName)); }
+        try { AddApplicationPaths([AppDiscovery.FromExecutable(picker.FileName)]); }
         catch (ClientFault fault) { ShowFault(fault.Code); }
     }
-    private void AddDiscovered(AppRule? rule)
+    private void AddApplicationPaths(IReadOnlyList<AppRule> paths)
     {
-        if (rule == null) return;
-        rule=ApplicationGroups.Normalize(rule);
-        var paths=Discovered.Where(x=>string.Equals(x.Name.Trim(),rule.Name.Trim(),StringComparison.CurrentCultureIgnoreCase)).Append(rule).ToArray();
+        var rule=ApplicationGroups.Normalize(paths[0]);
+        paths=paths.Select(ApplicationGroups.Normalize).Select(x=>x with{Name=rule.Name,Enabled=true})
+            .DistinctBy(x=>x.ExecutablePath,StringComparer.OrdinalIgnoreCase).ToArray();
         var existing=Applications.FirstOrDefault(x=>string.Equals(x.Name.Trim(),rule.Name.Trim(),StringComparison.CurrentCultureIgnoreCase));
         if(existing!=null){foreach(var path in paths)existing.AddPath(path);existing.Enabled=true;}
         else Attach(paths.Select(x=>x with{Enabled=true}));

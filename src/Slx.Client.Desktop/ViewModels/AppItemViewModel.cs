@@ -7,13 +7,14 @@ public sealed class AppItemViewModel : ObservableObject
 {
     private bool enabled;
     private readonly List<AppRule> members=[];
+    private LocalIconRequest? iconRequest;
     public AppItemViewModel(AppRule rule):this(new[]{rule}){}
     public AppItemViewModel(IEnumerable<AppRule> rules)
     {
         var items=rules.ToArray();var primary=items[0];
         Id=primary.Id;Name=primary.Name;ExecutablePath=primary.ExecutablePath;enabled=items.Any(x=>x.Enabled);
         foreach(var rule in items)AddPath(rule);
-        Icon=LocalIcon.Load(primary.ExecutablePath);
+        LoadIcon(primary.ExecutablePath);
     }
     public Guid Id { get; }
     public string Name { get; }
@@ -32,10 +33,16 @@ public sealed class AppItemViewModel : ObservableObject
         if (members.Select(x => x.ExecutablePath).SequenceEqual(refreshed.Select(x => x.ExecutablePath), StringComparer.OrdinalIgnoreCase)) return false;
         members.Clear(); members.AddRange(refreshed);
         ExecutablePath = members[0].ExecutablePath;
-        Icon = LocalIcon.Load(ExecutablePath); OnPropertyChanged(nameof(Icon));
+        LoadIcon(ExecutablePath);
         OnPropertyChanged(nameof(ExecutablePath)); OnPropertyChanged(nameof(ExecutablePaths));
         return true;
     }
     public AppRule ToRule()=>new(Id,Name,ExecutablePath,Enabled);
     public IEnumerable<AppRule> ToRules()=>members.Select(x=>x with{Name=Name,Enabled=Enabled});
+    private void LoadIcon(string path)
+    {
+        iconRequest?.Dispose(); Icon = LocalIcon.Cached(path); OnPropertyChanged(nameof(Icon));
+        iconRequest = LocalIconRequest.Start(this, path, static (item, image) =>
+        { item.Icon = image; item.OnPropertyChanged(nameof(Icon)); });
+    }
 }

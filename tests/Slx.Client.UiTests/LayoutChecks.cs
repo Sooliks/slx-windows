@@ -23,6 +23,7 @@ internal static class LayoutChecks
         UiScreenshots.Save(window, "slx-populated-whole");
         model.IsSelectedMode = true;
         var original = model.Applications.ToHashSet();
+        UiFixtures.AllowSyntheticApplications(model);
         foreach (var name in new[] { "Design Studio", "Code Editor", "Music Player", "Video Player", "Research Browser", "Team Messenger" })
             model.AddDiscoveredCommand.Execute(new AppRule(Guid.NewGuid(), name, @"C:\SLX UI Fixture\" + name + ".exe"));
         window.Width = 940; window.Height = 660; Sta.Pump();

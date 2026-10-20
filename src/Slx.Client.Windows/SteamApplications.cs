@@ -4,25 +4,28 @@ using Slx.Client.Core;
 namespace Slx.Client.Windows;
 public static class SteamApplications
 {
-    public static IReadOnlyList<AppRule> Find()
+    public static IReadOnlyList<AppRule> Find(CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         using var key=Registry.CurrentUser.OpenSubKey(@"Software\Valve\Steam");
         var root=key?.GetValue("SteamPath") as string??Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),"Steam");
         var shortcuts=new List<string>();
         foreach(var folder in new[]{Environment.SpecialFolder.DesktopDirectory,Environment.SpecialFolder.CommonDesktopDirectory})
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var directory=Environment.GetFolderPath(folder);
             try{if(Directory.Exists(directory))shortcuts.AddRange(Directory.EnumerateFiles(directory,"*.url").Take(500));}
             catch(Exception error) when(error is IOException or UnauthorizedAccessException) { }
         }
-        return Find(shortcuts,root);
+        return Find(shortcuts,root,cancellationToken);
     }
-    public static IReadOnlyList<AppRule> Find(IEnumerable<string> shortcuts,string steamRoot)
+    public static IReadOnlyList<AppRule> Find(IEnumerable<string> shortcuts,string steamRoot,CancellationToken cancellationToken = default)
     {
         var found=new Dictionary<string,AppRule>(StringComparer.OrdinalIgnoreCase);
         var requested=new HashSet<string>(StringComparer.Ordinal);
         foreach(var shortcut in shortcuts.Take(1000))
         {
+            cancellationToken.ThrowIfCancellationRequested();
             try{var id=SteamMetadata.AppId(Read(shortcut,16384));if(id is not null)requested.Add(id);}
             catch(Exception error) when(error is IOException or UnauthorizedAccessException or ArgumentException or RegexMatchTimeoutException) { }
         }
@@ -32,6 +35,7 @@ public static class SteamApplications
         catch(Exception error) when(error is IOException or UnauthorizedAccessException or ArgumentException or RegexMatchTimeoutException) { }
         foreach(var id in requested)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             (string Name,string[] Executables)? known=id switch
             {
                 "730"=>("Counter-Strike 2",[@"game\bin\win64\cs2.exe"]),
@@ -41,6 +45,7 @@ public static class SteamApplications
             if(known is null)continue;
             foreach(var library in libraries)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
                     var values=SteamMetadata.Values(Read(Path.Combine(library,"steamapps","appmanifest_"+id+".acf"),262144),"installdir");
@@ -48,6 +53,7 @@ public static class SteamApplications
                     var gameRoot=Path.GetFullPath(Path.Combine(library,"steamapps","common",values[0]))+Path.DirectorySeparatorChar;
                     foreach(var relative in known.Value.Executables)
                     {
+                        cancellationToken.ThrowIfCancellationRequested();
                         var executable=Path.GetFullPath(Path.Combine(gameRoot,relative));
                         if(!executable.StartsWith(gameRoot,StringComparison.OrdinalIgnoreCase)||!LibraryApplication.IsCandidate(executable)||!File.Exists(executable))continue;
                         found.TryAdd(executable,AppDiscovery.FromExecutable(executable) with{Name=known.Value.Name});

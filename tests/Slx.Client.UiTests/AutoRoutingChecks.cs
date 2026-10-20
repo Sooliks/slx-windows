@@ -8,6 +8,7 @@ internal static class AutoRoutingChecks
     private static MainViewModel Model(List<PipeRequest> requests, bool unknown=false)
     {
         var model=new MainViewModel(false,UiFixtures.Subscription,UiFixtures.Preferences(RoutingMode.SelectedApplications));
+        UiFixtures.AllowSyntheticApplications(model);
         model.SendOverride=(request,_)=>{
             requests.Add(request);
             if(unknown&&request.Action!="status")return Task.FromException<PipeReply>(new ClientFault("SERVICE_TIMEOUT"));
@@ -66,6 +67,7 @@ internal static class AutoRoutingChecks
         requests.Clear();
         using(var model=new MainViewModel(false,UiFixtures.Subscription,UiFixtures.Preferences(RoutingMode.WholeComputer)))
         {
+            UiFixtures.AllowSyntheticApplications(model);
             model.SendOverride=(request,_)=>{
                 requests.Add(request);
                 return Task.FromResult(new PipeReply(true,"OK",new(TunnelPhase.Connected,DateTimeOffset.UtcNow,

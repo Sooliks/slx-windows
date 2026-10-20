@@ -1,5 +1,26 @@
 # Windows client UX brief
 
+## Alpha.12 library acceptance contract
+
+Audience: returning Windows users opening Applications to add a program. Current friction: sequential native discovery
+and eager icon extraction hide usable results until every source completes; every revisit repeats that work.
+On entry, show the saved local list promptly and refresh in the background. Search/add/manual .exe/navigation remain
+available. A new source batch enriches the visible list independently of slow sources/icons. Refresh failure preserves
+the previous list and its observation time, with scoped recovery copy. A successful complete scan prunes removed items.
+Saved data is labelled as saved; checking is an activity, not fresh evidence. Validate existence before adding a cached
+program; unavailable paths offer refresh/manual selection and never enter selected routing. Scanning alone never mutates
+selected rules or reconnects VPN. Repeated entry coalesces active work and reuses a recent successful scan.
+Observable acceptance: cached rows visible before a blocked scanner; fast batch visible before slow batch; search/add
+works during refresh; failure retains cache/time; removed path cannot be added; cancellation/disposal cannot publish;
+bounded concurrency and no UI-thread shell extraction. Inspect RU/EN wide/narrow cached/loading/partial/empty states.
+Privacy: encrypted local cache only, no inventory upload or diagnostic paths. Real installed-app latency and all target
+Windows/DPI combinations remain separate acceptance from controlled WPF fixtures.
+
+Executed on 2026-10-20: scripts/verify.ps1 exit 0, 330 unit/Windows checks plus expanded WPF scenario, no skips/failures
+or build warnings. Current RU940/EN1200 cached-refresh/search/partial PNGs inspected; query, caret, logical focus and
+stable same-group card verified. Read-only real discovery first nonempty batch 100ms/complete1866ms on this PC only;
+not a universal latency or installed startup acceptance claim. See VERIFICATION.md.
+
 ## Alpha.11 acceptance contract
 
 Owner explicitly requested startup VPN connection, superseding older startup-only statements in historical sections.

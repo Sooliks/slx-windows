@@ -134,11 +134,11 @@
 <data name="ServiceUnknownHelp" xml:space="preserve"><value>Служба не ответила вовремя. Состояние подключения пока неизвестно; SLX проверит его снова.</value></data>
 <data name="ExitUnknownBody" xml:space="preserve"><value>SLX не удалось подтвердить остановку VPN — он может продолжать работать. Можно отменить выход и повторить попытку или закрыть только приложение, без подтверждения отключения VPN.</value></data>
  <data name="QuickApps" xml:space="preserve"><value>Библиотека приложений</value></data>
- <data name="QuickAppsHint" xml:space="preserve"><value>Каталог популярных программ и приложения на этом компьютере. Можно добавить программу до запуска. Список установленных приложений остаётся на компьютере.</value></data>
+ <data name="QuickAppsHint" xml:space="preserve"><value>Найденные программы можно добавить сразу. Для остальных выберите файл .exe.</value></data>
  <data name="RefreshApps" xml:space="preserve"><value>Обновить список</value></data>
  <data name="FindRunningApp" xml:space="preserve"><value>Найти приложение</value></data>
- <data name="FindingApps" xml:space="preserve"><value>Ищем приложения и загружаем иконки…</value></data>
- <data name="QuickAppsEmpty" xml:space="preserve"><value>Нет подходящих программ. Откройте нужную программу и обновите список или выберите её .exe вручную.</value></data>
+ <data name="FindingApps" xml:space="preserve"><value>Ищем приложения на компьютере…</value></data>
+ <data name="QuickAppsEmpty" xml:space="preserve"><value>В доступном списке нет совпадений. Попробуйте другое название или выберите .exe вручную.</value></data>
  <data name="AddedApps" xml:space="preserve"><value>Добавлены в SLX</value></data>
  <data name="DiscoveryUnavailable" xml:space="preserve"><value>Не удалось обновить список программ. Можно выбрать .exe вручную.</value></data>
  <data name="RefreshingProfiles" xml:space="preserve"><value>Обновляем способы подключения…</value></data>

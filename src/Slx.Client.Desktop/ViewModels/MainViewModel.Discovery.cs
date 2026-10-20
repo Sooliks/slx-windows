@@ -1,84 +1,102 @@
+using System.Collections.Concurrent;
+using System.IO;
+using System.Windows;
+using System.Windows.Threading;
 using Slx.Client.Core;
 using Slx.Client.Windows;
-using Slx.Client.Desktop.Presentation;
-using Microsoft.Win32;
 namespace Slx.Client.Desktop.ViewModels;
 public sealed partial class MainViewModel
 {
     internal Func<CancellationToken,Task<AppRule[]>>? DiscoveryFetchOverride {get;set;}
+    internal Func<IReadOnlyList<CatalogApplication>,Action<DiscoveryBatch>,CancellationToken,Task>? DiscoveryScanOverride {get;set;}
     internal Func<CancellationToken,Task<IReadOnlyList<CatalogApplication>>>? CatalogFetchOverride {get;set;}
-    private string discoverySearch="";
-    private bool discovering;
+    private bool discovering, changingDiscovery;
+    private long lastDiscoverySuccess;
     private CancellationTokenSource? discoveryCancellation;
-    internal IReadOnlyList<CatalogApplication> CatalogEntries {get;set;}=CatalogClient.Bundled();
-    public bool Discovering {get=>discovering;private set{if(SetProperty(ref discovering,value))DiscoverCommand.NotifyCanExecuteChanged();}}
-    public string DiscoverySearch {get=>discoverySearch;set{if(SetProperty(ref discoverySearch,value))RefreshDiscoveryProperties();}}
-    public IEnumerable<AppRule> FilteredDiscovered=>Discovered.Where(app=>
-        !Applications.Any(added=>string.Equals(added.Name.Trim(),app.Name.Trim(),StringComparison.CurrentCultureIgnoreCase))
-        &&app.Name.Contains(DiscoverySearch,StringComparison.CurrentCultureIgnoreCase)).GroupBy(x=>x.Name.Trim(),StringComparer.CurrentCultureIgnoreCase).Select(x=>x.First());
-    public IEnumerable<LibraryEntry> FilteredLibrary
+    public bool Discovering {get=>discovering;private set{if(SetProperty(ref discovering,value)){DiscoverCommand.NotifyCanExecuteChanged();NotifyLibraryState();}}}
+    internal Task RefreshLibraryIfNeededAsync()=>DiscoverApplicationsAsync(false);
+    private async Task DiscoverApplicationsAsync(bool force = true)
     {
-        get
-        {
-            var names=Discovered.Select(x=>System.IO.Path.GetFileName(x.ExecutablePath))
-                .Concat(Applications.SelectMany(x=>x.ToRules()).Select(x=>System.IO.Path.GetFileName(x.ExecutablePath))).ToHashSet(StringComparer.OrdinalIgnoreCase);
-            return FilteredDiscovered.Select(app=>new LibraryEntry(app.Name,app,null,Discovered.Where(x=>string.Equals(x.Name.Trim(),app.Name.Trim(),StringComparison.CurrentCultureIgnoreCase)).ToArray()))
-                .Concat(CatalogEntries.Where(app=>!app.Executables.Any(names.Contains)
-                    &&app.Name.Contains(DiscoverySearch,StringComparison.CurrentCultureIgnoreCase))
-                    .Select(app=>new LibraryEntry(app.Name,null,app)));
-        }
-    }
-    public bool HasDiscoveryResults=>FilteredLibrary.Any();
-    private void AddLibrary(LibraryEntry? entry)
-    {
-        if(entry==null)return;
-        if(entry.Rule!=null){AddDiscovered(entry.Rule);return;}
-        var picker=new OpenFileDialog{Filter=Localization.Text.Catalog["ExecutableFilter"],CheckFileExists=true,Multiselect=false,
-            Title=entry.Name,FileName=entry.Catalog?.Executables.FirstOrDefault()??""};
-        if(picker.ShowDialog()!=true)return;
-        try{AddDiscovered(AppDiscovery.FromExecutable(picker.FileName));}
-        catch(ClientFault fault){ShowFault(fault.Code);}
-    }
-    private async Task DiscoverApplicationsAsync()
-    {
-        if(Discovering||disposed)return;
-        Discovering=true;
-        using var current=new CancellationTokenSource(TimeSpan.FromSeconds(8));
+        if(Discovering||disposed||!force&&lastDiscoverySuccess!=0&&System.Diagnostics.Stopwatch.GetElapsedTime(lastDiscoverySuccess)<TimeSpan.FromMinutes(5))return;
+        Discovering=true; discoveryFailed=false;discoveryCacheWriteFailed=false;
+        using var current=new CancellationTokenSource(TimeSpan.FromSeconds(12));
         discoveryCancellation=current;
+        bool acceptingProgress=true;
+        var dispatcher=Application.Current.Dispatcher;
+        using var expiration=current.Token.Register(()=>{if(!disposed&&!dispatcher.HasShutdownStarted)_=dispatcher.BeginInvoke(new Action(()=>{if(!disposed)NotifyLibraryState();}));});
         try
         {
-            await System.Windows.Threading.Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.Background);
-            var catalog=CatalogEntries;
-            var apps=DiscoveryFetchOverride is not null?await DiscoveryFetchOverride(current.Token):await Task.Run(()=>
-            {
-                var found=AppDiscovery.RunningApplications().Concat(AppDiscovery.InstalledApplications())
-                    .Concat(ShortcutApplications.Find()).Concat(SteamApplications.Find()).Concat(ApplicationGroups.Discover()).Concat(CatalogApplications.Find(catalog))
-                    .Select(ApplicationGroups.Normalize).DistinctBy(app=>app.ExecutablePath,StringComparer.OrdinalIgnoreCase)
-                    .OrderBy(app=>app.Name,StringComparer.CurrentCultureIgnoreCase).Take(300).ToArray();
-                foreach(var app in found){current.Token.ThrowIfCancellationRequested();LocalIcon.Load(app.ExecutablePath);}
-                return found;
-            },current.Token);
+            await WarmDiscoveryCacheAsync();
             if(disposed||current.IsCancellationRequested)return;
-            Discovered.Clear();foreach(var app in apps)Discovered.Add(app);
-            bool changed=false;foreach(var app in apps){var added=Applications.FirstOrDefault(x=>string.Equals(x.Name.Trim(),app.Name.Trim(),StringComparison.CurrentCultureIgnoreCase));if(added!=null)changed|=added.AddPath(app);}
-            if(changed){SaveApplications();MarkRulesChanged();}
-            RefreshDiscoveryProperties();
-            try
+            var baseline=Discovered.ToArray();
+            var batches=new ConcurrentDictionary<DiscoverySource,DiscoveryBatch>();
+            void Publish(DiscoveryBatch batch)
             {
-                var fresh=await (CatalogFetchOverride?.Invoke(current.Token)??CatalogClient.RefreshAsync(current.Token));
-                if(disposed||current.IsCancellationRequested)return;
-                CatalogEntries=fresh;RefreshDiscoveryProperties();
+                if(disposed||current.IsCancellationRequested||dispatcher.HasShutdownStarted)return;
+                batches[batch.Source]=batch;
+                _=dispatcher.BeginInvoke(DispatcherPriority.Background,new Action(()=>
+                {
+                    if(acceptingProgress&&!disposed&&!current.IsCancellationRequested&&ReferenceEquals(discoveryCancellation,current))
+                        ApplyDiscovery(MergeWithPrior(baseline,MergedBatches(batches.Values)),true);
+                }));
             }
-            catch(Exception error) when(error is ClientFault or System.Net.Http.HttpRequestException or OperationCanceledException or System.IO.IOException)
-            { /* The available local catalog remains; no claim that refresh succeeded. */ }
+            async Task Scan()
+            {
+                if(DiscoveryFetchOverride is not null)Publish(new(DiscoverySource.Running,await DiscoveryFetchOverride(current.Token),true));
+                else await (DiscoveryScanOverride?.Invoke(CatalogEntries,Publish,current.Token)??DiscoveryScanner.RunAsync(CatalogEntries,Publish,current.Token));
+            }
+            await Task.WhenAll(Scan(),RefreshLibraryCatalogAsync(current.Token));
+            acceptingProgress=false;
+            if(disposed||current.IsCancellationRequested)return;
+            int expected=DiscoveryFetchOverride is null?Enum.GetValues<DiscoverySource>().Length:1;
+            bool complete=batches.Count==expected&&batches.Values.All(x=>x.Success);
+            var fresh=MergedBatches(batches.Values).ToArray();
+            ApplyDiscovery(complete?fresh:MergeWithPrior(baseline,fresh),!complete);
+            discoveryFailed=!complete;
+            if(complete)
+            {
+                discoveryObservedAt=DateTimeOffset.UtcNow;discoveryFromCache=false;
+                lastDiscoverySuccess=System.Diagnostics.Stopwatch.GetTimestamp();
+                await SaveDiscoveryCacheAsync(new(discoveryObservedAt.Value,fresh));
+            }
         }
-        catch(Exception error) when(error is ClientFault or System.ComponentModel.Win32Exception or System.IO.IOException or UnauthorizedAccessException or OperationCanceledException)
-        {if(!disposed)Notice("DiscoveryUnavailable");}
-        finally{if(ReferenceEquals(discoveryCancellation,current))discoveryCancellation=null;Discovering=false;}
+        catch(Exception error) when(error is ClientFault or System.ComponentModel.Win32Exception or IOException or UnauthorizedAccessException or OperationCanceledException)
+        {if(!disposed)discoveryFailed=true;}
+        finally
+        {
+            acceptingProgress=false;
+            if(ReferenceEquals(discoveryCancellation,current))discoveryCancellation=null;
+            Discovering=false;
+        }
     }
-    private void RefreshDiscoveryProperties()
+    private static IEnumerable<AppRule> MergedBatches(IEnumerable<DiscoveryBatch> batches)=>batches.Where(x=>x.Success)
+        .OrderBy(x=>x.Source).SelectMany(x=>x.Apps).DistinctBy(x=>x.ExecutablePath,StringComparer.OrdinalIgnoreCase)
+        .OrderBy(x=>x.Name,StringComparer.CurrentCultureIgnoreCase).Take(300);
+    private static IEnumerable<AppRule> MergeWithPrior(IEnumerable<AppRule> baseline,IEnumerable<AppRule> fresh)
     {
-        OnPropertyChanged(nameof(FilteredDiscovered));OnPropertyChanged(nameof(FilteredLibrary));
-        OnPropertyChanged(nameof(HasDiscoveryResults));OnPropertyChanged(nameof(HasDiscovered));
+        var latest=fresh.ToDictionary(x=>x.ExecutablePath,StringComparer.OrdinalIgnoreCase);
+        foreach(var previous in baseline)yield return latest.Remove(previous.ExecutablePath,out var updated)?updated:previous;
+        foreach(var added in latest.Values)yield return added;
+    }
+    private void ApplyDiscovery(IEnumerable<AppRule> rows,bool preservePrior=false)
+    {
+        var unique=rows.DistinctBy(x=>x.ExecutablePath,StringComparer.OrdinalIgnoreCase);
+        int maximum=preservePrior?600:300;
+        if(preservePrior)unique=unique.Take(maximum);
+        var found=unique.OrderBy(x=>x.Name,StringComparer.CurrentCultureIgnoreCase).Take(maximum).ToArray();
+        changingDiscovery=true;
+        try{Discovered.Clear();foreach(var row in found)Discovered.Add(row);}
+        finally{changingDiscovery=false;}
+        RefreshDiscoveryProperties();
+    }
+    private async Task RefreshLibraryCatalogAsync(CancellationToken token)
+    {
+        try
+        {
+            var fresh=await(CatalogFetchOverride?.Invoke(token)??CatalogClient.RefreshAsync(token));
+            if(!disposed&&!token.IsCancellationRequested)CatalogEntries=fresh;
+        }
+        catch(Exception error) when(error is ClientFault or System.Net.Http.HttpRequestException or OperationCanceledException or IOException)
+        { /* Bundled recommendations remain separate from locally discovered applications. */ }
     }
 }

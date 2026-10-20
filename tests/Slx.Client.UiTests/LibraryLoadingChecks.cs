@@ -32,7 +32,7 @@ internal static class LibraryLoadingChecks
             Assert.Contains(model.FilteredLibrary,x=>x.Name=="Loaded app");
             model.DiscoveryFetchOverride=_=>Task.FromException<AppRule[]>(new ClientFault("DISCOVERY_UNAVAILABLE"));
             model.DiscoverCommand.Execute(null);Sta.Pump();PumpUntilDone(model);
-            Assert.False(loading.IsVisible);Assert.True(model.ShowMessage);
+            Assert.False(loading.IsVisible);Assert.Equal(Slx.Client.Desktop.Localization.Text.Catalog["LibraryRefreshPartial"],model.LibraryStatusText);
             Assert.Contains(model.FilteredLibrary,x=>x.Name=="Loaded app");
         }
         finally{window.Close();Sta.Pump();}

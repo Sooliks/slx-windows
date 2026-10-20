@@ -24,6 +24,9 @@ internal static class FollowupChecks
         CheckQuickAdd();
         LibraryChecks.Run(window);
         LibraryLoadingChecks.Run();
+        LibraryCacheChecks.Run();
+        IconLoadingChecks.Run();
+        LibraryPresentationChecks.Run(window);
         AutoRoutingChecks.Run();
         DashboardChecks.Run(window);
         CheckStartupRefresh();
@@ -31,6 +34,7 @@ internal static class FollowupChecks
     private static void CheckQuickAdd()
     {
         using var model = new MainViewModel(false);
+        UiFixtures.AllowSyntheticApplications(model);
         var first = new AppRule(Guid.NewGuid(), "Messenger", @"C:\Synthetic\Messenger.exe");
         model.Discovered.Add(first);
         model.Discovered.Add(new(Guid.NewGuid(), "Browser", @"C:\Synthetic\Browser.exe"));

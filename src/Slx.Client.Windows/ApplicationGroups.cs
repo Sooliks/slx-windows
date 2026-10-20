@@ -9,15 +9,17 @@ public static class ApplicationGroups
 {
     private const string Family="OpenAI.Codex_2p2nqsd0c76g0";
     private static string Bin=>Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"OpenAI","Codex","bin");
-    public static IReadOnlyList<AppRule> Discover()
+    public static IReadOnlyList<AppRule> Discover(CancellationToken cancellationToken = default)
     {
-        var primary=PackageExecutables().FirstOrDefault(File.Exists);
+        var primary=PackageExecutables(cancellationToken).FirstOrDefault(File.Exists);
         return primary is null?[]:[AppDiscovery.FromExecutable(primary) with{Name="Codex / ChatGPT"}];
     }
-    public static AppRule Normalize(AppRule rule)
+    public static AppRule Normalize(AppRule rule)=>Normalize(rule,CancellationToken.None);
+    public static AppRule Normalize(AppRule rule,CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if(!IsGroup(rule.ExecutablePath))return rule;
-        var primary=PackageExecutables().FirstOrDefault(File.Exists);
+        var primary=PackageExecutables(cancellationToken).FirstOrDefault(File.Exists);
         return rule with{Name="Codex / ChatGPT",ExecutablePath=primary??rule.ExecutablePath};
     }
     public static List<AppRule> Expand(IEnumerable<AppRule> applications)
@@ -50,8 +52,9 @@ public static class ApplicationGroups
             .OrderByDescending(Directory.GetLastWriteTimeUtc).Take(20)
             .SelectMany(p=>new[]{Path.Combine(p,"codex.exe"),Path.Combine(p,"codex-code-mode-host.exe")}).ToArray();
     }
-    private static unsafe IReadOnlyList<string> PackageExecutables()
+    private static unsafe IReadOnlyList<string> PackageExecutables(CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if(!OperatingSystem.IsWindowsVersionAtLeast(10))return [];
         uint count=0,length=0;
         var status=PInvoke.GetPackagesByPackageFamily(Family,ref count,default,ref length,default);
@@ -63,6 +66,7 @@ public static class ApplicationGroups
             var paths=new List<string>();
             foreach(var name in names.Take((int)count))
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 uint size=0;
                 string full=name.ToString();
                 if(PInvoke.GetPackagePathByFullName(full,ref size,default)!=WIN32_ERROR.ERROR_INSUFFICIENT_BUFFER||size>32768)continue;

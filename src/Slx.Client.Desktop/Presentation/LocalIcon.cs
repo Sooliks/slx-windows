@@ -20,20 +20,23 @@ internal static class LocalIcon
     private static extern nint SHGetFileInfo(string path, uint attributes, out FileInfo info, uint size, uint flags);
     [DllImport("user32.dll")] [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool DestroyIcon(nint icon);
-    private static readonly Dictionary<string, ImageSource> Cache = new(StringComparer.OrdinalIgnoreCase);
-    private static readonly ImageSource Fallback = CreateFallback();
+    internal static ImageSource Fallback { get; } = CreateFallback();
+    private static readonly LocalIconCache Cache = new(Fallback, Extract);
+    public static ImageSource Cached(string path) => IsExecutable(path) && Cache.TryCached(path, out var image) ? image : Fallback;
     public static ImageSource Load(string path)
     {
-        if (string.IsNullOrWhiteSpace(path)) return Fallback;
-        lock (Cache)
-        {
-            if (Cache.TryGetValue(path, out var cached)) return cached;
-            var image = Extract(path) ?? Fallback;
-            if (Cache.Count >= 512) Cache.Clear();
-            Cache[path] = image;
-            return image;
-        }
+        if (!IsExecutable(path)) return Fallback;
+        if (Cache.TryCached(path, out var image)) return image;
+        _ = LoadAsync(path);
+        return Fallback;
     }
+    public static Task<ImageSource> LoadAsync(string path, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return IsExecutable(path) ? Cache.LoadAsync(path, cancellationToken) : Task.FromResult(Fallback);
+    }
+    private static bool IsExecutable(string path) => !string.IsNullOrWhiteSpace(path) && Path.IsPathFullyQualified(path)
+        && !path.StartsWith(@"\\", StringComparison.Ordinal) && string.Equals(Path.GetExtension(path), ".exe", StringComparison.OrdinalIgnoreCase);
     private static ImageSource CreateFallback()
     {
         var drawing = new DrawingGroup();
@@ -43,7 +46,7 @@ internal static class LocalIcon
     }
     private static ImageSource? Extract(string path)
     {
-        if (!Path.IsPathFullyQualified(path) || path.StartsWith(@"\\", StringComparison.Ordinal) || !string.Equals(Path.GetExtension(path), ".exe", StringComparison.OrdinalIgnoreCase)) return null;
+        if (!IsExecutable(path)) return null;
         nint icon = 0;
         try
         {

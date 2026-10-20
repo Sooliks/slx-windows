@@ -21,6 +21,7 @@ public sealed partial class MainViewModel
         timer.Start();
         _ = PollAsync();
         _ = RefreshOnStartupAsync();
+        _ = WarmDiscoveryCacheAsync();
         Updates.Start();
     }
     private async void PollTick(object? sender, EventArgs e) => await PollAsync();
@@ -143,6 +144,7 @@ public sealed partial class MainViewModel
     {
         if (disposed) return;
         disposed = true; discoveryCancellation?.Cancel(); CancelRoutingApply(); CancelStartupRefresh(); timer.Stop(); timer.Tick -= PollTick; operation?.Cancel();
+        libraryAddCancellation?.Cancel();foreach(var entry in libraryEntries.Values)entry.Dispose();
         Updates.Dispose();
         Text.Catalog.PropertyChanged -= LanguageChanged;
         GC.SuppressFinalize(this);

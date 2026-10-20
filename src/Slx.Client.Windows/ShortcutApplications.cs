@@ -6,20 +6,23 @@ namespace Slx.Client.Windows;
 /// <summary>Reads local shortcuts without Resolve, shell execution, arguments or network searches.</summary>
 public static class ShortcutApplications
 {
-    public static IReadOnlyList<AppRule> Find()
+    public static IReadOnlyList<AppRule> Find(CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var found=new Dictionary<string,AppRule>(StringComparer.OrdinalIgnoreCase);
         var roots=new[]{Environment.SpecialFolder.DesktopDirectory,Environment.SpecialFolder.CommonDesktopDirectory,
             Environment.SpecialFolder.StartMenu,Environment.SpecialFolder.CommonStartMenu};
-        var queue=new Queue<(string Path,int Depth)>(roots.Select(x=>(Environment.GetFolderPath(x),0)));
+        var queue=new ShortcutDirectoryQueue(roots.Select(Environment.GetFolderPath));
         int visited=0;
         while(queue.TryDequeue(out var item)&&visited<2000)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             try
             {
                 if(!Directory.Exists(item.Path)||(File.GetAttributes(item.Path)&FileAttributes.ReparsePoint)!=0)continue;
                 foreach(var file in Directory.EnumerateFiles(item.Path,"*.lnk").Take(2000-visited))
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     visited++;
                     try
                     {
@@ -32,7 +35,7 @@ public static class ShortcutApplications
                     }
                     catch(Exception error) when(error is COMException or ClientFault or IOException or UnauthorizedAccessException or ArgumentException) { }
                 }
-                if(item.Depth<5)foreach(var directory in Directory.EnumerateDirectories(item.Path).Take(200))queue.Enqueue((directory,item.Depth+1));
+                queue.AddChildren(Directory.EnumerateDirectories(item.Path),item.Depth,cancellationToken);
             }
             catch(Exception error) when(error is IOException or UnauthorizedAccessException) { }
         }

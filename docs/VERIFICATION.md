@@ -1,3 +1,40 @@
+# Verification — 0.1.0-alpha.12 (2026-10-20)
+
+STATUS: PARTIAL. Final `pwsh -NoProfile -File scripts/verify.ps1` on the Windows host exited 0:
+locked restore, Release solution build with zero warnings/errors, 330 unit/Windows checks and one expanded
+WPF scenario; zero failed/skipped, <=200 nonblank authored source gate. An earlier targeted cache/scanner
+run hit sandbox DPAPI restrictions (6 failures of 42); the same targeted host run passed all 42. No gate was weakened.
+
+New unit evidence covers schema/count/size/Unicode/path/UTC cache validation, CurrentUser DPAPI round trip,
+corrupt/foreign-purpose/missing cache, atomic replacement and independent preferences/vault behavior in isolated
+fixture directories. Discovery checks cover fast-source publication before a blocked source, concurrency three,
+source failure isolation, cancellation quiescence/no late publication and total shortcut-directory queue bounds.
+
+The controlled WPF scenario covers saved rows before a blocked scan, fast batches, single refresh, search and
+explicit addition during refresh, 300 previous plus 300 new transient rows retained on partial failure, unchanged
+observation time and no cache write after incomplete scan. Complete scans prune old rows and save once; queued
+progress cannot restore an old row while the final cache save is blocked. A recent automatic revisit reuses the
+complete result; manual refresh bypasses that interval. Missing cached files cannot become selected routes.
+Discovery does not mutate selected rules or call the service. Pagination and search across the available list pass.
+
+Async icon fixtures check two workers, coalescing, cache access during blocked extraction, LRU eviction, frozen
+fallback, caller cancellation, origin Dispatcher, weak target lifetime and disposal. UIA/search fixtures preserve
+query/caret/logical focus and the same card when a later source adds a second executable path. RU 940x660 and
+EN 1200x820 WPF PNGs were inspected for cached refresh/search/partial failure, without clipping or horizontal
+overflow. These are synthetic fixtures with fallback icons, not actual third-party icons or a physical-monitor study.
+201 matching RU/EN resource keys across the main and library owners; no duplicate keys. git diff --check passed.
+
+A temporary read-only console called the actual DiscoveryScanner on this Windows PC, without writing a cache,
+executing a shortcut, printing app names/paths or changing any network/service state. Exit 0: first nonempty batch
+100ms, all six sources succeeded, total 1866ms. This is one observation with this PC's OS/file caches, not a benchmark
+across users or a measurement of the complete WPF frame time. Optional persisted-cache behavior is fixture tested.
+
+No installed client, startup registration, VPN service, firewall, adapter, server, account or DB changes were made
+for acceptance. Required open evidence includes installed upgrade/cancel/rollback and first/returning startup latency
+on clean Windows 10/11, unusual shell providers, DPI/High Contrast and live screen-reader behavior. Historical network
+acceptance gaps remain open; the service and network policy are unchanged in alpha.12. Final clean build/installer
+identity is recorded in release provenance; publication does not establish installed-system acceptance.
+
 # Verification — 0.1.0-alpha.11 (2026-10-20)
 
 STATUS: PARTIAL. Final `pwsh -NoProfile -File scripts/verify.ps1` outside the restricted sandbox exited 0:

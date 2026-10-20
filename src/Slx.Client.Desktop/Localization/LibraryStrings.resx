@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><root>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>2.0</value></resheader>
+<data name="LibraryRefreshing" xml:space="preserve"><value>Updating in the background. You can choose apps now.</value></data>
+<data name="LibraryRefreshPartial" xml:space="preserve"><value>Some apps could not be checked. Your available list is still here; try refreshing again.</value></data>
+<data name="LibraryCacheUnavailable" xml:space="preserve"><value>The list is updated, but could not be saved for the next launch.</value></data>
+<data name="LibrarySaved" xml:space="preserve"><value>Your saved list is ready. Refresh to find new apps.</value></data>
+<data name="LibraryUpdated" xml:space="preserve"><value>App list updated.</value></data>
+<data name="LibraryReady" xml:space="preserve"><value>Choose an app or search by name.</value></data>
+<data name="LibraryObservation" xml:space="preserve"><value>Last complete check</value></data>
+<data name="LibraryAppUnavailable" xml:space="preserve"><value>Could not open the app executable. Refresh the list or choose its current .exe.</value></data>
+<data name="LibraryMore" xml:space="preserve"><value>Show more apps</value></data>
+<data name="LibrarySearchSlow" xml:space="preserve"><value>Finishing the search is taking longer. You can use the available list.</value></data>
+</root>

@@ -1,5 +1,10 @@
 # Boundaries
 
+Alpha.12 application library: UserSettingsStore owns a separate bounded DPAPI discovery cache; DiscoveryScanner owns
+independent source work with three workers and progressive batches. Desktop retains saved/partial results without
+claiming freshness, reuses recent successful scans and validates explicit additions off UI. Scanning never mutates
+selected routes. Shared asynchronous frozen icons use two workers and stable card instances. See APPLICATION_LIBRARY.md.
+
 Alpha.11 resume: RestoredTunnelPlan prepares/validates bounded exact application siblings from existing encrypted intent;
 it changes no endpoint, SID, storage or network policy. TunnelEngine uses one repaired list for WFP and core launch and
 persists changed intent after committed protection. Desktop startup coordinates one connect-if-idle intent only for

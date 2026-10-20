@@ -134,11 +134,11 @@
 <data name="ServiceUnknownHelp" xml:space="preserve"><value>The service did not reply in time. Connection state is unknown; SLX will check it again.</value></data>
 <data name="ExitUnknownBody" xml:space="preserve"><value>SLX could not confirm that the VPN stopped. It may still be running. You can cancel and retry, or close only this app without claiming the VPN is off.</value></data>
  <data name="QuickApps" xml:space="preserve"><value>Application library</value></data>
- <data name="QuickAppsHint" xml:space="preserve"><value>Popular apps and programs on this computer. Add apps before launching them. Your app inventory stays on this computer.</value></data>
+ <data name="QuickAppsHint" xml:space="preserve"><value>Add detected apps right away. For other apps, choose their .exe.</value></data>
  <data name="RefreshApps" xml:space="preserve"><value>Refresh list</value></data>
  <data name="FindRunningApp" xml:space="preserve"><value>Find an app</value></data>
- <data name="FindingApps" xml:space="preserve"><value>Finding apps and loading icons…</value></data>
- <data name="QuickAppsEmpty" xml:space="preserve"><value>No matching apps. Open the app and refresh, or choose its .exe manually.</value></data>
+ <data name="FindingApps" xml:space="preserve"><value>Finding apps on this computer…</value></data>
+ <data name="QuickAppsEmpty" xml:space="preserve"><value>No matches in the available list. Try another name or choose the .exe manually.</value></data>
  <data name="AddedApps" xml:space="preserve"><value>Added to SLX</value></data>
  <data name="DiscoveryUnavailable" xml:space="preserve"><value>Could not refresh the app list. You can choose an .exe manually.</value></data>
  <data name="RefreshingProfiles" xml:space="preserve"><value>Refreshing connection methods…</value></data>

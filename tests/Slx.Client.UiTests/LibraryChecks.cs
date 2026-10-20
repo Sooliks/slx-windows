@@ -11,6 +11,7 @@ internal static class LibraryChecks
     public static void Run(MainWindow window)
     {
         var model=(MainViewModel)window.DataContext;
+        UiFixtures.AllowSyntheticApplications(model);
         var oldPage=model.Page;var oldTheme=model.Theme;
         model.CatalogEntries=[];
         model.Discovered.Clear();

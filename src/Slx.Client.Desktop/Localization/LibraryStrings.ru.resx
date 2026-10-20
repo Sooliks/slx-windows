@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><root>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>2.0</value></resheader>
+<data name="LibraryRefreshing" xml:space="preserve"><value>Обновляем список в фоне. Можно выбирать приложения.</value></data>
+<data name="LibraryRefreshPartial" xml:space="preserve"><value>Не всё удалось проверить. Доступный список остался на месте; можно обновить его ещё раз.</value></data>
+<data name="LibraryCacheUnavailable" xml:space="preserve"><value>Список обновлён, но сохранить его для следующего запуска не удалось.</value></data>
+<data name="LibrarySaved" xml:space="preserve"><value>Сохранённый список готов. Обновите его, чтобы найти новые приложения.</value></data>
+<data name="LibraryUpdated" xml:space="preserve"><value>Список приложений обновлён.</value></data>
+<data name="LibraryReady" xml:space="preserve"><value>Выберите приложение или найдите его по названию.</value></data>
+<data name="LibraryObservation" xml:space="preserve"><value>Последняя полная проверка</value></data>
+<data name="LibraryAppUnavailable" xml:space="preserve"><value>Не удалось открыть файл приложения. Обновите список или выберите актуальный .exe.</value></data>
+<data name="LibraryMore" xml:space="preserve"><value>Показать ещё приложения</value></data>
+<data name="LibrarySearchSlow" xml:space="preserve"><value>Поиск завершается дольше обычного. Можно пользоваться доступным списком.</value></data>
+</root>
