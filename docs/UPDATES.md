@@ -1,4 +1,4 @@
-# Application updates — alpha.11
+# Application updates — alpha.13 (transport introduced in alpha.11)
 
 The desktop checks the public `Sooliks/slx-windows` GitHub releases at startup and every six hours while running.
 Settings can disable automatic checks; Check for updates remains available. Remind me tomorrow persists a 24h pause.
@@ -11,7 +11,8 @@ The feed covers the newest 20 public releases. Missing/incomplete assets are not
 
 ## User flow
 
-1. A nonmodal banner announces an available version. It never steals focus or changes the VPN.
+1. A nonmodal card floats at the lower right inside the workspace, above page content and below modal flows. It does not
+   reserve a layout row, move primary controls, steal focus or change the VPN. Width is constrained to the workspace.
 2. Download update fetches the installer with bounded size, duration and HTTPS redirects. Download progress is actual bytes.
 3. The file remains `.part` until its complete size and SHA-256 match the release metadata. Windows Mark-of-Web is retained.
 4. Install update is a separate action. It is unavailable until the service confirms disconnected with protection released.
@@ -23,6 +24,13 @@ The feed covers the newest 20 public releases. Missing/incomplete assets are not
 The installer preserves saved settings, installation ID and subscription. An unknown/offline service cannot authorize install.
 An interrupted or failed check does not become Current. A previously observed offer may stay visible with failed-check copy;
 its installer still needs all normal download/hash checks. Failed hashes cannot launch.
+
+The card distinguishes installed/available version, actual transfer percentage, verified readiness and why installation
+is blocked (active VPN, unknown service observation or current operation). Transfer 100% is not an installation claim.
+Old progress callbacks cannot update a new transfer or a completed phase. Same-offer checks preserve verified readiness.
+Later dismisses the offer for 24h and remains available while downloading without cancelling transfer; Settings retains
+the offer, current transfer and explicit action even while the floating card is hidden. It stays disabled during installer
+handoff. No operating-system notification or reminder while the app is closed is promised.
 
 ## Ownership and trust
 

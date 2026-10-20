@@ -41,10 +41,13 @@
     </Grid>
    </Border>
    <p:AmbientBackdrop Grid.Column="1" IsHitTestVisible="False"/>
-   <Grid Grid.Column="1" Margin="32,25,0,0"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-    <v:UpdateBanner DataContext="{Binding Updates}" Margin="0,0,26,0"/>
-    <Border Grid.Row="1" Margin="0,0,26,16" Padding="14,10" Background="{DynamicResource SurfaceRaised}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="6" Visibility="{Binding ShowMessage, Converter={StaticResource VisibleWhen}}"><TextBlock Text="{Binding Message}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/></Border>
-    <ContentControl Grid.Row="2" Content="{Binding}"><ContentControl.Style><Style TargetType="ContentControl"><Setter Property="ContentTemplate" Value="{StaticResource ConnectionPage}"/><Style.Triggers><DataTrigger Binding="{Binding Page}" Value="applications"><Setter Property="ContentTemplate" Value="{StaticResource ApplicationsPage}"/></DataTrigger><DataTrigger Binding="{Binding Page}" Value="settings"><Setter Property="ContentTemplate" Value="{StaticResource SettingsPage}"/></DataTrigger><DataTrigger Binding="{Binding Page}" Value="help"><Setter Property="ContentTemplate" Value="{StaticResource HelpPage}"/></DataTrigger></Style.Triggers></Style></ContentControl.Style></ContentControl>
+   <Grid Grid.Column="1" Margin="32,25,0,0"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+    <Border Margin="0,0,26,16" Padding="14,10" Background="{DynamicResource SurfaceRaised}" BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="6" Visibility="{Binding ShowMessage, Converter={StaticResource VisibleWhen}}"><TextBlock Text="{Binding Message}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/></Border>
+    <ContentControl Grid.Row="1" Content="{Binding}"><ContentControl.Style><Style TargetType="ContentControl"><Setter Property="ContentTemplate" Value="{StaticResource ConnectionPage}"/><Style.Triggers><DataTrigger Binding="{Binding Page}" Value="applications"><Setter Property="ContentTemplate" Value="{StaticResource ApplicationsPage}"/></DataTrigger><DataTrigger Binding="{Binding Page}" Value="settings"><Setter Property="ContentTemplate" Value="{StaticResource SettingsPage}"/></DataTrigger><DataTrigger Binding="{Binding Page}" Value="help"><Setter Property="ContentTemplate" Value="{StaticResource HelpPage}"/></DataTrigger></Style.Triggers></Style></ContentControl.Style></ContentControl>
+   </Grid>
+   <Grid x:Name="UpdateOverlayHost" Grid.Column="1" Margin="24,0,24,22" VerticalAlignment="Bottom" Panel.ZIndex="10">
+    <Grid.Style><Style TargetType="Grid"><Style.Triggers><DataTrigger Binding="{Binding IsOverlayVisible}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></Grid.Style>
+    <v:UpdateBanner DataContext="{Binding Updates}" Width="480" MaxWidth="{Binding ActualWidth, ElementName=UpdateOverlayHost}" HorizontalAlignment="Right"/>
    </Grid>
   </Grid>
   <v:ImportOverlay Grid.RowSpan="2" x:Name="ImportPanel" Visibility="{Binding ImportVisible, Converter={StaticResource VisibleWhen}}"/>

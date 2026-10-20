@@ -14,10 +14,11 @@ public sealed partial class MainViewModel
     private long lastDiscoverySuccess;
     private CancellationTokenSource? discoveryCancellation;
     public bool Discovering {get=>discovering;private set{if(SetProperty(ref discovering,value)){DiscoverCommand.NotifyCanExecuteChanged();NotifyLibraryState();}}}
-    internal Task RefreshLibraryIfNeededAsync()=>DiscoverApplicationsAsync(false);
+    internal Task RefreshLibraryIfNeededAsync(){RefreshMissingIcons();return DiscoverApplicationsAsync(false);}
     private async Task DiscoverApplicationsAsync(bool force = true)
     {
         if(Discovering||disposed||!force&&lastDiscoverySuccess!=0&&System.Diagnostics.Stopwatch.GetElapsedTime(lastDiscoverySuccess)<TimeSpan.FromMinutes(5))return;
+        if(force)RefreshMissingIcons();
         Discovering=true; discoveryFailed=false;discoveryCacheWriteFailed=false;
         using var current=new CancellationTokenSource(TimeSpan.FromSeconds(12));
         discoveryCancellation=current;

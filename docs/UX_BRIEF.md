@@ -1,5 +1,22 @@
 # Windows client UX brief
 
+## Alpha.13 icon and update acceptance contract
+
+Audience: Windows users returning to selected apps or seeing a new release. Friction: a failed asynchronous icon can
+stay a generic fallback for the session; notification mixes availability, transfer and installation prerequisites.
+Installed icons recover after a transient failure without blocking the UI. If a group's first path is missing, another
+known member may supply the icon only; selected paths, enabled flags and routing remain unchanged. Late icon results
+cannot replace a newer candidate or resurrect a disposed card. Keep two workers and immediate frozen fallback.
+Owner explicitly requested absolute-style placement: the update card floats at the lower right within the workspace,
+without moving the page, primary connection action or subscription. No focus theft or full-window hit-test blocker;
+import/remove modals take precedence. Dismissing during transfer keeps the download and Settings entry available.
+When an update is available, show its version and next explicit action. During transfer, show actual bytes-derived
+percentage; 100% transfer is not an installation result. Ready, blocked by active/unknown service, cancellation and
+failure each have a clear explanation and safe recovery. Settings retains a reachable saved offer after Later.
+Keyboard focus and native accessible names remain; review RU/EN at 940x660/1200x820, both themes and long strings.
+Controlled failure/retry/candidate fixtures plus read-only real Yandex/TeamSpeak icon extraction are required evidence;
+the screenshot alone does not prove the first native failure, and installer fixtures do not prove UAC/upgrade success.
+
 ## Alpha.12 library acceptance contract
 
 Audience: returning Windows users opening Applications to add a program. Current friction: sequential native discovery

@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.12. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.13. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,22 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.13 — resilient icons and update notification
+
+Owner reported persistent fallback icons for installed Yandex/TeamSpeak and requested clearer update UI. Read-only
+probing confirms those EXEs exist and contain usable icon resources; the initial transient failure in the live app has
+not been reproduced. Correct permanent negative caching, bounded group-candidate fallback and native icon extraction
+while retaining two workers, frozen images, dispatcher delivery and weak lifetime. Resource extraction never executes
+the application; Shell fallback balances explicit COM initialization. One bounded delayed retry may repair a transient
+miss for a live consumer; no perpetual icon polling. Presentation candidates must never change selected routing paths.
+Update notification floats above the workspace at the lower right, consumes no page-layout row and never steals focus.
+It stays below import/remove modal overlays, clamps to the workspace, and exposes dismissal even during download
+without cancelling transfer. Update notification stays nonmodal with explicit version, transfer progress, safe retry and clear install availability.
+Current version, available/downloaded state and reminder remain reachable in Settings. Preserve separate download and
+install actions, SHA/size validation, UAC and fresh-service-status mutation lease; never disconnect or install silently.
+Late transfer progress cannot overwrite a later operation. No dependency, service, network, account or data migration.
+Distribution continues through the authorized production GitHub channel, preserving prerelease/PARTIAL acceptance.
 
 ## Alpha.12 — responsive application library
 

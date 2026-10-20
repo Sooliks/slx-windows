@@ -1,3 +1,37 @@
+# Verification — 0.1.0-alpha.13 (2026-10-20)
+
+STATUS: PARTIAL. `pwsh -NoProfile -File scripts/verify.ps1` on the Windows host exited 0:
+locked restore, Release solution build with zero warnings/errors, 330 unit/Windows checks and one expanded
+WPF scenario; zero failed/skipped, <=200 nonblank authored source gate. An initial build found a nullable
+test assertion (CS8602); it was corrected without weakening gates. Final targeted
+`dotnet test tests/Slx.Client.UiTests/Slx.Client.UiTests.csproj -c Release --no-restore` exited 0 after
+the Settings spacing and update copy changes: one expanded WPF scenario, zero failed/skipped or build warnings.
+
+Icon fixtures cover monotonic negative-cache expiry, one bounded cancellable retry, weak-target lifetime,
+group-member fallback without changing routing rules, explicit same-path refresh and frozen native images.
+An isolated Unicode temporary path starts missing, receives a copy of the built apphost and recovers its actual
+resource icon on retry. The apphost is never executed. Real Yandex and TeamSpeak executables on this PC also
+returned native images through the actual alpha.13 loader in a read-only probe; alpha.12 decoded them in the
+same observation. The user's original transient failure is not reproduced. Permanent negative caching and
+first-member-only image lookup are confirmed code defects; missing explicit Shell COM setup is an API-contract
+hardening change, not proof of the original cause. No preferences, subscription data or service state were changed.
+
+The controlled WPF scenario checks the floating card at RU 940x660 and EN 1200x820. Connection and subscription
+rectangles remain identical before/after the offer and dismissal; the card does not intersect Connect or steal
+focus, and modal flows suppress it. Dismissal during download keeps the transfer running and progress visible
+in Settings. Tests cover fresh service-state installation guards, mutation-lease races, UAC cancellation,
+checksum failure, prepared-file retention and rejection of late progress from an older download. Fixtures never
+launch an installer or UAC. Current native PNGs for offers, download, deferred Settings and failure/wait states
+were visually inspected without clipping or horizontal overflow. The synthetic offer is alpha.14 for installed
+alpha.13; it is not a published-release or installed-upgrade claim. 215 matching RU/EN resource keys across
+the main, library and updates owners; no duplicate keys. `git diff --check` passed.
+
+No installed client, startup registration, VPN service, firewall, adapter, account, server or DB changes were made
+for acceptance. Installed upgrade/cancel/rollback, clean Windows 10/11, unusual Shell providers, physical-monitor
+rendering at 125/150/200% DPI, High Contrast and live accessibility remain open. Historical reboot/network acceptance
+gaps remain open. Final clean source/installer identity is recorded in release provenance; publication does not
+establish installed-system acceptance.
+
 # Verification — 0.1.0-alpha.12 (2026-10-20)
 
 STATUS: PARTIAL. Final `pwsh -NoProfile -File scripts/verify.ps1` on the Windows host exited 0:

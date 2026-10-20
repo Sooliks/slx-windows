@@ -51,6 +51,12 @@ and retained in an LRU of 512 images. Extraction runs outside the UI thread and 
 targets and dispatcher delivery prevent abandoned cards from being retained or updated. Selected cards use the same
 asynchronous mechanism. The main resource formatter also reads a feature-owned RU/EN LibraryStrings catalogue.
 
+Alpha.13 icon recovery reads an EXE resource first and uses explicitly initialized COM for the Shell fallback, without
+executing the target file. A failed cache entry expires after two seconds; a live weak consumer gets one delayed retry.
+Up to 64 known group members may supply a presentation icon without changing selected routes. User refresh/entry and
+visible-card revalidation can retry a failed icon again; unobserved cards and existing images are not eagerly loaded.
+Late old-candidate results and disposed requests are rejected. The original first live failure remains unconfirmed.
+
 ## Migration and acceptance
 
 No dependency, service/IPC, network policy, server, DB or account migration. Older clients ignore the optional cache.

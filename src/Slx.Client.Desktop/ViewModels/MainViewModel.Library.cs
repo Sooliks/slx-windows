@@ -42,6 +42,7 @@ public sealed partial class MainViewModel
         var matching=desired.Where(x=>x.Name.Contains(DiscoverySearch,StringComparison.CurrentCultureIgnoreCase)).ToArray();
         HasMoreLibraryResults=matching.Length>libraryLimit;OnPropertyChanged(nameof(HasMoreLibraryResults));
         var visible=matching.Take(libraryLimit).ToArray();
+        foreach(var entry in visible)entry.RefreshIconIfMissing();
         for(int i=0;i<visible.Length;i++)
         {
             if(i<FilteredLibrary.Count&&ReferenceEquals(FilteredLibrary[i],visible[i]))continue;
@@ -53,4 +54,10 @@ public sealed partial class MainViewModel
         NotifyLibraryState();
     }
     private void ShowMoreApplications(){libraryLimit+=12;RefreshDiscoveryProperties();}
+    private void RefreshMissingIcons()
+    {
+        if(disposed)return;
+        foreach(var app in Applications)if(ReferenceEquals(app.Icon,LocalIcon.Fallback))app.RefreshIcon();
+        foreach(var entry in FilteredLibrary)entry.RefreshIconIfMissing();
+    }
 }

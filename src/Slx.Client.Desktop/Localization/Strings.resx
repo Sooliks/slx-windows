@@ -161,16 +161,16 @@
 <data name="UpdateChecking" xml:space="preserve"><value>Checking for new versions…</value></data>
 <data name="UpdateCheck" xml:space="preserve"><value>Check for updates</value></data>
 <data name="UpdateAvailable" xml:space="preserve"><value>Version {0} is available</value></data>
-<data name="UpdateFound" xml:space="preserve"><value>A new version is ready to download.</value></data>
+<data name="UpdateFound" xml:space="preserve"><value>Download the update, then choose when to install it.</value></data>
 <data name="UpdateCurrent" xml:space="preserve"><value>You have the latest available version.</value></data>
 <data name="UpdateCheckFailed" xml:space="preserve"><value>Could not check for new versions. Try again later.</value></data>
 <data name="UpdateDownloading" xml:space="preserve"><value>Downloading and verifying the update…</value></data>
 <data name="UpdateDownload" xml:space="preserve"><value>Download update</value></data>
 <data name="UpdateInstall" xml:space="preserve"><value>Install update</value></data>
 <data name="UpdateLater" xml:space="preserve"><value>Remind me tomorrow</value></data>
-<data name="UpdateInstallHint" xml:space="preserve"><value>Installation requires your confirmation in Windows. Your settings and installation ID are preserved.</value></data>
+<data name="UpdateInstallHint" xml:space="preserve"><value>Confirm installation in Windows. Your settings are preserved.</value></data>
 <data name="UpdateDisconnectFirst" xml:space="preserve"><value>The update is downloaded. Disconnect VPN and wait for confirmation before installing.</value></data>
-<data name="UpdateReady" xml:space="preserve"><value>Downloaded file matches the published release SHA-256. Ready to install.</value></data>
+<data name="UpdateReady" xml:space="preserve"><value>Update downloaded and checked. Ready to install.</value></data>
 <data name="UpdateStarting" xml:space="preserve"><value>Opening the installer…</value></data>
 <data name="UpdateInstallerOpened" xml:space="preserve"><value>Installer started. SLX is closing; reopen the app if you cancel installation.</value></data>
 <data name="UpdateInstallCancelled" xml:space="preserve"><value>Installation was cancelled in Windows. You can start it later.</value></data>

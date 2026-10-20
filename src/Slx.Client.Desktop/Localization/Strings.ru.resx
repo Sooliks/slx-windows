@@ -161,16 +161,16 @@
 <data name="UpdateChecking" xml:space="preserve"><value>Проверяем новые версии…</value></data>
 <data name="UpdateCheck" xml:space="preserve"><value>Проверить обновления</value></data>
 <data name="UpdateAvailable" xml:space="preserve"><value>Доступна версия {0}</value></data>
-<data name="UpdateFound" xml:space="preserve"><value>Новая версия готова к скачиванию.</value></data>
+<data name="UpdateFound" xml:space="preserve"><value>Скачайте новую версию. Установку можно запустить позже.</value></data>
 <data name="UpdateCurrent" xml:space="preserve"><value>У вас последняя доступная версия.</value></data>
 <data name="UpdateCheckFailed" xml:space="preserve"><value>Не удалось проверить новые версии. Повторите позже.</value></data>
 <data name="UpdateDownloading" xml:space="preserve"><value>Скачиваем и проверяем обновление…</value></data>
 <data name="UpdateDownload" xml:space="preserve"><value>Скачать обновление</value></data>
 <data name="UpdateInstall" xml:space="preserve"><value>Установить обновление</value></data>
 <data name="UpdateLater" xml:space="preserve"><value>Напомнить завтра</value></data>
-<data name="UpdateInstallHint" xml:space="preserve"><value>Установка — только с вашего подтверждения Windows. Настройки и ID установки сохраняются.</value></data>
+<data name="UpdateInstallHint" xml:space="preserve"><value>Подтвердите установку в Windows. Ваши настройки сохранятся.</value></data>
 <data name="UpdateDisconnectFirst" xml:space="preserve"><value>Обновление скачано. Сначала отключите VPN и дождитесь подтверждения, затем установите его.</value></data>
-<data name="UpdateReady" xml:space="preserve"><value>Файл скачан, SHA-256 совпадает с опубликованным релизом. Можно установить.</value></data>
+<data name="UpdateReady" xml:space="preserve"><value>Обновление скачано и проверено. Можно установить.</value></data>
 <data name="UpdateStarting" xml:space="preserve"><value>Открываем установщик…</value></data>
 <data name="UpdateInstallerOpened" xml:space="preserve"><value>Установщик запущен. SLX закрывается; при отмене установки откройте приложение снова.</value></data>
 <data name="UpdateInstallCancelled" xml:space="preserve"><value>Установка отменена в Windows. Можно запустить её позже.</value></data>

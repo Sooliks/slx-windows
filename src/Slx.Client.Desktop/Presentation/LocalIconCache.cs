@@ -1,10 +1,13 @@
 using System.Windows.Media;
 namespace Slx.Client.Desktop.Presentation;
-internal sealed class LocalIconCache(ImageSource fallback, Func<string, ImageSource?> extract, int capacity = 512)
+internal sealed class LocalIconCache(ImageSource fallback, Func<string, ImageSource?> extract, int capacity = 512,
+    Func<long>? milliseconds = null)
 {
+    internal static TimeSpan RetryDelay { get; } = TimeSpan.FromSeconds(2);
+    private readonly Func<long> clock = milliseconds ?? (() => Environment.TickCount64);
     private readonly object sync = new();
     private readonly SemaphoreSlim workers = new(2, 2);
-    private readonly Dictionary<string, (ImageSource Image, LinkedListNode<string> Node)> images = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, (ImageSource Image, LinkedListNode<string> Node, long RetryAt)> images = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Task<ImageSource>> pending = new(StringComparer.OrdinalIgnoreCase);
     private readonly LinkedList<string> recent = new();
     public bool TryCached(string path, out ImageSource image)
@@ -13,6 +16,8 @@ internal sealed class LocalIconCache(ImageSource fallback, Func<string, ImageSou
         {
             if (images.TryGetValue(path, out var entry))
             {
+                if (ReferenceEquals(entry.Image, fallback) && clock() >= entry.RetryAt)
+                { images.Remove(path); recent.Remove(entry.Node); image = fallback; return false; }
                 recent.Remove(entry.Node); recent.AddLast(entry.Node); image = entry.Image; return true;
             }
         }
@@ -49,7 +54,7 @@ internal sealed class LocalIconCache(ImageSource fallback, Func<string, ImageSou
         {
             if (images.Count >= capacity && recent.First is { } oldest)
             { images.Remove(oldest.Value); recent.RemoveFirst(); }
-            images[path] = (image, recent.AddLast(path)); pending.Remove(path);
+            images[path] = (image, recent.AddLast(path), clock() + (long)RetryDelay.TotalMilliseconds); pending.Remove(path);
         }
         return image;
     }

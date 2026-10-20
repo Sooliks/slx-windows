@@ -14,7 +14,7 @@ public sealed class AppItemViewModel : ObservableObject
         var items=rules.ToArray();var primary=items[0];
         Id=primary.Id;Name=primary.Name;ExecutablePath=primary.ExecutablePath;enabled=items.Any(x=>x.Enabled);
         foreach(var rule in items)AddPath(rule);
-        LoadIcon(primary.ExecutablePath);
+        RefreshIcon();
     }
     public Guid Id { get; }
     public string Name { get; }
@@ -26,23 +26,26 @@ public sealed class AppItemViewModel : ObservableObject
     public bool AddPath(AppRule rule)
     {
         if(members.Any(x=>string.Equals(x.ExecutablePath,rule.ExecutablePath,StringComparison.OrdinalIgnoreCase)))return false;
-        members.Add(rule);OnPropertyChanged(nameof(ExecutablePaths));return true;
+        members.Add(rule);OnPropertyChanged(nameof(ExecutablePaths));
+        if(iconRequest is not null)RefreshIcon();
+        return true;
     }
     public bool ApplyRefreshedPaths(IReadOnlyList<AppRule> refreshed)
     {
         if (members.Select(x => x.ExecutablePath).SequenceEqual(refreshed.Select(x => x.ExecutablePath), StringComparer.OrdinalIgnoreCase)) return false;
         members.Clear(); members.AddRange(refreshed);
         ExecutablePath = members[0].ExecutablePath;
-        LoadIcon(ExecutablePath);
+        RefreshIcon();
         OnPropertyChanged(nameof(ExecutablePath)); OnPropertyChanged(nameof(ExecutablePaths));
         return true;
     }
     public AppRule ToRule()=>new(Id,Name,ExecutablePath,Enabled);
     public IEnumerable<AppRule> ToRules()=>members.Select(x=>x with{Name=Name,Enabled=Enabled});
-    private void LoadIcon(string path)
+    internal void RefreshIcon()
     {
-        iconRequest?.Dispose(); Icon = LocalIcon.Cached(path); OnPropertyChanged(nameof(Icon));
-        iconRequest = LocalIconRequest.Start(this, path, static (item, image) =>
+        var paths = members.Select(member => member.ExecutablePath).ToArray();
+        iconRequest?.Dispose(); Icon = LocalIcon.Cached(paths); OnPropertyChanged(nameof(Icon));
+        iconRequest = LocalIconRequest.Start(this, paths, static (item, image) =>
         { item.Icon = image; item.OnPropertyChanged(nameof(Icon)); });
     }
 }

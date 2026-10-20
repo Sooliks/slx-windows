@@ -18,9 +18,10 @@ public sealed class LibraryEntry(string Name, AppRule? Rule, CatalogApplication?
         get
         {
             if (icon is not null) return icon;
-            icon = LocalIcon.Cached(Rule?.ExecutablePath ?? "");
+            var paths = IconPaths();
+            icon = LocalIcon.Cached(paths);
             if (!disposed && Rule is not null)
-                iconRequest = LocalIconRequest.Start(this, Rule.ExecutablePath,
+                iconRequest = LocalIconRequest.Start(this, paths,
                     static (entry, image) => entry.SetProperty(ref entry.icon, image, nameof(Icon)), IconLoader);
             return icon;
         }
@@ -30,15 +31,23 @@ public sealed class LibraryEntry(string Name, AppRule? Rule, CatalogApplication?
     public void UpdatePaths(AppRule primary, IReadOnlyList<AppRule> paths)
     {
         if (disposed) return;
-        bool iconChanged = !string.Equals(Rule?.ExecutablePath, primary.ExecutablePath, StringComparison.OrdinalIgnoreCase);
+        var previousPaths = IconPaths();
         Rule = primary; Paths = paths;
         OnPropertyChanged(nameof(Rule)); OnPropertyChanged(nameof(Paths)); OnPropertyChanged(nameof(Detail));
-        if (iconChanged)
-        {
-            iconRequest?.Dispose(); iconRequest = null; icon = null;
-            OnPropertyChanged(nameof(Icon));
-        }
+        if (ReferenceEquals(icon, LocalIcon.Fallback) || !previousPaths.SequenceEqual(IconPaths(), StringComparer.OrdinalIgnoreCase))
+            ResetIcon();
     }
+    internal void RefreshIconIfMissing()
+    {
+        if (!disposed && ReferenceEquals(icon, LocalIcon.Fallback)) ResetIcon();
+    }
+    private void ResetIcon()
+    {
+        iconRequest?.Dispose(); iconRequest = null; icon = null;
+        OnPropertyChanged(nameof(Icon));
+    }
+    private IReadOnlyList<string> IconPaths() => (Rule is null ? [] : new[] { Rule.ExecutablePath })
+        .Concat(Paths?.Select(path => path.ExecutablePath) ?? []).Distinct(StringComparer.OrdinalIgnoreCase).Take(64).ToArray();
     public void Dispose()
     {
         if (disposed) return;

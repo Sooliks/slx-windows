@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Globalization;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -7,7 +6,7 @@ using Slx.Client.Core;
 using Slx.Client.Desktop.Localization;
 using Slx.Client.Windows;
 namespace Slx.Client.Desktop.ViewModels;
-public sealed class UpdateViewModel : ObservableObject, IDisposable
+public sealed partial class UpdateViewModel : ObservableObject, IDisposable
 {
     private readonly ReleaseUpdateClient client = new();
     private readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromHours(6) };
@@ -15,23 +14,26 @@ public sealed class UpdateViewModel : ObservableObject, IDisposable
     private readonly Action<bool, DateTimeOffset?> save;
     private readonly Func<bool> canInstall;
     private readonly Func<CancellationToken, Task<IDisposable>> beginInstall;
+    private readonly Func<string?>? installBlockReason;
     private readonly string version;
     private bool automatic, busy, disposed, started, installerOpened;
     private DateTimeOffset? remindAfter;
     private UpdateOffer? offer;
     private PreparedUpdate? prepared;
     private string stateKey = "UpdateNotChecked";
-    private int progress;
+    private int progress, downloadGeneration;
     internal Func<string, CancellationToken, Task<UpdateCheckResult>>? CheckOverride { get; set; }
     internal Func<UpdateOffer, IProgress<int>?, CancellationToken, Task<PreparedUpdate>>? DownloadOverride { get; set; }
     internal Func<PreparedUpdate, CancellationToken, Task<UpdateLaunchResult>>? LaunchOverride { get; set; }
     public UpdateViewModel(string version, bool automatic, DateTimeOffset? reminder,
-        Action<bool, DateTimeOffset?> save, Func<bool> canInstall, Func<CancellationToken, Task<IDisposable>> beginInstall)
+        Action<bool, DateTimeOffset?> save, Func<bool> canInstall, Func<CancellationToken, Task<IDisposable>> beginInstall,
+        Func<string?>? installBlockReason = null)
     {
         this.version = version; this.automatic = automatic; remindAfter = reminder; this.save = save; this.canInstall = canInstall; this.beginInstall = beginInstall;
+        this.installBlockReason = installBlockReason;
         CheckCommand = new AsyncRelayCommand(() => CheckAsync(true), () => !busy);
         ApplyCommand = new AsyncRelayCommand(ApplyAsync, () => !busy && !installerOpened && offer != null && (prepared == null || canInstall()));
-        LaterCommand = new RelayCommand(RemindTomorrow, () => !busy);
+        LaterCommand = new RelayCommand(RemindTomorrow, () => !busy || IsDownloading);
         timer.Tick += AutomaticTick;
         Text.Catalog.PropertyChanged += LanguageChanged;
     }
@@ -50,9 +52,6 @@ public sealed class UpdateViewModel : ObservableObject, IDisposable
     public int Progress => progress;
     public string Status => Text.Catalog[stateKey];
     public string CurrentVersion => version;
-    public string OfferTitle => offer == null ? "" : string.Format(CultureInfo.CurrentCulture, Text.Catalog["UpdateAvailable"], offer.Version);
-    public string ActionText => Text.Catalog[prepared != null ? "UpdateInstall" : "UpdateDownload"];
-    public string InstallHint => Text.Catalog[prepared != null && !canInstall() ? "UpdateDisconnectFirst" : "UpdateInstallHint"];
     public void Start()
     {
         if (started || disposed) return;
@@ -71,7 +70,7 @@ public sealed class UpdateViewModel : ObservableObject, IDisposable
             if (result.State == UpdateCheckState.Available && result.Offer != null)
             {
                 if (offer != result.Offer) { prepared = null; installerOpened = false; }
-                offer = result.Offer; stateKey = "UpdateFound";
+                offer = result.Offer; stateKey = prepared == null ? "UpdateFound" : "UpdateReady";
             }
             else if (result.State == UpdateCheckState.Current) { offer = null; prepared = null; stateKey = "UpdateCurrent"; }
             else stateKey = "UpdateCheckFailed";
@@ -84,12 +83,19 @@ public sealed class UpdateViewModel : ObservableObject, IDisposable
     {
         if (disposed || busy || installerOpened || offer == null) return;
         if (prepared != null && !canInstall()) { Changed(); return; }
+        if (prepared == null) progress = 0;
         SetBusy(true, prepared == null ? "UpdateDownloading" : "UpdateStarting");
         try
         {
             if (prepared == null)
             {
-                var reporter = new Progress<int>(value => { if (!disposed) { progress = Math.Clamp(value, 0, 100); OnPropertyChanged(nameof(Progress)); } });
+                var generation = ++downloadGeneration;
+                var reporter = new Progress<int>(value =>
+                {
+                    if (disposed || generation != downloadGeneration || !IsDownloading) return;
+                    progress = Math.Clamp(value, 0, 100);
+                    OnPropertyChanged(nameof(Progress)); OnPropertyChanged(nameof(ProgressText));
+                });
                 prepared = await (DownloadOverride?.Invoke(offer, reporter, lifetime.Token) ?? client.DownloadAsync(offer, reporter, lifetime.Token));
                 stateKey = "UpdateReady";
             }
@@ -122,7 +128,11 @@ public sealed class UpdateViewModel : ObservableObject, IDisposable
     {
         busy = value; if (key != null) stateKey = key; Changed();
     }
-    public void RefreshInstallAvailability() { OnPropertyChanged(nameof(InstallHint)); ApplyCommand.NotifyCanExecuteChanged(); }
+    public void RefreshInstallAvailability()
+    {
+        OnPropertyChanged(nameof(InstallHint)); OnPropertyChanged(nameof(BannerDescription));
+        OnPropertyChanged(nameof(IsInstallBlocked)); OnPropertyChanged(nameof(ShowInstallHint)); ApplyCommand.NotifyCanExecuteChanged();
+    }
     private void Changed()
     {
         OnPropertyChanged(""); CheckCommand.NotifyCanExecuteChanged(); ApplyCommand.NotifyCanExecuteChanged(); LaterCommand.NotifyCanExecuteChanged();

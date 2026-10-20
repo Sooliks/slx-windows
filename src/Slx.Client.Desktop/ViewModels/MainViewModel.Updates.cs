@@ -14,7 +14,9 @@ public sealed partial class MainViewModel
                 preferences = preferences with { CheckUpdatesAutomatically = automatic, UpdateReminderUntil = reminder };
                 SavePreferences();
             }, () => statusFresh && status?.Phase == TunnelPhase.Disconnected && !status.ProtectionActive && !IsBusy,
-            AcquireUpdateInstallAsync);
+            AcquireUpdateInstallAsync, () => !statusFresh ? "UpdateServiceUnconfirmed"
+                : status?.Phase != TunnelPhase.Disconnected || status.ProtectionActive ? "UpdateDisconnectFirst"
+                : IsBusy ? "UpdateWaitForOperation" : null);
         Updates.PropertyChanged += (_, args) => { if (args.PropertyName is "" or nameof(UpdateViewModel.InstallerOpened)) NotifyState(); };
     }
     private async Task<IDisposable> AcquireUpdateInstallAsync(CancellationToken cancellationToken)

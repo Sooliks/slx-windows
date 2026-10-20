@@ -8,9 +8,9 @@ using Xunit;
 namespace Slx.Client.UiTests;
 internal static class UpdateChecks
 {
-    private static readonly UpdateOffer Offer = new("0.1.0-alpha.12", UpdateSourcePolicy.ReleasePage("0.1.0-alpha.12"),
-        UpdateSourcePolicy.InstallerName("0.1.0-alpha.12"),
-        new("https://github.com/Sooliks/slx-windows/releases/download/v0.1.0-alpha.12/SLX-VPN-0.1.0-alpha.12-win-x64-setup.exe"), 1, new string('a', 64));
+    private static readonly UpdateOffer Offer = new("0.1.0-alpha.14", UpdateSourcePolicy.ReleasePage("0.1.0-alpha.14"),
+        UpdateSourcePolicy.InstallerName("0.1.0-alpha.14"),
+        new("https://github.com/Sooliks/slx-windows/releases/download/v0.1.0-alpha.14/SLX-VPN-0.1.0-alpha.14-win-x64-setup.exe"), 1, new string('a', 64));
     public static void Run(MainWindow window)
     {
         var previous = window.DataContext;
@@ -45,7 +45,7 @@ internal static class UpdateChecks
             updates.DownloadOverride = (offer, progress, _) => { progress?.Report(100); return Task.FromResult(new PreparedUpdate(offer, @"C:\SLX UI Fixture\NeverLaunched.exe")); };
             updates.ApplyCommand.ExecuteAsync(null).GetAwaiter().GetResult(); Sta.Pump();
             Assert.Equal(Text.Catalog["UpdateReady"], updates.Status);
-            Assert.Equal(Text.Catalog["UpdateInstall"], updates.ActionText);
+            Assert.Equal(Text.Catalog["UpdateActionInstall"], updates.ActionText);
             model.SendOverride = (_, _) => Task.FromResult(new PipeReply(true, "OK", new(TunnelPhase.Connected, DateTimeOffset.UtcNow, ProbePassed:true, ProtectionActive:true)));
             model.PollAsync().GetAwaiter().GetResult();
             Assert.False(updates.ApplyCommand.CanExecute(null)); Assert.Equal(Text.Catalog["UpdateDisconnectFirst"], updates.InstallHint);
@@ -60,7 +60,7 @@ internal static class UpdateChecks
             Assert.Equal(Text.Catalog["UpdateInstallCancelled"], updates.Status);
             updates.LaunchOverride = (_, _) => Task.FromException<UpdateLaunchResult>(new ClientFault("UPDATE_INSTALL_FAILED"));
             updates.ApplyCommand.ExecuteAsync(null).GetAwaiter().GetResult();
-            Assert.Equal(Text.Catalog["UpdateDownload"], updates.ActionText);
+            Assert.Equal(Text.Catalog["UpdateActionDownload"], updates.ActionText);
             updates.ApplyCommand.ExecuteAsync(null).GetAwaiter().GetResult();
             var launching = new TaskCompletionSource<UpdateLaunchResult>();
             updates.LaunchOverride = (_, _) => { launches++; return launching.Task; };
@@ -74,6 +74,7 @@ internal static class UpdateChecks
             UiScreenshots.Save(window, "slx-update-settings-en");
             CheckSafeDiagnostics(model);
             CheckDisposedInstall();
+            UpdatePresentationChecks.Run(window);
         }
         finally { window.DataContext = previous; Text.Catalog.SetLanguage("ru"); }
     }

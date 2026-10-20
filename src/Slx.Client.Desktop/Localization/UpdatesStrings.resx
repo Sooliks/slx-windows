@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?><root>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>2.0</value></resheader>
+<data name="UpdateInstalledVersion" xml:space="preserve"><value>Installed version {0}</value></data>
+<data name="UpdateTransferProgress" xml:space="preserve"><value>Downloaded {0}%</value></data>
+<data name="UpdateActionDownload" xml:space="preserve"><value>Download</value></data>
+<data name="UpdateActionInstall" xml:space="preserve"><value>Install</value></data>
+<data name="UpdateActionLater" xml:space="preserve"><value>Later</value></data>
+<data name="UpdateLaterHint" xml:space="preserve"><value>Remind me about this update in 24 hours.</value></data>
+<data name="UpdateDownloadVersion" xml:space="preserve"><value>Download SLX {0}</value></data>
+<data name="UpdateInstallVersion" xml:space="preserve"><value>Install SLX {0}</value></data>
+<data name="UpdateServiceUnconfirmed" xml:space="preserve"><value>Waiting for the SLX service to confirm that VPN is off. Installation is unavailable for now.</value></data>
+<data name="UpdateWaitForOperation" xml:space="preserve"><value>Wait for the current operation to finish before installing.</value></data>
+<data name="UpdateSavedOffer" xml:space="preserve"><value>This update is available even if you dismissed the notification.</value></data>
+<data name="UpdateActionHide" xml:space="preserve"><value>Hide</value></data>
+<data name="UpdateHideDownload" xml:space="preserve"><value>Hide update notification</value></data>
+<data name="UpdateHideDownloadHint" xml:space="preserve"><value>Hide for 24 hours. The download continues; check its progress in Settings.</value></data>
+</root>

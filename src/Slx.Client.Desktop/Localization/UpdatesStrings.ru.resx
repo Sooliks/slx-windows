@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?><root>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>2.0</value></resheader>
+<data name="UpdateInstalledVersion" xml:space="preserve"><value>Установлена версия {0}</value></data>
+<data name="UpdateTransferProgress" xml:space="preserve"><value>Скачано {0}%</value></data>
+<data name="UpdateActionDownload" xml:space="preserve"><value>Скачать</value></data>
+<data name="UpdateActionInstall" xml:space="preserve"><value>Установить</value></data>
+<data name="UpdateActionLater" xml:space="preserve"><value>Позже</value></data>
+<data name="UpdateLaterHint" xml:space="preserve"><value>Напомнить об этом обновлении через 24 часа.</value></data>
+<data name="UpdateDownloadVersion" xml:space="preserve"><value>Скачать SLX {0}</value></data>
+<data name="UpdateInstallVersion" xml:space="preserve"><value>Установить SLX {0}</value></data>
+<data name="UpdateServiceUnconfirmed" xml:space="preserve"><value>Ждём подтверждения от службы SLX, что VPN выключен. Установка пока недоступна.</value></data>
+<data name="UpdateWaitForOperation" xml:space="preserve"><value>Дождитесь завершения текущей операции, затем установите обновление.</value></data>
+<data name="UpdateSavedOffer" xml:space="preserve"><value>Обновление доступно здесь, даже если вы отложили уведомление.</value></data>
+<data name="UpdateActionHide" xml:space="preserve"><value>Скрыть</value></data>
+<data name="UpdateHideDownload" xml:space="preserve"><value>Скрыть уведомление об обновлении</value></data>
+<data name="UpdateHideDownloadHint" xml:space="preserve"><value>Скрыть на 24 часа. Скачивание продолжится; прогресс доступен в настройках.</value></data>
+</root>

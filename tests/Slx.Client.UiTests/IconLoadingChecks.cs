@@ -15,6 +15,7 @@ internal static class IconLoadingChecks
         CheckLazyDispatchAndDisposal();
         CheckPathReplacement();
         CheckAbandonedEntry();
+        IconRecoveryChecks.Run();
     }
     private static void CheckSharedWorkers()
     {
