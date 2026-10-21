@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+<resheader name="version"><value>2.0</value></resheader>
+<resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+<resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+<data name="RulesApplyUnconfirmed" xml:space="preserve"><value>Could not confirm the application changes. The VPN tunnel is still running. Check the status before trying again.</value></data>
+<data name="RulesApplyFailed" xml:space="preserve"><value>Could not apply the application changes. The VPN tunnel is still running. Check the selected apps, then try again.</value></data>
+<data name="RulesConnectionChanged" xml:space="preserve"><value>The connection has changed. Reconnect to apply the current setup.</value></data>
+</root>

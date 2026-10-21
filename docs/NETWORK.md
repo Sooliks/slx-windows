@@ -1,4 +1,4 @@
-# Network model and limits — alpha.11
+# Network model and limits — alpha.14
 
 Startup resume also refreshes recognized exact versioned paths before native-ID preflight. One validated application
 list feeds WFP and Xray; changed encrypted intent is saved after committed protection. Unresolved paths remain fail-closed.
@@ -17,7 +17,23 @@ WFP owns one persistent provider/sublayer, applied atomically before starting th
 The TUN permit is nonpersistent: an interface LUID from an earlier boot must not become an exception for another interface. Persistent blocking rules survive core/service exit; on service startup encrypted intent reapplies the protection before recovery. This is not a promise about packets before Windows BFE has initialized at boot.
 Health failure or core exit schedules retries with pauses 2/5/10/20/40/60 seconds, capped at 60, without a total attempt limit. The saved pinned public endpoint enables service recovery without depending on a working shared DNS path. The original hostname is retained in encrypted intent; a validated cached IP is reused for the same endpoint on reconnect. Changing endpoint addresses needs an explicit refreshed connection. Multiple interactive users prevent recovery while protection stays on. SCM also restarts a failed SLX service.
 Only explicit Disconnect writes off-intent and releases protection after the owned child/adapter stops. Service shutdown preserves protection and intent. Uninstall is an explicit removal and invokes the installed service's restricted release command. Encrypted intent under ProgramData/SLX.NetworkService is SYSTEM/Administrators-only with machine DPAPI; it contains the local plan and owner SID, never plaintext subscription/configuration.
-Changing app rules reconnects automatically; a short protected pause is expected. Existing flows, raw packets, IPv6 and network changes require broader acceptance; matching configuration and successful new IPv4 sockets do not prove every Windows flow is leak-free.
+Application-list edits use a separate validated operation and keep the owned core/TUN/ConnectedAt. Effective no-ops
+(disabled removal, metadata/order/case changes, toggles returning to the old set) perform no WFP or Xray mutation.
+Actual changes first resolve every new native ID, add union protection, persist the desired plan, atomically replace
+Xray rules, then remove obsolete app-filter pairs. Unchanged application filters and global DNS/LAN/TUN exemptions
+keep their identities. Profile/mode changes and explicit Reconnect still restart; final selected app off disconnects.
+
+The Xray RoutingService has no standalone listener. A fixed destination matches only the existing secret-authenticated
+HTTP probe inbound and routes to the internal commander; ordinary TUN/unmatched traffic cannot access it. The service
+sends bounded HTTP/2 unary gRPC, with a single-use request body and one connection attempt per mutation. A lost response
+causes only a ListRule revision read, never an automatic AddRule replay. Unknown results retain union protection and the
+running tunnel; periodic read-only reconciliation can finish a confirmed outcome. A final WFP failure stays unconfirmed
+with protection retained; ordinary health recovery or explicit reconnect rebuilds the invalidated native baseline.
+
+New rules choose routes for new sessions. Existing sessions in the changed app may retain their original route until
+that app reconnects. No process is killed and other apps are not deliberately closed. Windows ALE policy changes can
+reauthorize flows even when unchanged filter keys remain: preserving the core/TUN is not proof of universal packet
+continuity. Existing flows, raw packets, IPv6 and network changes require broader installed acceptance.
 
 Alpha.11 resolves the complete enabled application-ID set with Windows before opening the filter-replacement transaction. A selected executable removed by an application update returns `TRAFFIC_APPLICATION_MISSING`; Windows access denial returns `TRAFFIC_APPLICATION_DENIED`. Other native failures return `TRAFFIC_PROTECTION_<OPERATION>_<8HEX>` with an owned operation name and numeric Windows result. Operations cover engine open, provider/sublayer, transaction begin/commit, enumeration/deletion, IPv4/IPv6 filter add, application identity and adapter lookup. Bounded `APPLICATION_INVALID`/`ADAPTER_INVALID` validation codes contain no native text. No code includes executable paths, keys, URLs or raw Windows error messages. A rejected preflight leaves existing blocking filters untouched.
 
@@ -41,6 +57,9 @@ Full IPv6/ECH/HTTP3, existing flows, sleep/network changes, clean VM, Windows 10
 
 ## Primary references
 - https://github.com/XTLS/Xray-core/tree/v26.9.9
+- https://github.com/XTLS/Xray-core/blob/v26.9.9/app/router/router.go
+- https://github.com/XTLS/Xray-core/blob/v26.9.9/app/commander/commander.go
+- https://learn.microsoft.com/en-us/windows/win32/fwp/ale-re-authorization
 - https://xtls.github.io/en/config/dns.html
 - https://learn.microsoft.com/en-us/windows/win32/fwp/filtering-condition-identifiers-
 - https://learn.microsoft.com/en-us/windows/win32/fwp/filter-arbitration

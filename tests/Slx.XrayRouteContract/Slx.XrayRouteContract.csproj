@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup><OutputType>Exe</OutputType></PropertyGroup>
+ <ItemGroup>
+  <ProjectReference Include="../../src/Slx.Client.Core/Slx.Client.Core.csproj"/>
+  <ProjectReference Include="../../src/Slx.Client.Windows/Slx.Client.Windows.csproj"/>
+ </ItemGroup>
+</Project>

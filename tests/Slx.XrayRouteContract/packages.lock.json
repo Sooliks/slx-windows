@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0-windows7.0": {
+      "System.Security.Cryptography.ProtectedData": {
+        "type": "Transitive",
+        "resolved": "10.0.13",
+        "contentHash": "aUSmC6cPjFLSE0rDTsmkR3wvUOnscqewebOaaELEToh12sNmoltZqT3f0C81mJ1zhxKjWco25soHTvYwsXCsUw=="
+      },
+      "slx.client.core": {
+        "type": "Project"
+      },
+      "slx.client.windows": {
+        "type": "Project",
+        "dependencies": {
+          "Slx.Client.Core": "[0.1.0-alpha.14, )",
+          "System.Security.Cryptography.ProtectedData": "[10.0.13, )"
+        }
+      }
+    },
+    "net10.0-windows7.0/win-x64": {}
+  }
+}

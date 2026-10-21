@@ -59,7 +59,7 @@ public sealed partial class MainViewModel
     private void SetMode(RoutingMode value)
     {
         if (preferences.Mode == value) return;
-        preferences = preferences with { Mode = value }; SavePreferences(); MarkRulesChanged();
+        preferences = preferences with { Mode = value }; SavePreferences(); MarkConnectionChanged();
         OnPropertyChanged(nameof(IsSelectedMode)); OnPropertyChanged(nameof(IsWholeMode)); OnPropertyChanged(nameof(ModeDescription));
     }
     private void Attach(IEnumerable<AppRule> rules)

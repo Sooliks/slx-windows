@@ -1,5 +1,20 @@
 # Windows client UX brief
 
+## Alpha.14 live application changes
+
+Friction: every app-list mutation restarts the whole core/TUN, including removing a disabled row. Given a live selected
+connection, changed apps get new rules while unchanged apps keep the core, TUN and ConnectedAt. Disabled row removal,
+metadata/order edits and toggles returning to the same effective set perform no WFP/Xray mutation. Service owns truth.
+Rapid edits produce one coalesced plan. Profile/mode changes keep a separate reconnect intent; different connection
+credentials/endpoint with the same name still reconnect. Whole-PC app edits are local. Final app off disconnects.
+Show RU/EN copy that rules apply to new sessions; the changed app's already-open sessions may need to reconnect.
+A lost API response retains protection and running core, reads its revision and never replays the mutation. A known
+failed update with a live protected tunnel is scoped feedback, not a false disconnect. Matching revision clears only
+that pending UI intent, never newer edits. Ordinary Connected without the target revision is insufficient.
+Required evidence: pure equality/transaction/replay/failure tests, WPF action-count/state/copy checks, real pinned Xray
+API contract without TUN and retained local TCP stream, and current RU/EN native images. These do not establish installed
+WFP/TUN packet continuity, every preexisting flow, Windows 10 or physical-monitor rendering acceptance.
+
 ## Alpha.13 icon and update acceptance contract
 
 Audience: Windows users returning to selected apps or seeing a new release. Friction: a failed asynchronous icon can

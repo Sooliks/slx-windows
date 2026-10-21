@@ -100,6 +100,7 @@ public sealed partial class ServiceControlTests
     {
         public int Starts { get; private set; }
         public int Stops { get; private set; }
+        public int Updates { get; private set; }
         public string? OwnerSid { get; private set; }
         public bool StopFails { get; set; }
         public bool ReportUnownedAfterStop { get; set; }
@@ -113,6 +114,13 @@ public sealed partial class ServiceControlTests
             return Task.CompletedTask;
         }
         public Task ReconnectAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task UpdateApplicationsAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken)
+        {
+            if (OwnerSid != sid || Status.Phase != TunnelPhase.Connected) throw new ClientFault("ROUTING_NOT_READY");
+            Updates++;
+            Status = Status with { ApplicationRevision = XrayRouteRevision.For(plan) };
+            return Task.CompletedTask;
+        }
         public Task StopAsync(CancellationToken cancellationToken)
         {
             Stops++;

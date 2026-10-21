@@ -1,13 +1,16 @@
 using System.Diagnostics;
 using Slx.Client.Core;
+using Slx.Client.Desktop.Localization;
 using Slx.Client.Desktop.ViewModels;
 using Xunit;
 namespace Slx.Client.UiTests;
 internal static class AutoRoutingChecks
 {
-    private static MainViewModel Model(List<PipeRequest> requests, bool unknown=false)
+    private static MainViewModel Model(List<PipeRequest> requests, bool unknown=false, bool disabledFirst=false)
     {
-        var model=new MainViewModel(false,UiFixtures.Subscription,UiFixtures.Preferences(RoutingMode.SelectedApplications));
+        var preferences=UiFixtures.Preferences(RoutingMode.SelectedApplications);
+        if(disabledFirst)preferences.Applications![0]=preferences.Applications![0] with{Enabled=false};
+        var model=new MainViewModel(false,UiFixtures.Subscription,preferences);
         UiFixtures.AllowSyntheticApplications(model);
         model.SendOverride=(request,_)=>{
             requests.Add(request);
@@ -19,11 +22,15 @@ internal static class AutoRoutingChecks
         model.PollAsync().GetAwaiter().GetResult();requests.Clear();
         return model;
     }
-    private static void Settle(Func<bool> done)
+    internal static void Settle(Func<bool> done)
     {
         var watch=Stopwatch.StartNew();
         while(!done()&&watch.Elapsed<TimeSpan.FromSeconds(3)){Thread.Sleep(10);Sta.Pump();}
         Assert.True(done());
+    }
+    internal static void WaitQuiet()
+    {
+        var watch=Stopwatch.StartNew();while(watch.ElapsedMilliseconds<600){Thread.Sleep(10);Sta.Pump();}
     }
     public static void Run()
     {
@@ -36,9 +43,25 @@ internal static class AutoRoutingChecks
             Assert.Empty(requests);
             Settle(()=>requests.Count>0&&!model.IsBusy);
             var sent=Assert.Single(requests);
-            Assert.Equal("reconnect",sent.Action);
+            Assert.Equal("update-applications",sent.Action);
             Assert.Contains(sent.Plan!.Applications,x=>x.Id==app.Id&&x.Enabled);
             Assert.False(model.RulesPending);
+        }
+        requests.Clear();
+        using(var model=Model(requests,disabledFirst:true))
+        {
+            var removed=model.Applications[0];model.RemoveAppCommand.Execute(removed);
+            Settle(()=>requests.Count>0&&!model.IsBusy);
+            var sent=Assert.Single(requests);Assert.Equal("update-applications",sent.Action);
+            Assert.DoesNotContain(sent.Plan!.Applications,app=>app.Id==removed.Id);
+        }
+        requests.Clear();
+        using(var model=Model(requests))
+        {
+            model.Applications[0].Enabled=false;model.Applications[0].Enabled=true;
+            Settle(()=>requests.Count>0&&!model.IsBusy);
+            var sent=Assert.Single(requests);Assert.Equal("update-applications",sent.Action);
+            Assert.All(sent.Plan!.Applications,app=>Assert.True(app.Enabled));
         }
         requests.Clear();
         using(var model=Model(requests,true))
@@ -48,6 +71,11 @@ internal static class AutoRoutingChecks
             Assert.Single(requests);Assert.True(model.RulesPending);Assert.False(model.IsConnected);
             var watch=Stopwatch.StartNew();while(watch.ElapsedMilliseconds<600){Thread.Sleep(10);Sta.Pump();}
             Assert.Single(requests);
+            model.PollAsync().GetAwaiter().GetResult();
+            Assert.True(model.IsConnected);Assert.True(model.RulesPending);
+            Assert.Equal(Text.Catalog["RulesUnconfirmed"],model.RoutingUpdateText);
+            watch.Restart();while(watch.ElapsedMilliseconds<600){Thread.Sleep(10);Sta.Pump();}
+            Assert.Single(requests,request=>request.Action!="status");
         }
         requests.Clear();
         using(var model=Model(requests))
@@ -77,9 +105,18 @@ internal static class AutoRoutingChecks
             model.AddDiscoveredCommand.Execute(new AppRule(Guid.NewGuid(),"Whole app",@"C:\Synthetic\Whole.exe"));
             Assert.False(model.RulesPending);Assert.Empty(requests);
             model.SelectedProfile=UiFixtures.Alternative;
+            model.AddDiscoveredCommand.Execute(new AppRule(Guid.NewGuid(),"Whole pending app",@"C:\Synthetic\WholePending.exe"));
             Settle(()=>requests.Count>0&&!model.IsBusy);
-            Assert.Equal(UiFixtures.Alternative.Id,Assert.Single(requests).Plan!.Profile.Id);
+            var sent=Assert.Single(requests);Assert.Equal("reconnect",sent.Action);
+            Assert.Equal(UiFixtures.Alternative.Id,sent.Plan!.Profile.Id);
+            requests.Clear();
+            model.SelectedProfile=UiFixtures.Alternative with{Port=9444};
+            Settle(()=>requests.Count>0&&!model.IsBusy);
+            sent=Assert.Single(requests);Assert.Equal("reconnect",sent.Action);Assert.Equal(9444,sent.Plan!.Profile.Port);
+            requests.Clear();
+            model.ReconnectCommand.ExecuteAsync(null).GetAwaiter().GetResult();
+            Assert.Equal("reconnect",Assert.Single(requests).Action);
         }
-
+        ApplicationUpdateReconciliationChecks.Run();
     }
 }

@@ -37,6 +37,6 @@ public sealed class RecoveryAndDiscoveryTests
         int resolver=Array.FindIndex(rules,x=>x.TryGetProperty("inboundTag",out var tags)&&tags.EnumerateArray().Any(t=>t.GetString()=="resolver"));
         int self=Array.FindIndex(rules,x=>x.TryGetProperty("process",out _));Assert.InRange(resolver,0,self-1);
         Assert.Equal("vpn",rules[resolver].GetProperty("outboundTag").GetString());
-        Assert.Equal("dns",Assert.Single(rules,x=>x.TryGetProperty("port",out _)).GetProperty("outboundTag").GetString());
+        Assert.Equal("dns",Assert.Single(rules,x=>x.TryGetProperty("port",out var port)&&port.GetString()=="53").GetProperty("outboundTag").GetString());
     }
 }

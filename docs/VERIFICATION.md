@@ -1,3 +1,42 @@
+# Verification — 0.1.0-alpha.14 (2026-10-21)
+
+STATUS: PARTIAL. `pwsh -NoProfile -File scripts/verify.ps1` on the Windows host exited 0: locked restore,
+Release solution build with zero warnings/errors, 379 unit/Windows checks and one expanded WPF scenario, zero
+failed/skipped, <=200 nonblank source gate. The first build found CS8631 in three new nullable JSON assertions;
+explicit non-null string assertions corrected them without weakening tests or production guards. After adding the
+final native UI evidence scenario, targeted `dotnet test tests/Slx.Client.UiTests/Slx.Client.UiTests.csproj -c Release
+--no-restore` also exited 0, one expanded scenario and no failures/skips/warnings.
+
+New isolated evidence covers effective app-set equality, strict profile/mode comparison, separate dispatch path,
+SID/session/receipt-capacity guards, idle update rejection without ownership capture, strict replay after stop and
+app updates never invoking Start/Stop. WFP planner checks preserve existing filter IDs, no-op zero transactions,
+full preflight, union/rollback snapshots and baseline invalidation after native failure. They never call real WFP.
+Coordinator checks cover union → durable desired intent → one core replacement → final policy, initial/final storage
+failure, cancelled caller, lost acknowledgement reporting old/new/unrelated revisions and read-only reconciliation
+without replay. A failed final native transaction retains protection and unconfirmed state, not a false success.
+
+WPF checks cover coalescing, disabled removal/toggle-back using app-only IPC, final app off, separate mode/profile
+reconnect including changed same-name profile, Whole-PC library changes, explicit reconnect, unknown outcome without
+automatic replay, stale response/revision versus newer edit and live protected failure feedback. Current native RU
+940x660 and EN 1200x820 live/unconfirmed PNGs were inspected: hints and persistent scoped feedback wrap; connection
+action stays available, no horizontal overflow. These are synthetic profiles and controlled status, not real VPN proof.
+218 paired RU/EN keys across four owners, no duplicates; source size and git diff --check pass.
+
+Separate real-core command: `dotnet run --project tests/Slx.XrayRouteContract/Slx.XrayRouteContract.csproj -c Release
+--no-build -- C:/Users/xls/Desktop/slx-windows/.runtime/xray.exe` exited 0 after a zero-warning targeted build. The
+fixture verifies the pinned executable SHA, starts its own Xray with config in stdin, authenticated loopback HTTP and
+local echo only. Two actual full routing replacements and ListRule revision readbacks passed; the same existing TCP
+stream continued. Unauthenticated CONNECT returned 407 and wrong-password AddRule was rejected. A first fixture launch
+rejected a documentation IP as INVALID_PROFILE; its synthetic hostname was corrected, without changing runtime policy.
+This is an actual pinned API contract, not TUN, installed service, WFP or Internet traffic acceptance.
+
+No installed application/service, user preferences/subscription, firewall, adapter, server, account or DB was mutated.
+Existing sessions in the changed app can retain their old route until that app reconnects. Windows ALE can reauthorize
+flows after policy changes, so retained core/TUN/filter identities do not establish every flow's packet continuity.
+Installed app-rule changes and packet isolation/continuity, unusual Shell providers, Windows 10, multi-user loopback
+port races, boot/sleep/network changes, upgrade/UAC/rollback, DPI/High Contrast/live accessibility remain open.
+Final build/installer identity belongs to release provenance; publication is not installed-system acceptance.
+
 # Verification — 0.1.0-alpha.13 (2026-10-20)
 
 STATUS: PARTIAL. `pwsh -NoProfile -File scripts/verify.ps1` on the Windows host exited 0:

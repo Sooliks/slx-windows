@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.13. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.14. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,27 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.14 — live application routing
+
+Owner requested application changes without a global reconnect, including removing an already disabled application.
+Add SID-authorized typed IPC v2 action update-applications; preserve full validation, strict fingerprints, receipts,
+limits and session checks. It cannot change profile/mode, start an idle tunnel or silently fall back to reconnect.
+Effective equality ignores metadata, disabled rows, ordering and path case; service currentPlan is authoritative.
+No-op changes only persist the revised intent. Explicit reconnect remains a forced restart.
+Pinned Xray 26.9.9 atomically replaces all routing rules through RoutingService. The API has no new listener: only the
+existing authenticated loopback probe can route a fixed control destination to the internal commander. Share typed
+rule generation, bound gRPC/protobuf and never store plaintext configuration. Resolve all new native app IDs first.
+WFP adds union protection before changing routes, then removes only changed app-filter pairs; DNS/LAN/TUN exemptions
+and unchanged app-filter identities remain. Save desired intent before core mutation. Uncertain acknowledgement keeps
+union protection and reconciles by reading the core revision, never by replaying AddRule or restarting the core.
+Optional confirmed ApplicationRevision reconciles a UI target; ordinary Connected does not prove an applied app list.
+Failed app updates retain the tunnel and show scoped recovery. Natural health recovery remains independent.
+App edits coalesce; profile/mode changes reconnect, and disabling the final selected app explicitly disconnects.
+Changes affect new sessions; an affected app's existing session may need that app to reconnect. Windows may reauthorize
+ALE flows after policy changes: do not promise universal flow continuity without installed packet acceptance.
+Update UI/service together; old services reject the additive action with no reconnect fallback. No server, DB, account,
+provider-ID, credentials or dependency migration. Production distribution remains authorized with PARTIAL/prerelease.
 
 ## Alpha.13 — resilient icons and update notification
 

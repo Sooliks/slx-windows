@@ -12,7 +12,7 @@ public sealed partial class MainViewModel
         {
             if (!SetProperty(ref selectedProfile, value) || value == null) return;
             preferences = preferences with { SelectedProfileId = value.Id };
-            SavePreferences(); MarkRulesChanged();
+            SavePreferences(); MarkConnectionChanged();
         }
     }
     private Task ImportAsync() => FetchSubscriptionAsync(ImportLink, true);

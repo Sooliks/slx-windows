@@ -28,6 +28,8 @@ public sealed unsafe partial class TrafficGuard : IDisposable
     {
         PlanValidator.Validate(plan);
         var applications=TrafficApplicationIds.Resolve(plan,corePath,servicePath);
+        var prepared=plan.Mode==RoutingMode.SelectedApplications
+            ?new TrafficApplicationState(TrafficApplicationPolicy.FromIdentities(applications.Select(app=>app.Identity))):null;
         ulong luid=0;
         if(adapterId is not null)
         {
@@ -48,20 +50,31 @@ public sealed unsafe partial class TrafficGuard : IDisposable
                     foreach(var app in applications)ApplicationFilter(layer,app);
                     Add(layer,false,[]);
                 }
-                else foreach(var app in applications)ApplicationFilter(layer,app);
+                else foreach(var app in prepared!.Filters.Values)
+                    ApplicationFilter(layer,new(app.Identity,false),layer==PInvoke.FWPM_LAYER_ALE_AUTH_CONNECT_V4?app.V4:app.V6);
             }
         });
+        applicationState=adapterId is not null?prepared:null;
     }
-    public void Remove()=>Transaction(DeleteOwned);
+    public void Remove(){Transaction(DeleteOwned);applicationState=null;}
     public void Dispose()
     {
+        applicationState=null;
         if(engine.Value!=null){PInvoke.FwpmEngineClose0(engine);engine=default;}
     }
     private void Transaction(Action action)
     {
-        Check(PInvoke.FwpmTransactionBegin0(engine,0),TrafficOperation.Begin);
-        try{action();Check(PInvoke.FwpmTransactionCommit0(engine),TrafficOperation.Commit);}
-        catch{PInvoke.FwpmTransactionAbort0(engine);throw;}
+        bool began=false;
+        try
+        {
+            Check(PInvoke.FwpmTransactionBegin0(engine,0),TrafficOperation.Begin);began=true;
+            action();Check(PInvoke.FwpmTransactionCommit0(engine),TrafficOperation.Commit);
+        }
+        catch
+        {
+            if(began)PInvoke.FwpmTransactionAbort0(engine);
+            applicationState?.Invalidate();throw;
+        }
     }
     private void DeleteOwned()
     {

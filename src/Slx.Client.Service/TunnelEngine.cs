@@ -30,6 +30,7 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
         try
         {
             ArmProtection(plan);
+            pendingApplicationUpdate = null;
             startupOffCleanup.Cancel();
             currentPlan=plan;ownerSid=sid;desiredConnected=true;pinnedPlan=pinned;retryAt=0;
             state=new(TunnelPhase.Connecting,DateTimeOffset.UtcNow,plan.Profile.Name,Mode:plan.Mode,ProtectionActive:protectionActive);
@@ -60,6 +61,7 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
             state = state with { Phase = TunnelPhase.Stopping, ObservedAt = DateTimeOffset.UtcNow, ProbePassed = false };
             await StopChildAsync();
             ReleaseProtection();
+            pendingApplicationUpdate = null;
             currentPlan=pinnedPlan=null;
             DnsCache.Refresh();
             state = new(TunnelPhase.Disconnected, DateTimeOffset.UtcNow);
@@ -111,7 +113,9 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
             cancellationToken.ThrowIfCancellationRequested();
             if (process.HasExited || !LocalProbe.TunnelReady()) throw new ClientFault("CORE_EXITED");
             state = new(TunnelPhase.Connected, DateTimeOffset.UtcNow, plan.Profile.Name,
-                ConnectedAt: DateTimeOffset.UtcNow, Mode: plan.Mode, ProbePassed: true, ProtectionActive:protectionActive);
+                ConnectedAt: DateTimeOffset.UtcNow, Mode: plan.Mode, ProbePassed: true, ProtectionActive:protectionActive,
+                ApplicationRevision: XrayRouteRevision.For(currentPlan ?? plan));
+            pendingApplicationUpdate = null;
             recoveryAttempts=0; healthAt=Stopwatch.GetTimestamp()+15*Stopwatch.Frequency;
         }
         catch (Exception error)

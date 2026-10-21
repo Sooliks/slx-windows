@@ -38,17 +38,17 @@ public sealed unsafe partial class TrafficGuard
             }
         }
     }
-    private void ApplicationFilter(Guid layer,TrafficApplicationId app)
+    private void ApplicationFilter(Guid layer,TrafficApplicationId app,Guid? key=null)
     {
         fixed(byte* identity=app.Identity)
         {
             var application=new FWP_BYTE_BLOB{size=(uint)app.Identity.Length,data=identity};
             var condition=new FWPM_FILTER_CONDITION0{fieldKey=PInvoke.FWPM_CONDITION_ALE_APP_ID,matchType=FWP_MATCH_TYPE.FWP_MATCH_EQUAL,
                 conditionValue=new(){type=FWP_DATA_TYPE.FWP_BYTE_BLOB_TYPE,byteBlob=&application}};
-            Add(layer,app.Permit,[condition]);
+            Add(layer,app.Permit,[condition],key:key);
         }
     }
-    private void Add(Guid layer,bool permit,ReadOnlySpan<FWPM_FILTER_CONDITION0> conditions,bool persistent=true)
+    private void Add(Guid layer,bool permit,ReadOnlySpan<FWPM_FILTER_CONDITION0> conditions,bool persistent=true,Guid? key=null)
     {
         Guid provider=Provider;
         fixed(char* label="SLX VPN traffic protection")
@@ -56,7 +56,7 @@ public sealed unsafe partial class TrafficGuard
         {
             var filter=new FWPM_FILTER0
             {
-                filterKey=Guid.NewGuid(),providerKey=&provider,subLayerKey=Sublayer,layerKey=layer,
+                filterKey=key??Guid.NewGuid(),providerKey=&provider,subLayerKey=Sublayer,layerKey=layer,
                 flags=persistent?FWPM_FILTER_FLAGS.FWPM_FILTER_FLAG_PERSISTENT:FWPM_FILTER_FLAGS.FWPM_FILTER_FLAG_NONE,displayData=new(){name=label},
                 weight=new(){type=FWP_DATA_TYPE.FWP_UINT8,uint8=permit?(byte)15:(byte)1},
                 action=new(){type=permit?FWP_ACTION_TYPE.FWP_ACTION_PERMIT:FWP_ACTION_TYPE.FWP_ACTION_BLOCK},

@@ -17,6 +17,8 @@ internal sealed partial class TunnelEngine
                 bool wasConnected = state.Phase == TunnelPhase.Connected;
                 if(wasConnected && child is not null && !child.HasExited && LocalProbe.TunnelReady())
                 {
+                    if(pendingApplicationUpdate is not null && Stopwatch.GetTimestamp()>=applicationReconcileAt)
+                        await ReconcileApplicationsAsync();
                     if(Stopwatch.GetTimestamp()<healthAt)return;
                     healthAt=Stopwatch.GetTimestamp()+15*Stopwatch.Frequency;
                     var result = await HealthConfirmation.CheckAsync(

@@ -10,9 +10,10 @@ public sealed class Text : INotifyPropertyChanged
     private readonly ResourceManager resources = new("Slx.Client.Desktop.Localization.Strings", typeof(Text).Assembly);
     private readonly ResourceManager libraryResources = new("Slx.Client.Desktop.Localization.LibraryStrings", typeof(Text).Assembly);
     private readonly ResourceManager updateResources = new("Slx.Client.Desktop.Localization.UpdatesStrings", typeof(Text).Assembly);
+    private readonly ResourceManager routingResources = new("Slx.Client.Desktop.Localization.RoutingStrings", typeof(Text).Assembly);
     private CultureInfo culture = CultureInfo.GetCultureInfo("ru");
     public string this[string key] => resources.GetString(key, culture) ?? libraryResources.GetString(key, culture)
-        ?? updateResources.GetString(key, culture) ?? key;
+        ?? updateResources.GetString(key, culture) ?? routingResources.GetString(key, culture) ?? key;
     public string Language => culture.TwoLetterISOLanguageName;
     public event PropertyChangedEventHandler? PropertyChanged;
     public void SetLanguage(string language)

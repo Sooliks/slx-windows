@@ -11,35 +11,28 @@ internal static class XrayRouting
         "::/128", "::1/128", "fc00::/7", "fe80::/10", "ff00::/8"
     ];
 
-    public static object[] Build(ConnectPlan plan)
+    public static XrayRouteRule[] Build(ConnectPlan plan)
     {
-        var rules = new List<object>
+        var rules = new List<XrayRouteRule>
         {
-            new { type = "field", ip = LocalNetworks, outboundTag = "direct" },
+            new(XrayRouteProtocol.ApiTag) { Inbounds = ["probe"], Domains = ["full:" + XrayRouteProtocol.Host], Network = "tcp", Port = "80" },
+            new("direct") { Ips = LocalNetworks },
             // A real readiness probe must use VPN even though it originates in our service.
-            new { type = "field", inboundTag = new[] { "probe", "resolver" }, outboundTag = "vpn" },
-            new { type = "field", inboundTag = new[] { "tun" }, port = "53", outboundTag = "dns" },
-            new { type = "field", process = new[] { "self/" }, outboundTag = "direct" }
+            new("vpn") { Inbounds = ["probe", "resolver"] },
+            new("dns") { Inbounds = ["tun"], Port = "53" },
+            new("direct") { Processes = ["self/"] }
         };
         if (IPAddress.TryParse(plan.Profile.Host, out var address))
-            rules.Add(new { type = "field", ip = new[] { address.ToString() }, outboundTag = "direct" });
+            rules.Add(new("direct") { Ips = [address.ToString()] });
         else
-            rules.Add(new { type = "field", domain = new[] { "full:" + plan.Profile.Host }, outboundTag = "direct" });
+            rules.Add(new("direct") { Domains = ["full:" + plan.Profile.Host] });
         if (plan.Mode == RoutingMode.SelectedApplications)
         {
 
-            rules.Add(new
-            {
-                type = "field",
-                process = plan.Applications.Where(app => app.Enabled).Select(app => app.ExecutablePath.Replace('\\', '/')).ToArray(),
-                outboundTag = "vpn"
-            });
+            rules.Add(new("vpn") { Processes = plan.Applications.Where(app => app.Enabled).Select(app => app.ExecutablePath.Replace('\\', '/')).ToArray() });
         }
-        rules.Add(new
-        {
-            type = "field", network = "tcp,udp",
-            outboundTag = plan.Mode == RoutingMode.WholeComputer ? "vpn" : "direct"
-        });
+        rules.Add(new(plan.Mode == RoutingMode.WholeComputer ? "vpn" : "direct")
+        { Network = "tcp,udp", RuleTag = XrayRouteProtocol.MarkerPrefix + XrayRouteRevision.For(plan) });
         return rules.ToArray();
     }
 }

@@ -38,6 +38,7 @@ public sealed partial class MainViewModel
             if (!reply.Success) { MarkStatusUnknown(reply.Code); ShowFault(reply.Code); return; }
             status = reply.Status;
             statusFresh = true;
+            ReconcileApplicationRevision();
             if (!ServiceStateCopy.IsTrafficFault(lastServiceCode) || status.Phase == TunnelPhase.Connected && status.ProbePassed) lastServiceCode = null;
             if (status.Phase == TunnelPhase.Faulted && status.Code != null) ShowFault(status.Code);
         }
@@ -51,7 +52,7 @@ public sealed partial class MainViewModel
     {
         if (action != "connect-if-idle") CancelStartupConnection();
         if (UpdateInProgress) return;
-        CancelRoutingApply();
+        var routingOwner = BeginRoutingMutation();
         if (action != "disconnect" && saved == null) { OpenImportCommand.Execute(null); return; }
         if (action != "disconnect" && IsSelectedMode && !HasSelectedApplications) { Notice("NoActiveApps"); Page = "applications"; return; }
         ConnectPlan? plan = null;
@@ -69,19 +70,25 @@ public sealed partial class MainViewModel
             if(action != "disconnect" && SelectedProfile != null)plan=new(SelectedProfile,preferences.Mode,Slx.Client.Windows.ApplicationGroups.Expand(Applications.SelectMany(x=>x.ToRules())));
             await mutationGate.WaitAsync(current.Token);
             entered = true;
+            if (action == "update-applications" && plan != null) RememberApplicationRevision(plan, routingOwner);
             var reply = await SendControlAsync(new(PipeContract.Version, action, Guid.NewGuid(), plan), current.Token);
             if (owner != generation || disposed) return;
-            if (!reply.Success) { MarkStatusUnknown(reply.Code); ShowFault(reply.Code); return; }
+            if (!reply.Success)
+            {
+                if (action == "update-applications" && RetainLiveRoutingFailure(reply)) return;
+                MarkStatusUnknown(reply.Code); ShowFault(reply.Code); return;
+            }
             status = reply.Status;
             statusFresh = true; lastServiceCode = null;
             if (status.Phase == TunnelPhase.Faulted && status.Code != null) ShowFault(status.Code);
-            if (action != "disconnect" || status.Phase == TunnelPhase.Disconnected) RulesPending = false;
+            if (action != "disconnect" || status.Phase == TunnelPhase.Disconnected) ConfirmRoutingMutation(routingOwner);
         }
         catch (Exception error) when (error is ClientFault or OperationCanceledException or IOException)
         {
             if (owner != generation) return;
             var code = error is ClientFault fault ? fault.Code : error is OperationCanceledException ? "SERVICE_TIMEOUT" : "SERVICE_UNAVAILABLE";
-            MarkStatusUnknown(code); ShowFault(code);
+            MarkStatusUnknown(code);
+            if (action == "update-applications") Notice("RulesApplyUnconfirmed"); else ShowFault(code);
         }
         finally
         {
@@ -106,6 +113,7 @@ public sealed partial class MainViewModel
     }
     private void MarkStatusUnknown(string code)
     {
+        routingUnconfirmed |= RulesPending;
         statusFresh = false; lastServiceCode = ServiceStateCopy.SafeCode(code);
     }
     private void ShowFault(string code)

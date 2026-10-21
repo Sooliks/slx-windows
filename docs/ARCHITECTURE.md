@@ -1,5 +1,16 @@
 # Boundaries
 
+Alpha.14: app edits use typed update-applications, distinct from explicit reconnect. Service compares the current
+effective route set after full validation; metadata-only changes touch neither WFP nor core. ApplicationUpdateTransaction
+owns union protection → durable desired intent → one Xray replacement → final app-only WFP delta. Response loss is
+reconciled by reading a route revision; no blind mutation retry or global-restart fallback. Pending durable desired state
+feeds normal recovery after a genuine health failure. A failed final native transaction invalidates the delta baseline;
+the union stays protected until ordinary recovery or an explicit reconnect, rather than claiming applied success.
+XrayRouteControl reaches the internal commander through authenticated HTTP CONNECT on the existing probe. API config
+has no listen endpoint and exposes only RoutingService. Shared typed XrayRouteRule generates both JSON and pinned
+protobuf. The optional ApplicationRevision on IPC v2 is confirmed only after routing/protection agree. Desktop matches
+the final submitted revision and local intent generation; generic Connected cannot clear uncertain application state.
+
 Alpha.12 application library: UserSettingsStore owns a separate bounded DPAPI discovery cache; DiscoveryScanner owns
 independent source work with three workers and progressive batches. Desktop retains saved/partial results without
 claiming freshness, reuses recent successful scans and validates explicit additions off UI. Scanning never mutates

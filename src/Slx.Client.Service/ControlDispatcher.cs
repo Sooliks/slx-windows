@@ -18,7 +18,7 @@ internal sealed class ControlDispatcher(IControlTunnelEngine engine, ISessionGua
         try
         {
             if (request.Version != PipeContract.Version || request.RequestId == Guid.Empty
-                || request.Action is not ("status" or "connect" or "connect-if-idle" or "disconnect" or "reconnect"))
+                || request.Action is not ("status" or "connect" or "connect-if-idle" or "disconnect" or "reconnect" or "update-applications"))
                 return Rejected("IPC_INVALID");
             owner ??= engine.OwnerSid;
             if (owner is not null && owner != sid) return Rejected("CONTROLLER_OWNED");
@@ -28,7 +28,7 @@ internal sealed class ControlDispatcher(IControlTunnelEngine engine, ISessionGua
             if (receipts.TryGetValue(request.RequestId, out var prior))
                 return prior.Fingerprint == fingerprint ? prior.Reply with { Status = engine.Status }
                     : Rejected("IPC_REPLAY_MISMATCH");
-            if ((request.Action is "connect" or "connect-if-idle") && request.Plan is null
+            if ((request.Action is "connect" or "connect-if-idle" or "update-applications") && request.Plan is null
                 || request.Action == "disconnect" && request.Plan is not null)
                 return Rejected("IPC_INVALID");
             bool receiptAvailable = receipts.Count < 4096;
@@ -40,7 +40,7 @@ internal sealed class ControlDispatcher(IControlTunnelEngine engine, ISessionGua
                 try { PlanValidator.Validate(request.Plan); }
                 catch (ClientFault fault) { return Rejected(fault.Code); }
             }
-            if (request.Action is "connect" or "connect-if-idle" or "reconnect")
+            if (request.Action is "connect" or "connect-if-idle" or "reconnect" or "update-applications")
             {
                 try { sessions.RequireOwner(sid); }
                 catch (ClientFault fault) { return Rejected(fault.Code); }
@@ -53,11 +53,12 @@ internal sealed class ControlDispatcher(IControlTunnelEngine engine, ISessionGua
                 receipts.Add(request.RequestId,new(fingerprint,unchanged));
                 return unchanged;
             }
-            if (request.Plan is not null) owner ??= sid;
+            if (request.Plan is not null && request.Action != "update-applications") owner ??= sid;
             PipeReply result;
             try
             {
                 if (request.Action == "disconnect") await engine.StopAsync(cancellationToken);
+                else if (request.Action == "update-applications") await engine.UpdateApplicationsAsync(request.Plan!, sid, cancellationToken);
                 else
                 {
                     if (request.Plan is not null) await engine.StartAsync(request.Plan, sid, cancellationToken);

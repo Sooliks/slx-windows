@@ -59,8 +59,8 @@
 <data name="RemoveApp" xml:space="preserve"><value>Убрать из списка</value></data>
 <data name="RouteApp" xml:space="preserve"><value>Направлять приложение через VPN</value></data>
 <data name="NoSearchResults" xml:space="preserve"><value>Подходящих приложений нет.</value></data>
-<data name="RulesPending" xml:space="preserve"><value>Применяем изменения автоматически. Соединение может ненадолго прерваться.</value></data>
-<data name="RulesNotice" xml:space="preserve"><value>После изменения маршрута приложению может понадобиться переподключение. SLX не закрывает чужие приложения.</value></data>
+<data name="RulesPending" xml:space="preserve"><value>Применяем изменения…</value></data>
+<data name="RulesNotice" xml:space="preserve"><value>Выбор приложений применяется к новым соединениям без перезапуска VPN. Для уже открытого сеанса может понадобиться переподключение самого приложения.</value></data>
 <data name="AppLimitations" xml:space="preserve"><value>Поддерживаются обычные .exe. Лаунчеры, защищённые приложения и приложения из Store могут потребовать отдельной настройки. Изоляция DNS по приложениям не гарантируется.</value></data>
 <data name="DiscoveryTitle" xml:space="preserve"><value>Добавить запущенное приложение</value></data>
 <data name="DiscoveryDescription" xml:space="preserve"><value>Доступные запущенные приложения этого сеанса Windows. Также можно выбрать файл .exe.</value></data>
@@ -145,7 +145,7 @@
  <data name="CachedProfiles" xml:space="preserve"><value>Сохранённые настройки доступны. Обновить подписку можно кнопкой «Обновить».</value></data>
  <data name="ProfilesAutoRefresh" xml:space="preserve"><value>Способы подключения обновляются при запуске.</value></data>
  <data name="FaultCleanup" xml:space="preserve"><value>Windows ещё завершает отключение VPN. Подождите несколько секунд и повторите подключение.</value></data>
-<data name="RulesUnconfirmed" xml:space="preserve"><value>Изменения сохранены. Не удалось подтвердить их применение — проверьте подключение.</value></data>
+<data name="RulesUnconfirmed" xml:space="preserve"><value>Применение изменений ещё не подтверждено.</value></data>
 <data name="FindExecutable" xml:space="preserve"><value>Выбрать файл</value></data>
 <data name="StatsTitle" xml:space="preserve"><value>О подключении</value></data>
 <data name="StatsDuration" xml:space="preserve"><value>Время подключения</value></data>

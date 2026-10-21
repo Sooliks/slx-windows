@@ -104,5 +104,6 @@ public sealed class ServiceAutoConnectTests
             Stops++;OwnerSid=null;Status=new(TunnelPhase.Disconnected,DateTimeOffset.UtcNow);return Task.CompletedTask;
         }
         public Task ReconnectAsync(CancellationToken token)=>throw new InvalidOperationException("Auto-connect must use a validated plan.");
+        public Task UpdateApplicationsAsync(ConnectPlan plan,string sid,CancellationToken token)=>throw new InvalidOperationException("Not an automatic connection.");
     }
 }

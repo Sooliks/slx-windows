@@ -12,6 +12,7 @@ public static class XrayConfigBuilder
             throw new ClientFault("INVALID_PLAN");
         var config = new
         {
+            api = new { tag = XrayRouteProtocol.ApiTag, services = new[] { "RoutingService" } },
             dns = new { servers = new[] { "https://1.1.1.1/dns-query", "https://8.8.8.8/dns-query" }, tag = "resolver", queryStrategy = "UseIP", disableFallback = true },
             log = new { access = "none", error = "none", loglevel = "none" },
             inbounds = new object[]
