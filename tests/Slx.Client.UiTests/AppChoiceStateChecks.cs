@@ -1,8 +1,6 @@
-using System.Globalization;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
-using System.Windows.Media;
 using Slx.Client.Core;
 using Slx.Client.Desktop;
 using Slx.Client.Desktop.Localization;
@@ -55,25 +53,21 @@ internal static class AppChoiceStateChecks
             Sta.Pump();
         }
     }
+    // Owner decision: the switch alone shows the choice; no "Use VPN / No VPN" caption next to it.
     private static void CheckPages(MainWindow window,MainViewModel model)
     {
         foreach(var page in new[]{"connection","applications"})
         {
             model.Page=page;Sta.Pump();
-            var choices=Sta.Descendants<TextBlock>(window).Where(item=>item.Name=="AppRoutingChoice").ToArray();
-            Assert.Equal(model.Applications.Count,choices.Length);
-            foreach(var label in choices)
+            Assert.DoesNotContain(Sta.Descendants<TextBlock>(window),item=>item.Name=="AppRoutingChoice");
+            var switches=Sta.Descendants<CheckBox>(window).Where(item=>item.DataContext is AppItemViewModel).ToArray();
+            Assert.Equal(model.Applications.Count,switches.Length);
+            foreach(var option in switches)
             {
-                var app=Assert.IsType<AppItemViewModel>(label.DataContext);
-                Assert.Equal(Text.Catalog[app.Enabled?"RouteViaVpn":"RouteDirect"],label.Text);
-                Assert.Equal(Text.Catalog["RouteChoiceHint"],Assert.IsType<string>(label.ToolTip));
-                Assert.Equal(Text.Catalog["RouteChoiceHint"],AutomationProperties.GetHelpText(label));
-                Assert.True(label.FontSize>=13);
-                var text=new FormattedText(label.Text,CultureInfo.CurrentUICulture,label.FlowDirection,
-                    new Typeface(label.FontFamily,label.FontStyle,label.FontWeight,label.FontStretch),label.FontSize,
-                    label.Foreground,VisualTreeHelper.GetDpi(label).PixelsPerDip);
-                Assert.True(label.ActualWidth+2>=text.WidthIncludingTrailingWhitespace);
-                var bounds=label.TransformToAncestor(window).TransformBounds(new Rect(label.RenderSize));
+                var app=Assert.IsType<AppItemViewModel>(option.DataContext);
+                Assert.Equal(app.Enabled,option.IsChecked);
+                Assert.Equal(Text.Catalog["RouteChoiceHint"],page=="connection"?AutomationProperties.GetHelpText(option):Assert.IsType<string>(option.ToolTip));
+                var bounds=option.TransformToAncestor(window).TransformBounds(new Rect(option.RenderSize));
                 Assert.InRange(bounds.Right,0,window.ActualWidth);
             }
             if(page=="connection")Assert.Contains(Sta.Descendants<TextBlock>(window),item=>item.Text==Text.Catalog["SelectedApps"]);

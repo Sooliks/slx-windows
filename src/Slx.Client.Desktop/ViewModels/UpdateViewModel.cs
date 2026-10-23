@@ -16,6 +16,7 @@ public sealed partial class UpdateViewModel : ObservableObject, IDisposable
     private readonly Func<CancellationToken, Task<IDisposable>> beginInstall;
     private readonly Func<string?>? installBlockReason;
     private readonly string version;
+    private readonly bool reuseStaged;
     private bool automatic, busy, disposed, started, installerOpened;
     private DateTimeOffset? remindAfter;
     private UpdateOffer? offer;
@@ -25,12 +26,13 @@ public sealed partial class UpdateViewModel : ObservableObject, IDisposable
     internal Func<string, CancellationToken, Task<UpdateCheckResult>>? CheckOverride { get; set; }
     internal Func<UpdateOffer, IProgress<int>?, CancellationToken, Task<PreparedUpdate>>? DownloadOverride { get; set; }
     internal Func<PreparedUpdate, CancellationToken, Task<UpdateLaunchResult>>? LaunchOverride { get; set; }
+    internal Func<UpdateOffer, CancellationToken, Task<PreparedUpdate?>>? FindPreparedOverride { get; set; }
     public UpdateViewModel(string version, bool automatic, DateTimeOffset? reminder,
         Action<bool, DateTimeOffset?> save, Func<bool> canInstall, Func<CancellationToken, Task<IDisposable>> beginInstall,
-        Func<string?>? installBlockReason = null)
+        Func<string?>? installBlockReason = null, bool reuseStaged = false)
     {
         this.version = version; this.automatic = automatic; remindAfter = reminder; this.save = save; this.canInstall = canInstall; this.beginInstall = beginInstall;
-        this.installBlockReason = installBlockReason;
+        this.installBlockReason = installBlockReason; this.reuseStaged = reuseStaged;
         CheckCommand = new AsyncRelayCommand(() => CheckAsync(true), () => !busy);
         ApplyCommand = new AsyncRelayCommand(ApplyAsync, () => !busy && !installerOpened && offer != null && (prepared == null || canInstall()));
         LaterCommand = new RelayCommand(RemindTomorrow, () => !busy || IsDownloading);
@@ -70,7 +72,13 @@ public sealed partial class UpdateViewModel : ObservableObject, IDisposable
             if (result.State == UpdateCheckState.Available && result.Offer != null)
             {
                 if (offer != result.Offer) { prepared = null; installerOpened = false; }
-                offer = result.Offer; stateKey = prepared == null ? "UpdateFound" : "UpdateReady";
+                offer = result.Offer;
+                // An installer for this exact release that is already staged and verified is offered for install directly.
+                // Render checks and UI fixtures never read the real staging folder.
+                if (prepared == null && (reuseStaged || FindPreparedOverride != null))
+                    prepared = await (FindPreparedOverride?.Invoke(offer, lifetime.Token) ?? client.FindPreparedAsync(offer, lifetime.Token));
+                if (disposed) return;
+                stateKey = prepared == null ? "UpdateFound" : "UpdateReady";
             }
             else if (result.State == UpdateCheckState.Current) { offer = null; prepared = null; stateKey = "UpdateCurrent"; }
             else stateKey = "UpdateCheckFailed";

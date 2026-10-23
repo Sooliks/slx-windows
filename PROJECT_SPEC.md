@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.15. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.16. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,23 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.16 — switch-only app choice and receipt expiry
+
+Owner feedback 2026-10-23: the "Use VPN / No VPN" caption beside each app switch is unnecessary; the switch alone
+shows the saved choice (names get the freed width; the switch keeps its accessible name and the RouteChoiceHint).
+Owner report: after a long service uptime VPN could not be reconnected until the PC was restarted. Confirmed defect
+with that symptom: the dispatcher's replay receipts were never removed, so after 4096 mutations every connect,
+reconnect and app update returned IPC_RECEIPT_LIMIT until the service restarted. Receipts now expire after 10 minutes;
+the 4096 burst cap, fingerprint/replay checks inside the window and explicit-off-at-capacity remain. The UI never
+resends a request ID, so a request older than the window is equivalent to a new authenticated request. Whether this
+was the owner's actual cause is not established: the visible code (Help → copy diagnostics) distinguishes it from
+adapter/core faults such as TUN_ADAPTER_CONFLICT or TUN_CLEANUP_PENDING. Service and UI update together by installer;
+no IPC shape, storage or dependency change. Rollback: install alpha.15 (the old unbounded-lifetime cache returns).
+Owner request: an installer of the offered version that is already staged is not downloaded again. Download and
+update checks reuse a file only inside our protected GUID staging folders and only if it still matches the published
+size and SHA-256; Internet-zone metadata is restored if missing. Launch re-verifies as before; damaged or foreign
+files are ignored and a fresh download follows. Render checks/UI fixtures never read the real staging folder.
 
 ## Alpha.15 — site-aligned design and native motion
 

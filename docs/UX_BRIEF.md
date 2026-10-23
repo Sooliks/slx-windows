@@ -1,5 +1,10 @@
 # Windows client UX brief
 
+## Unreleased switch-only app choice (2026-10-23)
+
+Owner decision: app rows and connection chips show no "Use VPN / No VPN" caption; the switch state is the choice.
+Accessible names, the RouteChoiceHint help text and the chosen-row accent line remain; freed width goes to app names.
+
 ## Alpha.15 site-aligned design and motion (2026-10-23)
 
 Owner decision: the static alpha.11 composition may evolve; quality native animation is now explicitly allowed. The

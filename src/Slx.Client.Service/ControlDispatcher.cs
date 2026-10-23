@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -10,7 +11,13 @@ internal sealed class ControlDispatcher(IControlTunnelEngine engine, ISessionGua
     private readonly SemaphoreSlim gate = new(1, 1);
     private readonly Dictionary<Guid, Receipt> receipts = new();
     private string? owner;
-    private sealed record Receipt(string Fingerprint, PipeReply Reply);
+    private sealed record Receipt(string Fingerprint, PipeReply Reply, long Stamp);
+    internal const int ReceiptCapacity = 4096;
+    // Receipts used to live for the whole service lifetime: after 4096 mutations every connect/reconnect/app update
+    // was refused with IPC_RECEIPT_LIMIT until the service (in practice the PC) restarted. The UI never resends a
+    // request ID, so replay protection only needs a bounded recent window; the capacity still caps bursts inside it.
+    internal static readonly TimeSpan ReceiptRetention = TimeSpan.FromMinutes(10);
+    internal Func<long> Clock { get; init; } = Stopwatch.GetTimestamp;
 
     public async Task<PipeReply> DispatchAsync(string sid, PipeRequest request, CancellationToken cancellationToken)
     {
@@ -25,13 +32,14 @@ internal sealed class ControlDispatcher(IControlTunnelEngine engine, ISessionGua
             if (request.Action == "status")
                 return request.Plan is null ? new PipeReply(true, "OK", engine.Status) : Rejected("IPC_INVALID");
             string fingerprint = Fingerprint(sid, request);
+            PruneReceipts();
             if (receipts.TryGetValue(request.RequestId, out var prior))
                 return prior.Fingerprint == fingerprint ? prior.Reply with { Status = engine.Status }
                     : Rejected("IPC_REPLAY_MISMATCH");
             if ((request.Action is "connect" or "connect-if-idle" or "update-applications") && request.Plan is null
                 || request.Action == "disconnect" && request.Plan is not null)
                 return Rejected("IPC_INVALID");
-            bool receiptAvailable = receipts.Count < 4096;
+            bool receiptAvailable = receipts.Count < ReceiptCapacity;
             // Explicit off is idempotent and must remain available when the replay cache is full.
             // Existing receipt fingerprints were checked first; no new connect/reconnect can bypass the cap.
             if (!receiptAvailable && request.Action != "disconnect") return Rejected("IPC_RECEIPT_LIMIT");
@@ -50,7 +58,7 @@ internal sealed class ControlDispatcher(IControlTunnelEngine engine, ISessionGua
             {
                 // Remember the no-op too: replaying this request after explicit off must never connect later.
                 var unchanged=new PipeReply(true,"OK",observed);
-                receipts.Add(request.RequestId,new(fingerprint,unchanged));
+                receipts.Add(request.RequestId,new(fingerprint,unchanged,Clock()));
                 return unchanged;
             }
             if (request.Plan is not null && request.Action != "update-applications") owner ??= sid;
@@ -71,10 +79,18 @@ internal sealed class ControlDispatcher(IControlTunnelEngine engine, ISessionGua
             catch (Exception) { result = new(false, "SERVICE_FAILURE", engine.Status); }
             if (request.Action == "disconnect" && result.Success
                 && result.Status.Phase == TunnelPhase.Disconnected && !result.Status.ProtectionActive) owner = null;
-            if (receiptAvailable) receipts.Add(request.RequestId, new(fingerprint, result));
+            if (receiptAvailable) receipts.Add(request.RequestId, new(fingerprint, result, Clock()));
             return result;
         }
         finally { gate.Release(); }
+    }
+
+    private void PruneReceipts()
+    {
+        if (receipts.Count == 0) return;
+        long cutoff = Clock() - (long)(ReceiptRetention.TotalSeconds * Stopwatch.Frequency);
+        foreach (var expired in receipts.Where(pair => pair.Value.Stamp < cutoff).Select(pair => pair.Key).ToArray())
+            receipts.Remove(expired);
     }
 
     private static string Fingerprint(string sid, PipeRequest request)

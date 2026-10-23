@@ -39,6 +39,7 @@ public sealed class PopulatedUiTests
             ThemeContrastChecks.Run();
             RoutingDeferralChecks.Run();
             AppChoiceStateChecks.Run(window);
+            UpdateReuseChecks.Run();
         }
         finally { window.Close(); Sta.Pump(); }
     });

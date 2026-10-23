@@ -21,6 +21,8 @@ public sealed partial class ReleaseUpdateClient
         string? partial = null; string? installer = null; var completed = false;
         try
         {
+            // The same verified release staged earlier is reused instead of being downloaded again.
+            if (await FindPreparedAsync(offer, budget.Token) is { } staged) { progress?.Report(100); completed = true; return staged; }
             var directory = Path.Combine(root, Guid.NewGuid().ToString("N"));
             CreateStagingDirectory(directory);
             partial = Path.Combine(directory, "download.part");

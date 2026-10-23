@@ -17,7 +17,7 @@ internal static class LocalizationChecks
         foreach (var language in new[] { "ru", "en" })
         {
             Text.Catalog.SetLanguage(language);
-            foreach (var key in new[] { "RouteViaVpn", "RouteDirect", "RemoveBlocked", "TrayStatus" }) Assert.NotEqual(key, Text.Catalog[key]);
+            foreach (var key in new[] { "RouteChoiceHint", "RemoveBlocked", "TrayStatus" }) Assert.NotEqual(key, Text.Catalog[key]);
             Assert.Contains("{0}", Text.Catalog["TrayStatus"]);
         }
         Text.Catalog.SetLanguage("ru");

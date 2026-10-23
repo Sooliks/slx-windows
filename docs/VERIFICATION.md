@@ -1,3 +1,7 @@
+# Verification — 0.1.0-alpha.16 (2026-10-23)
+
+STATUS: PARTIAL. Owner explicitly requested build/publication without a full verification run. No verify.ps1, unit or WPF tests executed for this release; newly added tests are unexecuted. Release build and packaging are performed by the standard scripts; exact identity is recorded in provenance. Installed upgrade, receipt expiry behavior, staged-installer reuse and the reported long-uptime failure remain unverified. Historical alpha.15 results below do not validate alpha.16.
+
 # Verification — 0.1.0-alpha.15 (2026-10-23)
 
 STATUS: PARTIAL. Codex ran `pwsh -NoProfile -File scripts/verify.ps1` on the owner's Windows host via an evidence

@@ -56,3 +56,9 @@ Offline contracts cover SemVer, allowlists, malformed metadata, redirects, bound
 launch locking and simulated UAC cancellation. WPF fixtures cover snooze, optional checks, failed checks/hash,
 connected/unknown install blocking, and connection command exclusion during the simulated handoff.
 Actual UAC, installer upgrade, interruption/rollback, installed multi-instance behavior, Windows 10 and clean VM remain open.
+
+Staged installer reuse (unreleased, after alpha.15): before downloading, and right after a check finds an offer,
+the client looks for this exact asset in its own GUID staging folders (at most 64). A candidate is reused only when
+size and SHA-256 match the published checksum and no reparse point is involved; its Zone.Identifier is restored if
+missing. The offer then shows Install directly. Damaged or foreign files are ignored, and LaunchInstallerAsync keeps
+its full path, hash and MOTW checks. This is an integrity reuse, not a publisher-signature check.
