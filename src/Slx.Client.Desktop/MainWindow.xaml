@@ -59,12 +59,21 @@
    </Border>
    <p:AmbientBackdrop Grid.Column="1" IsHitTestVisible="False" RoutedApps="{Binding SelectedAppCount}" WholeRoute="{Binding IsWholeMode}"/>
    <Grid Grid.Column="1" Margin="32,25,0,0"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-    <Border x:Name="MessageNotice" Style="{StaticResource Notice}" Margin="0,0,26,16" Visibility="{Binding ShowMessage, Converter={StaticResource VisibleWhen}}"><TextBlock Text="{Binding Message}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/></Border>
     <ContentControl x:Name="PageHost" Grid.Row="1" Content="{Binding}" Focusable="False"><ContentControl.Style><Style TargetType="ContentControl"><Setter Property="ContentTemplate" Value="{StaticResource ConnectionPage}"/><Style.Triggers><DataTrigger Binding="{Binding Page}" Value="applications"><Setter Property="ContentTemplate" Value="{StaticResource ApplicationsPage}"/></DataTrigger><DataTrigger Binding="{Binding Page}" Value="settings"><Setter Property="ContentTemplate" Value="{StaticResource SettingsPage}"/></DataTrigger><DataTrigger Binding="{Binding Page}" Value="help"><Setter Property="ContentTemplate" Value="{StaticResource HelpPage}"/></DataTrigger></Style.Triggers></Style></ContentControl.Style></ContentControl>
    </Grid>
    <Grid x:Name="UpdateOverlayHost" Grid.Column="1" Margin="24,0,24,22" VerticalAlignment="Bottom" Panel.ZIndex="10">
     <Grid.Style><Style TargetType="Grid"><Style.Triggers><DataTrigger Binding="{Binding IsOverlayVisible}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></Grid.Style>
-    <v:UpdateBanner DataContext="{Binding Updates}" Width="480" MaxWidth="{Binding ActualWidth, ElementName=UpdateOverlayHost}" HorizontalAlignment="Right"/>
+    <!-- Notices float above the page like the update card: they never push the page content down. -->
+    <StackPanel HorizontalAlignment="Right" Width="480" MaxWidth="{Binding ActualWidth, ElementName=UpdateOverlayHost}">
+     <Grid x:Name="MessageNotice" Margin="0,0,0,10" Visibility="{Binding ShowMessage, Converter={StaticResource VisibleWhen}}" p:Motion.Reveal="True">
+      <Border Background="{DynamicResource Background}" CornerRadius="{DynamicResource PanelRadius}" IsHitTestVisible="False"><Border.Effect><DropShadowEffect Color="Black" BlurRadius="28" ShadowDepth="10" Direction="270" Opacity="0.3"/></Border.Effect></Border>
+      <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource ControlBorder}" BorderThickness="1" CornerRadius="{DynamicResource PanelRadius}" Padding="16,10,8,10">
+       <DockPanel><Button DockPanel.Dock="Right" Style="{StaticResource LinkButton}" Command="{Binding DismissMessageCommand}" Width="32" MinHeight="32" Padding="0" HorizontalContentAlignment="Center" VerticalAlignment="Top" Margin="8,0,0,0" AutomationProperties.Name="{l:Tr Close}" ToolTip="{l:Tr Close}"><Path Data="M0,0 L8,8 M8,0 L0,8" Width="9" Height="9" Stretch="Uniform" Stroke="{DynamicResource Muted}" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/></Button>
+        <TextBlock Text="{Binding Message}" TextWrapping="Wrap" VerticalAlignment="Center" LineHeight="20" AutomationProperties.LiveSetting="Polite"/></DockPanel>
+      </Border>
+     </Grid>
+     <v:UpdateBanner DataContext="{Binding Updates}"/>
+    </StackPanel>
    </Grid>
   </Grid>
   <v:ImportOverlay Grid.RowSpan="2" x:Name="ImportPanel" Visibility="{Binding ImportVisible, Converter={StaticResource VisibleWhen}}"/>

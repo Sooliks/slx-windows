@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.16. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.17. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,19 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.17 — stable layout for transient activity
+
+Owner report 2026-10-23: "Please wait…" / loading copy was inserted for ~0.5 s and made the interface jump.
+Transient copy no longer inserts rows: the status card keeps fixed geometry (two reserved detail lines and one status
+line shared by the service code and activity copy; a reported code wins). Activity copy appears only after 400 ms and,
+once shown, stays at least 700 ms (Presentation/Presence), so short operations never flash text; it is Hidden, never
+Collapsed, so space stays reserved. Pending application changes show inline beside the "Added apps" title instead
+of a notice that pushed the list. Messages float bottom-right above the page with a close button; confirmations
+(imported, updated, diagnostics copied) clear themselves after 4 s, warnings and errors stay until closed or replaced.
+Library loading and the import dialog reserve their status lines. Presence never invents or extends a state: it
+only delays and holds the visibility of copy the view model reports. Not covered: the update download progress row
+(floating banner and Updates settings) still appears with the download.
 
 ## Alpha.16 — switch-only app choice and receipt expiry
 

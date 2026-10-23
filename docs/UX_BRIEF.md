@@ -1,6 +1,15 @@
 # Windows client UX brief
 
-## Unreleased switch-only app choice (2026-10-23)
+## Unreleased stable layout for transient activity (2026-10-23)
+
+Owner report: short "Please wait…" / loading lines made the page jump. Contract: transient copy never changes the
+page geometry. The status card reserves two detail lines and one status line (service code or activity copy, code
+first); activity copy appears after 400 ms and stays at least 700 ms; hidden copy keeps its space. Messages float
+bottom-right with a close button and never push content; confirmations clear after 4 s, faults stay until closed.
+Checked by LayoutStabilityChecks (card height and the subscription row do not move during connect, finish and a
+fault notice; Presence timing) — unexecuted until the owner's verify run.
+
+## Alpha.16 switch-only app choice (2026-10-23)
 
 Owner decision: app rows and connection chips show no "Use VPN / No VPN" caption; the switch state is the choice.
 Accessible names, the RouteChoiceHint help text and the chosen-row accent line remain; freed width goes to app names.

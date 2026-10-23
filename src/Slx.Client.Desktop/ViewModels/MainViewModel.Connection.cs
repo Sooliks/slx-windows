@@ -154,7 +154,7 @@ public sealed partial class MainViewModel
         if (disposed) return;
         disposed = true; discoveryCancellation?.Cancel(); CancelRoutingApply(); CancelStartupRefresh(); timer.Stop(); timer.Tick -= PollTick; operation?.Cancel();
         libraryAddCancellation?.Cancel();foreach(var entry in libraryEntries.Values)entry.Dispose();
-        Updates.Dispose();
+        Updates.Dispose(); noticeTimer?.Stop();
         Text.Catalog.PropertyChanged -= LanguageChanged;
         GC.SuppressFinalize(this);
     }

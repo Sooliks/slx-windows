@@ -8,9 +8,9 @@ using Xunit;
 namespace Slx.Client.UiTests;
 internal static class UpdateChecks
 {
-    private static readonly UpdateOffer Offer = new("0.1.0-alpha.16", UpdateSourcePolicy.ReleasePage("0.1.0-alpha.16"),
-        UpdateSourcePolicy.InstallerName("0.1.0-alpha.16"),
-        new("https://github.com/Sooliks/slx-windows/releases/download/v0.1.0-alpha.16/SLX-VPN-0.1.0-alpha.16-win-x64-setup.exe"), 1, new string('a', 64));
+    private static readonly UpdateOffer Offer = new("0.1.0-alpha.18", UpdateSourcePolicy.ReleasePage("0.1.0-alpha.18"),
+        UpdateSourcePolicy.InstallerName("0.1.0-alpha.18"),
+        new("https://github.com/Sooliks/slx-windows/releases/download/v0.1.0-alpha.18/SLX-VPN-0.1.0-alpha.18-win-x64-setup.exe"), 1, new string('a', 64));
     public static void Run(MainWindow window)
     {
         var previous = window.DataContext;

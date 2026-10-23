@@ -30,9 +30,12 @@
        </Grid>
        <TextBlock Grid.Column="1" Text="{Binding StatusText}" FontFamily="{DynamicResource FontUi}" FontWeight="Bold" FontSize="17" AutomationProperties.LiveSetting="Polite"/>
       </Grid>
-      <TextBlock Text="{Binding StatusDetail}" Style="{StaticResource MutedText}" FontSize="13" LineHeight="19" Margin="20,7,0,0"/>
-      <TextBlock Text="{Binding ServiceCodeLabel}" Style="{StaticResource MonoLabel}" FontSize="13" Margin="20,5,0,0" Visibility="{Binding HasServiceCode, Converter={StaticResource VisibleWhen}}"/>
-      <TextBlock Text="{l:Tr Busy}" Foreground="{DynamicResource Muted}" FontSize="13" Margin="20,7,0,0" Visibility="{Binding IsBusy, Converter={StaticResource VisibleWhen}}"/>
+      <!-- Fixed geometry: two reserved detail lines and one status line, so state changes never move the page. -->
+      <TextBlock Text="{Binding StatusDetail}" Style="{StaticResource MutedText}" FontSize="13" LineHeight="19" MinHeight="38" Margin="20,7,0,0"/>
+      <Grid x:Name="StatusMeta" Margin="20,4,0,0" Height="19">
+       <TextBlock Text="{Binding ServiceCodeLabel}" Style="{StaticResource MonoLabel}" FontSize="13" LineHeight="19" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Visibility="{Binding HasServiceCode, Converter={StaticResource VisibleOrHidden}}"/>
+       <TextBlock x:Name="ActivityHint" Text="{Binding ActivityHint}" FontFamily="{DynamicResource FontUi}" FontSize="13" LineHeight="19" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Visibility="Hidden" p:Presence.Show="{Binding ShowActivityHint}" AutomationProperties.LiveSetting="Polite"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource Muted}"/><Style.Triggers><DataTrigger Binding="{Binding ActivityIsRouting}" Value="True"><Setter Property="Foreground" Value="{DynamicResource Accent}"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+      </Grid>
      </StackPanel>
      <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Visibility="{Binding HasSubscription, Converter={StaticResource VisibleWhen}}">
       <Button x:Name="ConnectAction" Content="{Binding ConnectionAction}" Command="{Binding ToggleConnectionCommand}" IsEnabled="{Binding CanConnect}" Style="{StaticResource PrimaryButton}" MinWidth="154" MinHeight="46" Padding="18,11"/>
@@ -60,9 +63,8 @@
        <CheckBox IsChecked="{Binding Enabled}" AutomationProperties.Name="{Binding Name}" AutomationProperties.HelpText="{l:Tr RouteChoiceHint}" ToolTip="{Binding Name}"><DockPanel><Image Source="{Binding Icon}" Width="18" Height="18" Margin="0,0,8,0"/><TextBlock Text="{Binding Name}" MaxWidth="240" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" FontSize="13"/></DockPanel></CheckBox>
       </Border>
      </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
-     <TextBlock x:Name="RulesLiveHint" Text="{l:Tr RulesNotice}" Style="{StaticResource MutedText}" FontSize="13" LineHeight="18" Margin="0,4,0,0" Visibility="{Binding IsConnected, Converter={StaticResource VisibleWhen}}"/>
+     <TextBlock x:Name="RulesLiveHint" Text="{l:Tr RulesNotice}" Style="{StaticResource MutedText}" FontSize="13" LineHeight="18" Margin="0,4,0,0"/>
     </StackPanel>
-    <TextBlock Text="{Binding RoutingUpdateText}" Foreground="{DynamicResource Accent}" FontFamily="{DynamicResource FontUi}" FontSize="13" Margin="0,10,0,0" Visibility="{Binding RulesPending, Converter={StaticResource VisibleWhen}}" p:Motion.Reveal="True"/>
     <Border x:Name="SubscriptionSection" BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0" Margin="0,16,0,0" Padding="0,14,0,0">
      <DockPanel><Button Content="{l:Tr UpdateSubscription}" DockPanel.Dock="Right" Command="{Binding RefreshCommand}" FontSize="13" Padding="13,8" MinHeight="36" Margin="16,0,0,0"/>
       <StackPanel VerticalAlignment="Center"><TextBlock Text="{Binding SubscriptionTitle}" FontWeight="SemiBold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" ToolTip="{Binding SubscriptionTitle}"/><StackPanel Orientation="Horizontal" Margin="0,5,0,0"><TextBlock Text="{l:Tr Expires}" Style="{StaticResource MutedText}" FontSize="13" Margin="0,0,8,0"/><TextBlock Text="{Binding SubscriptionExpiry}" Style="{StaticResource MutedText}" FontFamily="{DynamicResource FontUi}" FontSize="13"/></StackPanel></StackPanel>

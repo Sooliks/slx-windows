@@ -75,7 +75,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public bool RemoveVisible { get => removeVisible; set { if (SetProperty(ref removeVisible, value)) OnPropertyChanged(nameof(IsOverlayVisible)); } }
     public bool IsOverlayVisible => ImportVisible || DiscoveryVisible || RemoveVisible;
     public bool IsBusy { get => busy; private set { if (SetProperty(ref busy, value)) NotifyState(); } }
-    public bool RulesPending { get => rulesPending; private set => SetProperty(ref rulesPending, value); }
+    public bool RulesPending { get => rulesPending; private set { if (SetProperty(ref rulesPending, value)) NotifyActivity(); } }
     public bool HasSubscription => saved != null;
     public bool NoSubscription => !HasSubscription;
     public bool ShowMessage => messageKey.Length > 0;
@@ -123,10 +123,11 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public AsyncRelayCommand ConfirmRemoveCommand { get; }
     private void LanguageChanged(object? sender, PropertyChangedEventArgs e) {foreach(var entry in libraryEntries.Values)entry.RefreshLanguage();OnPropertyChanged("");}
     private void ClearMessage() { messageKey = ""; OnPropertyChanged(nameof(Message)); OnPropertyChanged(nameof(ShowMessage)); }
-    private void Notice(string key) { messageKey = key; OnPropertyChanged(nameof(Message)); OnPropertyChanged(nameof(ShowMessage)); }
+    private void Notice(string key) { messageKey = key; OnPropertyChanged(nameof(Message)); OnPropertyChanged(nameof(ShowMessage)); ScheduleNoticeDismiss(key); }
     private void NotifyState()
     {
         foreach (var name in new[] { nameof(StatusTone), nameof(HasConnectionFacts), nameof(HasActiveProtocol), nameof(ConnectionDuration), nameof(ActiveProtocol), nameof(LastConnectionCheck), nameof(RoutingUpdateText), nameof(IsConnected), nameof(CanEditRouting), nameof(CanConnect), nameof(CanReconnect), nameof(ConnectionAction), nameof(StatusText), nameof(StatusDetail), nameof(LastServiceCode), nameof(HasServiceCode), nameof(ServiceCodeLabel), nameof(HasSubscription), nameof(NoSubscription) }) OnPropertyChanged(name);
+        NotifyActivity();
         ImportCommand?.NotifyCanExecuteChanged(); RefreshCommand?.NotifyCanExecuteChanged();
         ReconnectCommand?.NotifyCanExecuteChanged(); AskRemoveCommand?.NotifyCanExecuteChanged();
         Updates?.RefreshInstallAvailability();

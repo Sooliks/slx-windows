@@ -3,9 +3,9 @@
   <TextBlock Text="{l:Tr ImportTitle}" FontFamily="{DynamicResource FontDisplay}" FontWeight="{DynamicResource DisplayWeight}" FontSize="25" Margin="0,0,0,15"/><TextBlock Text="{l:Tr ImportDescription}" Style="{StaticResource MutedText}" Margin="0,0,0,24"/>
   <Label Content="{l:Tr LinkLabel}" Target="{Binding ElementName=LinkInput}" Foreground="{DynamicResource Text}" FontFamily="{DynamicResource FontUi}" FontSize="13" FontWeight="Bold" Padding="0,0,0,8"/>
   <TextBox x:Name="LinkInput" Text="{Binding ImportLink, UpdateSourceTrigger=PropertyChanged}" SpellCheck.IsEnabled="False" AutomationProperties.Name="{l:Tr LinkLabel}" ToolTip="{l:Tr LinkPlaceholder}" MaxLength="2048" Margin="0,0,0,15" FontFamily="{DynamicResource FontUi}" FontSize="13"><TextBox.Style><Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}"><Style.Triggers><DataTrigger Binding="{Binding IsBusy}" Value="True"><Setter Property="IsReadOnly" Value="True"/></DataTrigger></Style.Triggers></Style></TextBox.Style></TextBox>
-  <TextBlock Text="{Binding Message}" Visibility="{Binding ShowMessage, Converter={StaticResource VisibleWhen}}" Foreground="{DynamicResource Danger}" Margin="0,0,0,14" AutomationProperties.LiveSetting="Polite"/>
+  <TextBlock Text="{Binding Message}" Visibility="{Binding ShowMessage, Converter={StaticResource VisibleOrHidden}}" MinHeight="19" Foreground="{DynamicResource Danger}" Margin="0,0,0,14" AutomationProperties.LiveSetting="Polite"/>
   <TextBlock Text="{l:Tr ImportFootnote}" Style="{StaticResource MutedText}" FontSize="13" Margin="0,0,0,24"/>
   <WrapPanel HorizontalAlignment="Right"><Button Content="{l:Tr Cancel}" Command="{Binding CancelOverlayCommand}" Margin="0,0,10,0"/><Button Content="{l:Tr ImportAction}" Command="{Binding ImportCommand}" Style="{StaticResource PrimaryButton}" MinWidth="130" IsDefault="True"/></WrapPanel>
-  <TextBlock Text="{l:Tr Busy}" Foreground="{DynamicResource Muted}" FontSize="13" Margin="0,15,0,0" Visibility="{Binding IsBusy, Converter={StaticResource VisibleWhen}}"/>
+  <TextBlock Text="{l:Tr Busy}" Foreground="{DynamicResource Muted}" FontSize="13" Margin="0,15,0,0" Visibility="Hidden" p:Presence.Show="{Binding IsBusy}"/>
  </StackPanel></Border></Grid>
 </UserControl>

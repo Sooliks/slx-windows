@@ -1,3 +1,7 @@
+# Verification — 0.1.0-alpha.17 (2026-10-23)
+
+STATUS: PARTIAL. Codex ran scripts/verify.ps1 on the Windows host: exit 0, completed 14:50:42 UTC. Locked restore and Release solution build passed with zero warnings/errors; 382 unit/Windows checks and one expanded WPF scenario passed, zero failed/skipped. Source size gate passed. Log: artifacts/handoff/verify-run5.txt. LayoutStabilityChecks covers stable connection/subscription positions, floating notice dismissal and suppression of short activity flashes. Current slx-floating-notice-ru-narrow.png was viewed. Synthetic WPF evidence does not establish installed product, physical DPI, real network or upgrade/rollback acceptance. No service/core/IPC/data/dependency change. Update download progress still appears when a transfer starts.
+
 # Verification — 0.1.0-alpha.16 (2026-10-23)
 
 STATUS: PARTIAL. Owner explicitly requested build/publication without a full verification run. No verify.ps1, unit or WPF tests executed for this release; newly added tests are unexecuted. Release build and packaging are performed by the standard scripts; exact identity is recorded in provenance. Installed upgrade, receipt expiry behavior, staged-installer reuse and the reported long-uptime failure remain unverified. Historical alpha.15 results below do not validate alpha.16.

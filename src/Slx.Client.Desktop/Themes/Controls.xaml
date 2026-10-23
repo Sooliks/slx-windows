@@ -4,7 +4,7 @@
  <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">12</sys:Double>
  <p:ApplicationIconConverter x:Key="ApplicationIcon"/>
  <DataTemplate x:Key="ProfileNameTemplate"><TextBlock FontWeight="SemiBold" Text="{Binding Name}" ToolTip="{Binding Name}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/></DataTemplate>
- <BooleanToVisibilityConverter x:Key="VisibleWhen"/><Style TargetType="UserControl"><Setter Property="Foreground" Value="{DynamicResource Text}"/></Style>
+ <BooleanToVisibilityConverter x:Key="VisibleWhen"/><p:VisibleOrHiddenConverter x:Key="VisibleOrHidden"/><Style TargetType="UserControl"><Setter Property="Foreground" Value="{DynamicResource Text}"/></Style>
  <Style TargetType="Window"><Setter Property="Background" Value="{DynamicResource Background}"/><Setter Property="Foreground" Value="{DynamicResource Text}"/><Setter Property="FontFamily" Value="{DynamicResource FontText}"/><Setter Property="FontSize" Value="14"/><Setter Property="FontWeight" Value="Medium"/><Setter Property="TextOptions.TextFormattingMode" Value="Ideal"/><Setter Property="TextOptions.TextRenderingMode" Value="Grayscale"/></Style>
  <Style TargetType="TextBlock"><Setter Property="TextWrapping" Value="Wrap"/></Style>
  <!-- Typography roles: reading text (FontText), interface voice for labels/controls/data (FontUi), display headings (FontDisplay). -->

@@ -6,9 +6,9 @@ using Xunit;
 namespace Slx.Client.UiTests;
 internal static class UpdateReuseChecks
 {
-    private static readonly UpdateOffer Offer = new("0.1.0-alpha.16", UpdateSourcePolicy.ReleasePage("0.1.0-alpha.16"),
-        UpdateSourcePolicy.InstallerName("0.1.0-alpha.16"),
-        new("https://github.com/Sooliks/slx-windows/releases/download/v0.1.0-alpha.16/SLX-VPN-0.1.0-alpha.16-win-x64-setup.exe"), 1, new string('a', 64));
+    private static readonly UpdateOffer Offer = new("0.1.0-alpha.18", UpdateSourcePolicy.ReleasePage("0.1.0-alpha.18"),
+        UpdateSourcePolicy.InstallerName("0.1.0-alpha.18"),
+        new("https://github.com/Sooliks/slx-windows/releases/download/v0.1.0-alpha.18/SLX-VPN-0.1.0-alpha.18-win-x64-setup.exe"), 1, new string('a', 64));
     // A verified installer staged earlier for the offered release goes straight to Install: no second download.
     public static void Run()
     {
