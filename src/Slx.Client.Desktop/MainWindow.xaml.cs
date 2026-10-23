@@ -14,6 +14,8 @@ public partial class MainWindow : Window
     public MainWindow(MainViewModel model, bool renderOnly = false)
     {
         this.model = model; this.renderOnly = renderOnly;
+        // Render checks and UI fixtures capture final frames; the running app follows Windows animation settings.
+        if (renderOnly) Motion.Suppressed = true;
         InitializeComponent(); DataContext = model;
         SourceInitialized += (_, _) => { if (!renderOnly) tray = new TrayIcon(this, model); };
         Closing += ClosingWindow;
@@ -35,6 +37,7 @@ public partial class MainWindow : Window
     }
     private void ModelChanged(object? sender, PropertyChangedEventArgs args)
     {
+        if (args.PropertyName == nameof(MainViewModel.Page)) Motion.Enter(PageHost);
         if (args.PropertyName is nameof(MainViewModel.ImportVisible) or nameof(MainViewModel.DiscoveryVisible) or nameof(MainViewModel.RemoveVisible))
         {
             AppContent.IsEnabled = !model.IsOverlayVisible;

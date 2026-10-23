@@ -1,5 +1,12 @@
 # Boundaries
 
+Alpha.15: Desktop/Presentation owns Motion (one-shot attached animations and the motion policy), Chrome
+(per-style hover fills), ScrollMemory (in-memory page offsets per view model) and the route-scene AmbientBackdrop.
+MotionLifetime owns active clocks and their temporary lifecycle/policy subscriptions; completion and cancellation
+remove clocks and handlers. ThemeManager adds/removes one owned system-color layer on High Contrast changes and
+unsubscribes on application exit. Themes own all tokens; views never branch on the theme.
+No Core/Windows/Service, IPC or stored-data format change.
+
 Alpha.14: app edits use typed update-applications, distinct from explicit reconnect. Service compares the current
 effective route set after full validation; metadata-only changes touch neither WFP nor core. ApplicationUpdateTransaction
 owns union protection → durable desired intent → one Xray replacement → final app-only WFP delta. Response loss is
@@ -45,4 +52,8 @@ Alpha.11: Windows `TrafficApplicationIds` resolves the complete native identity 
 
 Core owns SemVer comparison, same-repository release/asset policy and checksum parsing. Windows `ReleaseUpdateClient` owns bounded public HTTPS fetches, restricted asset redirects, streamed download, SHA-256 verification and explicit installer launch. Desktop owns startup/six-hour checking, saved reminder/automatic-check preferences and the offer/download/install states. A shared UI mutation lease checks the service for Disconnected and protection inactive before installer handoff and prevents connection changes during verification/launch. The installer is reverified while held open, Internet-zone metadata is retained, and UAC remains an explicit user step. Trust is in HTTPS and the authorized public GitHub repository; a checksum from that repository is integrity evidence, not a publisher signature. The application/installer remain intentionally unsigned; no elevated update daemon or updater IPC command is added. See UPDATES.md.
 
-Desktop graphics use frozen native WPF geometry with theme tokens: static cut-X diagonals/contours, no rendering timer, animated connection claim or fabricated traffic graph. High contrast omits the ambient drawing. The sidebar switches to an icon rail below 1080 WPF device-independent pixels while retaining tooltips and automation names; status/detail/code, application controls and update states remain native WPF views. Olive/lime and Terminal themes preserve the SLX brand.
+Desktop graphics use native WPF geometry with theme tokens. The route scene restates saved mode/app count only,
+with a bounded 650 ms redraw after a choice changes and no settled rendering timer, animated connection claim or
+fabricated traffic graph. High contrast omits the ambient drawing. The sidebar switches to an icon rail below
+1080 WPF device-independent pixels while retaining tooltips and automation names; status/detail/code, application
+controls and update states remain native WPF views. Olive/lime and Terminal themes preserve the SLX brand.

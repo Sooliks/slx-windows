@@ -13,8 +13,8 @@ using Xunit;
 namespace Slx.Client.UiTests;
 internal static class UpdatePresentationChecks
 {
-    private static readonly UpdateOffer Offer = new("0.1.0-alpha.15", UpdateSourcePolicy.ReleasePage("0.1.0-alpha.15"),
-        UpdateSourcePolicy.InstallerName("0.1.0-alpha.15"), new("https://github.com/Sooliks/slx-windows/releases/download/v0.1.0-alpha.15/SLX-VPN-0.1.0-alpha.15-win-x64-setup.exe"), 1, new string('a', 64));
+    private static readonly UpdateOffer Offer = new("0.1.0-alpha.16", UpdateSourcePolicy.ReleasePage("0.1.0-alpha.16"),
+        UpdateSourcePolicy.InstallerName("0.1.0-alpha.16"), new("https://github.com/Sooliks/slx-windows/releases/download/v0.1.0-alpha.16/SLX-VPN-0.1.0-alpha.16-win-x64-setup.exe"), 1, new string('a', 64));
     public static void Run(MainWindow window)
     {
         var original = window.DataContext;
@@ -40,7 +40,7 @@ internal static class UpdatePresentationChecks
             Assert.False(string.IsNullOrWhiteSpace(AutomationProperties.GetHelpText(later)));
             Assert.True(apply.Focusable); Assert.True(later.Focusable); Assert.NotNull(apply.FocusVisualStyle);
             Assert.All(Sta.Descendants<Button>(banner), button => Assert.True(button.ActualHeight >= 40));
-            AssertFits(window, banner); UiScreenshots.Save(window, "slx-update14-available-ru-narrow");
+            AssertFits(window, banner); UiScreenshots.Save(window, "slx-update15-available-ru-narrow");
             model.ImportVisible = true; Sta.Pump();
             Assert.False(banner.IsVisible);
             Assert.False(Sta.Descendants<Grid>(window).Single(grid => grid.Name == "UpdateOverlayHost").IsVisible);
@@ -54,7 +54,7 @@ internal static class UpdatePresentationChecks
             reporter!.Report(37); Sta.Pump();
             Assert.Equal(37, updates.Progress); Assert.Contains("37", updates.ProgressText);
             Assert.Same(connect, FocusManager.GetFocusedElement(window)); Assert.True(connect.IsEnabled);
-            AssertFits(window, banner); UiScreenshots.Save(window, "slx-update14-downloading-ru-narrow");
+            AssertFits(window, banner); UiScreenshots.Save(window, "slx-update15-downloading-ru-narrow");
             Assert.True(later.IsEnabled); updates.LaterCommand.Execute(null); Sta.Pump();
             Assert.False(banner.IsVisible); Assert.False(pending.Task.IsCompleted); Assert.False(downloadCancellation.IsCancellationRequested);
             Assert.Equal(originalConnect, Bounds(connect, window)); Assert.Equal(originalSubscription, Bounds(subscription, window));
@@ -62,7 +62,7 @@ internal static class UpdatePresentationChecks
             model.Page = "settings"; Sta.Pump();
             var downloadSettings = Sta.Descendants<UpdateSettings>(window).Single(); downloadSettings.BringIntoView(); Sta.Pump();
             Assert.Contains(Sta.Descendants<TextBlock>(downloadSettings), block => block.IsVisible && block.Text == updates.ProgressText);
-            UiScreenshots.Save(window, "slx-update14-deferred-download-settings-ru-narrow");
+            UiScreenshots.Save(window, "slx-update15-deferred-download-settings-ru-narrow");
             pending.SetResult(new(Offer, @"C:\SLX UI Fixture\NeverLaunched.exe")); Sta.Pump();
             Assert.True(download.IsCompletedSuccessfully); Assert.False(updates.IsDownloading);
             Assert.Equal(Text.Catalog["UpdateReady"], updates.Status);
@@ -82,18 +82,18 @@ internal static class UpdatePresentationChecks
             SetService(model, TunnelPhase.Connected);
             Assert.False(updates.ApplyCommand.CanExecute(null)); Assert.True(updates.IsInstallBlocked);
             Assert.Equal(Text.Catalog["UpdateDisconnectFirst"], updates.BannerDescription);
-            AssertFits(window, banner); UiScreenshots.Save(window, "slx-update14-vpn-blocked-ru-narrow");
+            AssertFits(window, banner); UiScreenshots.Save(window, "slx-update15-vpn-blocked-ru-narrow");
             model.SendOverride = (_, _) => Task.FromResult(new PipeReply(false, "SERVICE_TIMEOUT", new(TunnelPhase.Disconnected, DateTimeOffset.UtcNow)));
             model.PollAsync().GetAwaiter().GetResult(); Sta.Pump();
             Assert.Equal(Text.Catalog["UpdateServiceUnconfirmed"], updates.InstallHint);
             Assert.Equal(updates.InstallHint, updates.BannerDescription);
             Assert.Equal(updates.InstallHint, AutomationProperties.GetHelpText(apply));
-            AssertFits(window, banner); UiScreenshots.Save(window, "slx-update14-service-wait-ru-narrow");
+            AssertFits(window, banner); UiScreenshots.Save(window, "slx-update15-service-wait-ru-narrow");
             SetService(model, TunnelPhase.Disconnected);
             updates.LaunchOverride = (_, _) => Task.FromResult(UpdateLaunchResult.Cancelled);
             updates.ApplyCommand.ExecuteAsync(null).GetAwaiter().GetResult(); Sta.Pump();
             Assert.Equal(Text.Catalog["UpdateInstallCancelled"], updates.Status); Assert.True(apply.IsEnabled);
-            AssertFits(window, banner); UiScreenshots.Save(window, "slx-update14-uac-cancel-ru-narrow");
+            AssertFits(window, banner); UiScreenshots.Save(window, "slx-update15-uac-cancel-ru-narrow");
             SetService(model, TunnelPhase.Connected);
             Assert.Equal(Text.Catalog["UpdateInstallCancelled"], updates.BannerDescription);
             Assert.Equal(Text.Catalog["UpdateDisconnectFirst"], updates.InstallHint);
@@ -118,16 +118,16 @@ internal static class UpdatePresentationChecks
             nextReporter!.Report(64); Sta.Pump(); Assert.Equal(64, updates.Progress);
             next.SetException(new ClientFault("UPDATE_INTEGRITY_FAILED")); Sta.Pump(); Assert.True(secondDownload.IsCompletedSuccessfully);
             Assert.Equal(Text.Catalog["UpdateIntegrityFailed"], updates.Status);
-            AssertFits(window, banner); UiScreenshots.Save(window, "slx-update14-integrity-failure-ru-narrow");
+            AssertFits(window, banner); UiScreenshots.Save(window, "slx-update15-integrity-failure-ru-narrow");
             updates.LaterCommand.Execute(null); Sta.Pump(); Assert.False(banner.IsVisible); Assert.True(updates.IsOfferDeferred);
             model.Page = "settings"; Sta.Pump();
             var settings = Sta.Descendants<UpdateSettings>(window).Single();
             var settingsApply = Sta.Descendants<Button>(settings).Single(button => button.Name == "UpdateSettingsApply");
             Assert.True(settingsApply.IsEnabled); Assert.Contains(Offer.Version, new ButtonAutomationPeer(settingsApply).GetName());
-            settings.BringIntoView(); Sta.Pump(); UiScreenshots.Save(window, "slx-update14-deferred-settings-ru-narrow");
+            settings.BringIntoView(); Sta.Pump(); UiScreenshots.Save(window, "slx-update15-deferred-settings-ru-narrow");
             updates.CheckAsync(true).GetAwaiter().GetResult(); model.Page = "connection"; model.Language = "en";
             window.Width = 1200; window.Height = 820; Sta.Pump();
-            AssertFits(window, banner); UiScreenshots.Save(window, "slx-update14-available-en-wide");
+            AssertFits(window, banner); UiScreenshots.Save(window, "slx-update15-available-en-wide");
         }
         finally { window.DataContext = original; Text.Catalog.SetLanguage("ru"); }
     }

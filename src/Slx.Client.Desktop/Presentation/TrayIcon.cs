@@ -46,6 +46,22 @@ internal sealed class TrayIcon : IDisposable
         data = new NotifyData { Size = (uint)Marshal.SizeOf<NotifyData>(), Window = handle, Id = 1,
             Flags = 1 | 2 | 4, Callback = CallbackMessage, Icon = small, Tip = "SLX VPN", Info = "", InfoTitle = "" };
         IsAvailable = Shell_NotifyIcon(0, ref data);
+        model.PropertyChanged += StatusChanged;
+        UpdateTip();
+    }
+    // The tray tooltip restates the same service-confirmed status text as the window; it never infers a state.
+    private void StatusChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName is "" or null or nameof(MainViewModel.StatusText)) UpdateTip();
+    }
+    private void UpdateTip()
+    {
+        if (disposed) return;
+        var tip = string.Format(System.Globalization.CultureInfo.CurrentCulture, Text.Catalog["TrayStatus"], model.StatusText);
+        tip = tip.Length > 127 ? tip[..127] : tip;
+        if (tip == data.Tip) return;
+        data.Tip = tip;
+        if (IsAvailable) Shell_NotifyIcon(1, ref data);
     }
     private nint WndProc(nint handle, int message, nint wParam, nint lParam, ref bool handled)
     {
@@ -63,7 +79,7 @@ internal sealed class TrayIcon : IDisposable
         menu.SetResourceReference(Control.BorderBrushProperty, "Border");
         Add(menu, Text.Catalog["TrayOpen"], () => window.Restore());
         Add(menu, Text.Catalog["Reconnect"], () => model.ReconnectCommand.Execute(null), model.CanReconnect);
-        Add(menu, Text.Catalog["Disconnect"], () => model.ToggleConnectionCommand.Execute(null), model.IsTunnelActive);
+        Add(menu, model.ConnectionAction, () => model.ToggleConnectionCommand.Execute(null), model.IsTunnelActive || model.CanConnect);
         menu.Items.Add(new Separator { Style = (Style)window.FindResource("TrayMenuSeparator") });
         Add(menu, Text.Catalog["TrayExit"], () => _ = window.ExitAsync());
         window.Activate(); menu.IsOpen = true;
@@ -79,6 +95,7 @@ internal sealed class TrayIcon : IDisposable
     {
         if (disposed) return;
         disposed = true;
+        model.PropertyChanged -= StatusChanged;
         Shell_NotifyIcon(2, ref data); source.RemoveHook(WndProc);
         if (data.Icon != 0) DestroyIcon(data.Icon);
     }

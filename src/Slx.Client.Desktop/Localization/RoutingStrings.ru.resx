@@ -7,4 +7,7 @@
 <data name="RulesApplyUnconfirmed" xml:space="preserve"><value>Не удалось подтвердить изменения для приложений. VPN продолжает работать. Проверьте состояние перед повторной попыткой.</value></data>
 <data name="RulesApplyFailed" xml:space="preserve"><value>Не удалось применить изменения для приложений. VPN продолжает работать. Проверьте выбранные приложения и повторите попытку.</value></data>
 <data name="RulesConnectionChanged" xml:space="preserve"><value>Подключение изменилось. Переподключите VPN, чтобы применить текущие настройки.</value></data>
+<data name="RouteViaVpn" xml:space="preserve"><value>Использовать VPN</value></data>
+<data name="RouteDirect" xml:space="preserve"><value>Без VPN</value></data>
+<data name="RouteChoiceHint" xml:space="preserve"><value>Сохранённый выбор для режима «Приложения». Состояние VPN показано на экране «Подключение».</value></data>
 </root>

@@ -7,8 +7,9 @@
 <data name="OpenSource" xml:space="preserve"><value>Открытый исходный код</value></data>
 <data name="Account" xml:space="preserve"><value>Личный кабинет ↗</value></data>
 <data name="WindowMinimize" xml:space="preserve"><value>Свернуть</value></data>
-<data name="WindowMaximize" xml:space="preserve"><value>Развернуть или восстановить</value></data>
-<data name="WindowClose" xml:space="preserve"><value>Закрыть в трей</value></data>
+<data name="WindowMaximize" xml:space="preserve"><value>Развернуть</value></data>
+<data name="WindowRestore" xml:space="preserve"><value>Восстановить</value></data>
+<data name="WindowClose" xml:space="preserve"><value>Закрыть окно</value></data>
 <data name="Eyebrow" xml:space="preserve"><value>SLX VPN / WINDOWS</value></data>
 <data name="ConnectionTitle" xml:space="preserve"><value>Ваше подключение.</value></data>
 <data name="ConnectionSubtitle" xml:space="preserve"><value>Личный маршрут для нужных приложений.</value></data>
@@ -47,7 +48,7 @@
 <data name="ModeWhole" xml:space="preserve"><value>Весь ПК</value></data>
 <data name="ModeSelectedDescription" xml:space="preserve"><value>Только включённые приложения используют VPN.</value></data>
 <data name="ModeWholeDescription" xml:space="preserve"><value>Интернет на всём ПК через VPN. Локальная сеть доступна.</value></data>
-<data name="SelectedApps" xml:space="preserve"><value>Приложения через VPN</value></data>
+<data name="SelectedApps" xml:space="preserve"><value>Выбор приложений</value></data>
 <data name="NoAppsTitle" xml:space="preserve"><value>Выберите первое приложение</value></data>
 <data name="NoAppsDescription" xml:space="preserve"><value>Добавьте браузер, мессенджер или другой .exe. Мы ничего не выбираем автоматически.</value></data>
 <data name="ManageApps" xml:space="preserve"><value>Выбрать приложения</value></data>
@@ -191,4 +192,6 @@
 <data name="AutoConnectNetworkWait" xml:space="preserve"><value>Автоподключение ожидает доступную сеть. Если ожидание затянулось, проверьте интернет.</value></data>
 <data name="StatusPreparing" xml:space="preserve"><value>Подготовка подключения</value></data>
 <data name="ServiceStartupHelp" xml:space="preserve"><value>Windows ещё готовит сеть. SLX проверит готовность службы автоматически. Если ожидание затянулось, откройте «Помощь».</value></data>
+<data name="RemoveBlocked" xml:space="preserve"><value>Состояние VPN пока не подтверждено, поэтому ссылка остаётся на компьютере. Отключите VPN или дождитесь ответа службы SLX и повторите.</value></data>
+<data name="TrayStatus" xml:space="preserve"><value>SLX VPN · {0}</value></data>
 </root>

@@ -1,11 +1,31 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+ <!-- Site tokens.css (olive-black, 2026-10-23). Every key is redefined by Terminal.xaml; views never branch on the theme. -->
  <SolidColorBrush x:Key="Background" Color="#0F110E"/><SolidColorBrush x:Key="Surface" Color="#171A15"/>
- <SolidColorBrush x:Key="SurfaceRaised" Color="#21261E"/><SolidColorBrush x:Key="Border" Color="#353B30"/>
+ <SolidColorBrush x:Key="SurfaceRaised" Color="#21261E"/><SolidColorBrush x:Key="SurfaceHover" Color="#21261E"/>
+ <SolidColorBrush x:Key="SurfaceInset" Color="#0A0C09"/><SolidColorBrush x:Key="ControlFill" Color="#1A1E18"/>
+ <SolidColorBrush x:Key="ControlInset" Color="#121510"/><SolidColorBrush x:Key="Border" Color="#353B30"/>
+ <SolidColorBrush x:Key="ControlBorder" Color="#81897A"/><SolidColorBrush x:Key="ButtonBorder" Color="#5E6656"/>
+ <SolidColorBrush x:Key="ControlHoverBorder" Color="#A5AB9B"/><SolidColorBrush x:Key="ControlHighlight" Color="#0DFFFFFF"/>
  <SolidColorBrush x:Key="Text" Color="#F2F3ED"/><SolidColorBrush x:Key="Muted" Color="#A5AB9B"/>
- <SolidColorBrush x:Key="ControlBorder" Color="#81897A"/><SolidColorBrush x:Key="SurfaceInset" Color="#0A0C09"/>
- <SolidColorBrush x:Key="AccentWash" Color="#24291A"/>
- <LinearGradientBrush x:Key="SignalSurface" StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#202619" Offset="0"/><GradientStop Color="#171A15" Offset="0.7"/></LinearGradientBrush>
+ <SolidColorBrush x:Key="Accent" Color="#E6F35A"/><SolidColorBrush x:Key="AccentHover" Color="#F1FA9A"/>
+ <SolidColorBrush x:Key="AccentText" Color="#0F110E"/><SolidColorBrush x:Key="AccentWash" Color="#12E6F35A"/>
+ <SolidColorBrush x:Key="AccentWashStrong" Color="#1FE6F35A"/><SolidColorBrush x:Key="AccentLine" Color="#6BE6F35A"/>
+ <SolidColorBrush x:Key="Success" Color="#87CBA2"/><SolidColorBrush x:Key="SuccessWash" Color="#1787CBA2"/>
+ <SolidColorBrush x:Key="Danger" Color="#F09292"/><SolidColorBrush x:Key="DangerWash" Color="#17F09292"/>
+ <SolidColorBrush x:Key="DangerLine" Color="#66F09292"/>
+ <!-- Glass: WPF has no backdrop blur, so the material stays dense enough that route lines never cross text. -->
+ <LinearGradientBrush x:Key="GlassSurface" StartPoint="0,0" EndPoint="1,0.8"><GradientStop Color="#E81A1D18" Offset="0"/><GradientStop Color="#E30F110E" Offset="0.52"/></LinearGradientBrush>
+ <LinearGradientBrush x:Key="GlassEdge" StartPoint="0,0" EndPoint="0,1"><GradientStop Color="#40F2F3ED" Offset="0"/><GradientStop Color="#2BF2F3ED" Offset="0.12"/></LinearGradientBrush>
+ <LinearGradientBrush x:Key="SignalSurface" StartPoint="0,0" EndPoint="0,1"><GradientStop Color="#EB1C2013" Offset="0"/><GradientStop Color="#E8121410" Offset="0.6"/></LinearGradientBrush>
+ <SolidColorBrush x:Key="Backdrop" Color="#B8000000"/><Color x:Key="ShadowColor">#000000</Color>
+ <SolidColorBrush x:Key="ScrollThumb" Color="#747B64"/><SolidColorBrush x:Key="ScrollThumbHover" Color="#A9B485"/>
  <SolidColorBrush x:Key="AmbientFace" Color="#8B9568"/><SolidColorBrush x:Key="AmbientEdge" Color="#CBD0BD"/>
- <SolidColorBrush x:Key="Accent" Color="#E6F35A"/><SolidColorBrush x:Key="AccentText" Color="#15180D"/>
- <SolidColorBrush x:Key="Danger" Color="#F09292"/><SolidColorBrush x:Key="Success" Color="#87CBA2"/>
+ <!-- Installed site faces take priority. Olive falls back to Segoe UI for legibility at 96 DPI;
+      the opt-in Terminal theme retains its monospace fallback. No font binaries are bundled. -->
+ <FontFamily x:Key="FontText">IBM Plex Sans, Segoe UI</FontFamily>
+ <FontFamily x:Key="FontDisplay">Geologica, Segoe UI</FontFamily>
+ <FontFamily x:Key="FontUi">JetBrains Mono, Segoe UI</FontFamily>
+ <FontWeight x:Key="DisplayWeight">SemiBold</FontWeight>
+ <CornerRadius x:Key="ControlRadius">6</CornerRadius><CornerRadius x:Key="PanelRadius">10</CornerRadius>
+ <CornerRadius x:Key="SmallRadius">4</CornerRadius><CornerRadius x:Key="ThumbRadius">2</CornerRadius>
 </ResourceDictionary>

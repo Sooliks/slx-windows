@@ -45,11 +45,15 @@ public sealed partial class MainViewModel
     {
         if (IsBusy) return;
         CancelStartupRefresh();
+        RemoveBlocked = false;
         if (IsTunnelActive) await ChangeTunnelAsync("disconnect");
-        if (IsTunnelActive || !statusFresh) return;
+        // Without a fresh confirmed off state the saved link stays; the dialog says why (no silent no-op).
+        if (IsTunnelActive || !statusFresh) { RemoveBlocked = !disposed; return; }
         try
         {
-            store.ClearSubscription(); saved = null; Profiles.Clear(); SelectedProfile = null;
+            // Render checks and UI fixtures never touch the user's stored subscription.
+            if (persistPreferences) store.ClearSubscription();
+            saved = null; Profiles.Clear(); SelectedProfile = null;
             ImportLink = ""; RemoveVisible = false; ClearMessage();
             OnPropertyChanged(nameof(IsOverlayVisible)); OnPropertyChanged(nameof(SubscriptionTitle)); NotifyState();
         }

@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.14. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.15. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,28 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.15 — site-aligned design and native motion
+
+Owner request of 2026-10-23: align every Windows surface with the current slxvpn.com design system, add tasteful
+native animation, improve UX and fix confirmed stability defects; Codex owns review, integration and publication.
+Owner explicitly allows motion now. This supersedes the alpha.11 "no ambient timers/decorative animation" wording for
+interface feedback only: no loop, fake activity, traffic graph, ping or speed is introduced, and service health polling
+is unchanged. Motion is one-shot (140/180/220/360/650 ms, site cubic-bezier(0.2,0.7,0.2,1)); interface feedback uses
+Opacity and RenderTransform. The route scene redraws for at most 650 ms after a saved choice changes, without a
+settled repaint loop. Motion never defines state and applies its final values when Windows animations are off,
+High Contrast is on, the window is hidden/minimized, or in render checks/UI fixtures; active clocks are stopped too.
+Tokens follow site tokens.css/themes.css: olive-black neutrals, lime accent, washes/lines, glass panels; Terminal is
+black/white, square corners and mono. Faces: Geologica/IBM Plex Sans/JetBrains Mono when installed, otherwise native
+Segoe UI in Olive and Cascadia Mono/Consolas in Terminal; no font binaries are bundled. Ideal/Grayscale rendering, Medium body,
+13px minimum secondary text and the 204/76px adaptive sidebar remain. The background is the site route scene as a
+static drawing that restates the saved mode and selected-app count only; it eases once after a change.
+Adjacent fixes: subscription removal with an unconfirmed service state now explains why the link stays instead of
+silently keeping the dialog open; non-persistent render/test models never clear the stored subscription; the empty
+settings freshness dash is hidden; page scroll position survives navigation; window controls share centered glyphs,
+stable hit targets, distinct close feedback and correct maximize/restore state; the tray tooltip states the confirmed
+status and the tray menu offers Connect when allowed. No network, IPC, stored-data format, service or dependency change.
+Rollback: revert the Desktop/UiTests diff; there is no data or IPC migration.
 
 ## Alpha.14 — live application routing
 

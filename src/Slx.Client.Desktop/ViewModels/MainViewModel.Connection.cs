@@ -45,6 +45,7 @@ public sealed partial class MainViewModel
         catch (Exception error) when (error is ClientFault or OperationCanceledException or IOException)
         { if (owner == generation) MarkStatusUnknown(error is ClientFault fault ? fault.Code : "SERVICE_TIMEOUT"); }
         finally { polling = false; NotifyState(); }
+        ResumeDeferredRouting();
         await TryStartupConnectionAsync();
     }
     private Task ToggleAsync() => IsTunnelActive || IsBusy ? ChangeTunnelAsync("disconnect") : ChangeTunnelAsync("connect");
@@ -145,7 +146,7 @@ public sealed partial class MainViewModel
     private void CloseOverlay()
     {
         if (IsBusy) return;
-        ImportVisible = false; DiscoveryVisible = false; RemoveVisible = false;
+        ImportVisible = false; DiscoveryVisible = false; RemoveVisible = false; RemoveBlocked = false;
         OnPropertyChanged(nameof(IsOverlayVisible));
     }
     public void Dispose()

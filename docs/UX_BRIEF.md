@@ -1,5 +1,34 @@
 # Windows client UX brief
 
+## Alpha.15 site-aligned design and motion (2026-10-23)
+
+Owner decision: the static alpha.11 composition may evolve; quality native animation is now explicitly allowed. The
+older "no decorative animation" statements below remain true for loops, settled background repaint and fake activity.
+Reference: slxvpn.com /, /windows, /connection, /help, /support viewed 2026-10-23 (RU/EN, Olive and Terminal).
+Token map (site → WPF resource → use): surface-canvas/raised/inset/hover, control-fill/inset → Background, Surface,
+SurfaceInset, SurfaceHover, ControlFill, ControlInset → window, sidebar, fields, rows; border-subtle/control,
+control-border/hover → Border, ControlBorder, ButtonBorder, ControlHoverBorder → panels, inputs, buttons; accent,
+accent-hover, accent-wash(-strong), accent-line → Accent, AccentHover, AccentWash(Strong), AccentLine → primary
+action, current section, chosen app rows, lit status; danger/success (+wash/line) → Danger*, Success*; glass-surface,
+glass-edge → GlassSurface, GlassEdge → Card; control/panel/sm radius → ControlRadius 6, PanelRadius 10, SmallRadius 4
+(Terminal 0); face-text/display/ui → FontText, FontDisplay, FontUi + DisplayWeight; scroll-thumb(-hover) → ScrollThumb*.
+Patterns: .button variants → Button/PrimaryButton/LinkButton/DangerButton; .switch-track → CheckBox switch with square
+thumb; .segmented-options → RadioButton inside Segmented; route-console status/rows → StatusPanel tone and AppRow/
+AppChip with saved routing choices (not observed egress); .notice → Notice; .dialog → Dialog; support rail numbers → Help StepNumber; route scene →
+AmbientBackdrop. Olive uses Segoe UI when site fonts are absent for readability at 96 DPI; Terminal retains mono.
+WPF has no backdrop blur or letter-spacing: glass is denser than the site and tracking is native.
+Window controls use equal centered glyph areas, fixed hit targets, separate close feedback and localized
+maximize/restore tooltips. Hover/press/focus never shift their geometry; native drag/resize remains available.
+Motion: hover/press fade layers 140 ms, switch thumb and segmented choice 220 ms, page/notice/dialog/popup/update card
+entry 180 ms (opacity + 6px rise, ending at exact base values), confirmed-connected ring 360 ms once, route branches
+650 ms once after a mode/app change. Nothing loops; Windows animation preference, High Contrast, hidden/minimized
+window and render checks apply final values immediately. Animation never implies Connected/Applied/Installed.
+Status tone separates connected (lit accent panel), active (hollow accent marker), attention (danger line), unknown
+(hollow muted marker) and off (plain) and only restates the service-confirmed text beside it.
+Evidence required: WPF fixtures for motion policy, route scene, scroll memory, status tone, blocked removal, RU/EN
+parity and the existing layout suite; native PNG review at 940x660/1200x820. Physical DPI, live screen reader, real
+Windows animation toggles and installed VPN remain separate acceptance.
+
 ## Alpha.14 live application changes
 
 Friction: every app-list mutation restarts the whole core/TUN, including removing a disabled row. Given a live selected
@@ -134,8 +163,8 @@ Subscription secrets remain out of status text, diagnostics and render evidence.
 Native automation peers, labeled inputs/buttons, Tab/Enter/Escape, focus indicators,
 modal background disabling and scoped tab navigation. All UI copy and file-picker
 labels have matching RU/EN .resx resources. Native controls use themed dropdowns and
-scrollbars. High contrast maps theme colors to system resources. No decorative
-animation runs, so minimized/reduced-motion users have no background motion cost.
+scrollbars. High contrast maps theme colors to system resources and restores the selected theme when disabled.
+Only bounded action feedback runs; hidden/minimized and reduced-motion states finish active clocks immediately.
 
 `--render-check` is isolated from stored settings/subscriptions, autostart, tray,
 service and network requests. It creates current actual WPF RenderTargetBitmap

@@ -17,6 +17,7 @@ public sealed class PopulatedUiTests
         window.Show(); Sta.Pump();
         try
         {
+            CaptionChecks.Run(window, model);
             ComboChecks.Run(window, model);
             LayoutChecks.Run(window, model);
             AdaptiveNavigationChecks.Run(window, model);
@@ -32,6 +33,12 @@ public sealed class PopulatedUiTests
             ApplicationUpdateVisualChecks.Run(window);
             StartupAutoConnectChecks.Run();
             SettingsStartupChecks.Run(window);
+            MotionChecks.Run(window, model);
+            PresentationStateChecks.Run();
+            LocalizationChecks.Run();
+            ThemeContrastChecks.Run();
+            RoutingDeferralChecks.Run();
+            AppChoiceStateChecks.Run(window);
         }
         finally { window.Close(); Sta.Pump(); }
     });

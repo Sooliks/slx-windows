@@ -1,3 +1,46 @@
+# Verification — 0.1.0-alpha.15 (2026-10-23)
+
+STATUS: PARTIAL. Codex ran `pwsh -NoProfile -File scripts/verify.ps1` on the owner's Windows host via an evidence
+wrapper: final run 03:05:15–03:05:46 UTC, exit 0. Locked restore, Release solution build with zero warnings/errors,
+379 unit/Windows checks and one expanded WPF scenario passed, zero failed/skipped, source <=200 nonblank lines.
+SHA-256 inventories of all non-ignored source files before/after the gate match. Local evidence:
+artifacts/handoff/verify-alpha15.txt and source-alpha15-before/after.json. Only release documentation was finalized
+after this run; runtime/test files were unchanged. Earlier integration runs also passed. Claude authored the initial
+UI pass; Codex ran the host commands and performed release review. The original runs 1–2 caught a new scroll-memory
+defect, corrected before the successful run 3 and this final gate; no gate was weakened.
+
+Expanded WPF evidence covers page scroll memory, service-confirmed status tone, blocked subscription removal,
+non-persistent removal, and deferred app edits submitted once after a fresh observation without replaying unknown
+mutations. Saved-choice labels remain explicit at no observation/off/unconfirmed/unknown states in both languages;
+13px labels fit the narrow/wide layouts. High Contrast fixtures switch one owned resource layer on/off, preserve
+foreign resources and restore the selected theme without accumulating layers. These fixtures inject preferences;
+they never change the owner's actual Windows accessibility settings.
+
+Separate unsuppressed native-window fixtures start real WPF animation clocks. Mid-flight hide, minimize, unload,
+policy-off and render suppression apply final values and remove clocks/subscriptions; finite fade/route completion
+does the same. Route base Progress stays 1 and losing confirmation cancels the ring. This is native lifecycle
+evidence, not a PresentMon/ETW performance study or a physical-monitor motion review.
+
+Caption checks cover equal 46x42 hit targets, 12x12 glyph areas and numerical centering, keyboard-focus/chrome flags,
+UIA maximize/restore invocation and RU/EN names/tooltips. Maximize happens only while the isolated fixture is hidden.
+Caption normal/restored and hover/press PNGs were viewed; hover/press previews force final template layers and are
+not evidence of real mouse input. Subtree capture now normalizes its origin, avoiding empty offset screenshots.
+Current populated/update PNGs were viewed at RU 940x660 and EN 1200x820, Olive/Terminal. The synthetic updater offer
+is alpha.16 for installed alpha.15; it is not a public alpha.16 release. 224 matching RU/EN keys across four owners,
+no duplicates. git diff --check passed. Olive uses native Segoe UI if site fonts are absent; no font is installed.
+
+The isolated `dotnet run --project src/Slx.Client.Desktop/Slx.Client.Desktop.csproj -c Release --no-build --no-restore
+-- --render-check` refreshes empty/import/help/settings PNGs without reading stored user data, contacting the service
+or starting update checks. Final packaging identity belongs to clean-build provenance and SHA256SUMS.txt.
+
+No installed UI/service, saved subscription/preferences, startup registration, WFP, adapter, account, website,
+server or DB was changed for acceptance. No network/Core/Windows/Service, IPC, dependency or stored-data format change.
+Real Windows animation/High Contrast toggles, physical DPI 125/150/200, Narrator/keyboard in the installed product,
+live performance, Windows 10/clean VM, multi-user, reboot/BFE/ExitLag, sleep/network transitions and installed
+upgrade/UAC/cancel/rollback remain open. The friend's reboot failure is not declared reproduced or fully fixed.
+The real-core API contract from alpha.14 remains historical evidence; this UI-only release does not rerun or extend
+packet/TUN/DNS isolation or connection-continuity acceptance.
+
 # Verification — 0.1.0-alpha.14 (2026-10-21)
 
 STATUS: PARTIAL. `pwsh -NoProfile -File scripts/verify.ps1` on the Windows host exited 0: locked restore,

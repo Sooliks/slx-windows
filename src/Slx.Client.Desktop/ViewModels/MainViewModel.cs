@@ -49,7 +49,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         OpenSupportCommand = new RelayCommand(() => OpenLink("https://t.me/slxvpn?direct"));
         OpenSourceCommand = new RelayCommand(() => OpenLink("https://github.com/Sooliks/slx-windows"));
         OpenWebsiteCommand = new RelayCommand(() => OpenLink("https://slxvpn.com"));
-        AskRemoveCommand = new RelayCommand(() => { CancelStartupConnection(); RemoveVisible = true; }, () => saved != null && !IsBusy);
+        AskRemoveCommand = new RelayCommand(() => { CancelStartupConnection(); RemoveBlocked = false; RemoveVisible = true; }, () => saved != null && !IsBusy);
         ConfirmRemoveCommand = new AsyncRelayCommand(RemoveSubscriptionAsync);
         InitializeUpdates();
         InitializeDiagnostics();
@@ -126,7 +126,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private void Notice(string key) { messageKey = key; OnPropertyChanged(nameof(Message)); OnPropertyChanged(nameof(ShowMessage)); }
     private void NotifyState()
     {
-        foreach (var name in new[] { nameof(HasConnectionFacts), nameof(HasActiveProtocol), nameof(ConnectionDuration), nameof(ActiveProtocol), nameof(LastConnectionCheck), nameof(RoutingUpdateText), nameof(IsConnected), nameof(CanEditRouting), nameof(CanConnect), nameof(CanReconnect), nameof(ConnectionAction), nameof(StatusText), nameof(StatusDetail), nameof(LastServiceCode), nameof(HasServiceCode), nameof(ServiceCodeLabel), nameof(HasSubscription), nameof(NoSubscription) }) OnPropertyChanged(name);
+        foreach (var name in new[] { nameof(StatusTone), nameof(HasConnectionFacts), nameof(HasActiveProtocol), nameof(ConnectionDuration), nameof(ActiveProtocol), nameof(LastConnectionCheck), nameof(RoutingUpdateText), nameof(IsConnected), nameof(CanEditRouting), nameof(CanConnect), nameof(CanReconnect), nameof(ConnectionAction), nameof(StatusText), nameof(StatusDetail), nameof(LastServiceCode), nameof(HasServiceCode), nameof(ServiceCodeLabel), nameof(HasSubscription), nameof(NoSubscription) }) OnPropertyChanged(name);
         ImportCommand?.NotifyCanExecuteChanged(); RefreshCommand?.NotifyCanExecuteChanged();
         ReconnectCommand?.NotifyCanExecuteChanged(); AskRemoveCommand?.NotifyCanExecuteChanged();
         Updates?.RefreshInstallAvailability();

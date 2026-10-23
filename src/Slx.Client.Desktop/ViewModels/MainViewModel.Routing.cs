@@ -5,7 +5,7 @@ namespace Slx.Client.Desktop.ViewModels;
 public sealed partial class MainViewModel
 {
     private CancellationTokenSource? routingDelay;
-    private bool connectionChangePending, routingUnconfirmed;
+    private bool connectionChangePending, routingUnconfirmed, routingDeferred;
     private long routingChangeVersion, pendingAppVersion;
     private string? pendingAppRevision;
     public string RoutingUpdateText => Text.Catalog[statusFresh && !routingUnconfirmed ? "RulesPending" : "RulesUnconfirmed"];
@@ -38,7 +38,9 @@ public sealed partial class MainViewModel
         {
             // Coalesce rapid toggles before starting one mutation. Never retry an unknown result.
             await Task.Delay(400, delay.Token);
-            if (disposed || !statusFresh || IsBusy || !IsTunnelActive) return;
+            if (disposed || !IsTunnelActive) return;
+            // Nothing was sent yet: keep the edit and submit it after the next authoritative status, not never.
+            if (!statusFresh || IsBusy) { routingDeferred = true; return; }
             await ChangeTunnelAsync(IsSelectedMode && !HasSelectedApplications ? "disconnect"
                 : connectionChangePending ? "reconnect" : "update-applications");
         }
@@ -49,9 +51,15 @@ public sealed partial class MainViewModel
             delay.Dispose();
         }
     }
+    internal void ResumeDeferredRouting()
+    {
+        if (!routingDeferred || routingDelay != null || disposed || IsBusy || !statusFresh) return;
+        routingDeferred = false;
+        if (RulesPending && IsTunnelActive) QueueRoutingApply(false);
+    }
     private long BeginRoutingMutation()
     {
-        CancelRoutingApply(); connectionChangePending = false; pendingAppRevision = null;
+        CancelRoutingApply(); connectionChangePending = false; pendingAppRevision = null; routingDeferred = false;
         return routingChangeVersion;
     }
     private void RememberApplicationRevision(ConnectPlan plan, long version)
