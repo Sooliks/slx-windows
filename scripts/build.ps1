@@ -28,7 +28,8 @@ if ($LASTEXITCODE -ne 0 -or $commit -notmatch '\A[0-9a-f]{40}\z') { throw 'Canno
 $dirty = @(& git status --porcelain)
 if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect source worktree' }
 & (Join-Path $PSScriptRoot 'fetch-runtime.ps1')
-& (Join-Path $PSScriptRoot 'create-icon.ps1')
+# The reviewed icon is a source input. Regenerate it explicitly before review/commit, never during a release build.
+if (-not (Test-Path -LiteralPath (Join-Path $root 'assets/slx.ico') -PathType Leaf)) { throw 'Reviewed application icon is missing' }
 $bundle = Join-Path $metadata.WorkDirectory 'bundle'
 Remove-OwnedBuildDirectory $bundle
 [IO.Directory]::CreateDirectory($bundle) | Out-Null

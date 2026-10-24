@@ -1,5 +1,47 @@
 # Verification — 0.1.0-alpha.18 (2026-10-24)
 
+## Windows tests passed; immutable build-input correction
+
+The owner pushed `dc83ebcd546c5badd27ed752d590ad48b50c49e9`.
+[Run 40099322143](https://github.com/Sooliks/slx-windows/actions/runs/40099322143) passed all 24 release-policy tests,
+the Inno Setup 6 preflight, locked restore and the full solution build with zero warnings/errors. The native Windows
+test assembly passed 416/416 and the expanded WPF scenario passed 1/1, with zero failures/skips. The source-size gate
+passed. TRX reports and synthetic UI screenshots were saved in `windows-verification-40099322143-1`.
+Both self-contained application publishes and Inno compilation completed. The installer existed, but build-info
+reported `sourceClean=false`; the workflow correctly refused packaging/publication. No alpha.18 release was created.
+
+The failing step did not print its dirty-file list, so the exact changed file on that hosted machine is not established.
+Inspection found release build calls that overwrite reviewed source: the icon, runtime manifest and upstream licenses.
+TRX, UI images and normal build outputs are ignored and untracked. The pinned Xray archive and both extracted binaries
+match the reviewed SHA-256 values. LICENSE is byte-identical; LICENSE-Wintun differs only by CRLF, which normalizes
+cleanly under Git attributes. Reserializing the manifest with PowerShell 7.6.8 also produced no semantic/text difference
+locally. These checks do not prove an icon or signer-display difference occurred on the hosted machine.
+
+Release builds now consume the committed icon directly; `create-icon.ps1` remains an explicit source-authoring tool.
+Runtime preparation validates the reviewed manifest and license content against the pinned upstream runtime and writes
+only to `.runtime`. The pinned archive digest, actual Xray version and valid Wintun vendor-signature checks remain.
+Installer build evidence now records exact worktree paths, a binary-capable source diff, build-info and the bundled
+runtime manifest in a separate seven-day Actions artifact. Diagnostic steps cannot override a failed build or release
+gate. No source reset, source ignore rule, version change or runtime/application test removal was introduced.
+
+Correction verification completed locally:
+
+- `pwsh -NoLogo -NoProfile -File scripts/tests/runtime-inputs.test.ps1`: exit 0, 18 checks passed, including rejected
+  mismatched hashes, inventory/version/source/archive/signature metadata and missing/changed licenses.
+- Actual official pinned ZIP: archive and extracted binary hashes match; the validator accepts both license files and
+  preserves reviewed input bytes. A three-case fetch integration fixture passes valid input and refuses a changed
+  reviewed hash or license before staging the manifest. Only Windows executable-version and Authenticode calls were
+  replaced by explicit test doubles; archive extraction, digest/hash checks, validation and copying ran normally.
+- The exact workflow evidence step ran in an isolated Git fixture: tracked and untracked paths, text/binary changes,
+  build-info and bundled runtime manifest were recorded without cleaning the modified source.
+- An isolated clean Git packaging fixture produced the exact six expected assets with matching ZIP inventories,
+  CRCs, checksums and commit/base provenance. Tracked changes, untracked changes and `sourceClean=false` were rejected.
+  Its installer was an explicitly marked non-executable fixture; this is packaging validation, not a native build.
+- PowerShell AST/workflow YAML parsing, blocking-step/token-scope review, source-size and diff whitespace checks passed.
+
+The updated build scripts still require a new native Windows run. Real connections on the friends' PCs, CS2/Steam,
+Wi-Fi/Ethernet route behavior, installed upgrade/recovery and final GitHub/site distribution remain unverified.
+
 ## Windows verification follow-up after the compiler fix
 
 The owner pushed `0903212692104fc2cbe67b580c60a712de0cf751`.
@@ -19,7 +61,8 @@ before applying the original layout assertions. This addresses WPF's desktop-dep
 setting Width alone did not establish the required actual viewport. All 26 shared-window resize transitions use the
 helper. Production minimum 940x660 is asserted before test sizing; production UI, breakpoint, window constraints and
 the sidebar 204/76 assertions are unchanged. Exact runner desktop dimensions were not present in the failed log.
-The correction still requires a new native Windows run; local cross-compilation is not WPF execution.
+At that handoff the correction still required a new native Windows run. Run 40099322143 above subsequently passed it;
+the local cross-compilation result alone was not WPF execution.
 
 Final correction validation: locked restore with the existing package locks passed, and
 `dotnet build Slx.Windows.slnx -c Release --no-restore -m:1 -nr:false -p:UseSharedCompilation=false` passed with

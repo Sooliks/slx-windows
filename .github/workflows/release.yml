@@ -45,6 +45,7 @@ jobs:
         run: |
           node --test scripts/tests/release-auth.test.mjs scripts/tests/release-base.test.mjs
           if ($LASTEXITCODE -ne 0) { throw 'Release policy tests failed' }
+          ./scripts/tests/runtime-inputs.test.ps1
           $baseRef = node scripts/release-base.mjs
           if ($LASTEXITCODE -ne 0) { throw 'Exact previous release tag is required; no latest-release fallback is allowed' }
           "base_ref=$baseRef" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
@@ -80,8 +81,40 @@ jobs:
         run: |
           ./scripts/build.ps1
           if ($LASTEXITCODE -ne 0) { throw 'Installer build failed' }
-          $dirty = git status --porcelain
-          if ($LASTEXITCODE -ne 0 -or $dirty) { throw 'Build changed tracked source; review generated inputs before releasing' }
+          $dirty = git status --porcelain=v1 --untracked-files=all
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect source after build' }
+          if ($dirty) {
+            Write-Output $dirty
+            throw 'Build changed source; review the installer build evidence before releasing'
+          }
+      - name: Collect installer build evidence
+        if: always()
+        continue-on-error: true
+        run: |
+          $evidence = Join-Path $PWD 'artifacts/build-verification'
+          [IO.Directory]::CreateDirectory($evidence) | Out-Null
+          $state = @(git status --porcelain=v1 --untracked-files=all)
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect source for build evidence' }
+          $state | Set-Content -LiteralPath (Join-Path $evidence 'worktree-status.txt') -Encoding utf8NoBOM
+          Write-Output $state
+          git diff --stat HEAD -- | Tee-Object -FilePath (Join-Path $evidence 'source-diff-stat.txt')
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot summarize source changes' }
+          git diff --binary HEAD -- | Set-Content -LiteralPath (Join-Path $evidence 'source-changes.patch') -Encoding utf8NoBOM
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot record source changes' }
+          Get-ChildItem 'artifacts/work/*/build-info.json' -ErrorAction SilentlyContinue |
+            Copy-Item -Destination $evidence
+          if (Test-Path -LiteralPath '.runtime/runtime-manifest.json' -PathType Leaf) {
+            Copy-Item -LiteralPath '.runtime/runtime-manifest.json' -Destination (Join-Path $evidence 'bundled-runtime-manifest.json')
+          }
+      - name: Save installer build evidence
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: windows-build-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/build-verification/
+          retention-days: 7
+          if-no-files-found: warn
       - name: Package matching source, provenance and checksums
         env:
           SLX_BASE_REF: ${{ steps.previous.outputs.base_ref }}

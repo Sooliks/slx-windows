@@ -25,14 +25,8 @@ foreach ($name in @('xray.exe','wintun.dll')) {
 }
 $signature = Get-AuthenticodeSignature -LiteralPath (Join-Path $out 'wintun.dll')
 if ($signature.Status -ne 'Valid') { throw 'Wintun must have a valid vendor Authenticode signature' }
-$manifest = [ordered]@{ xrayVersion='26.9.9'; files=$files; source=$url; archiveSha256=$sha; driverSignatureStatus=[string]$signature.Status; driverSigner=$signature.SignerCertificate.Subject }
-$manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $out 'runtime-manifest.json') -Encoding utf8NoBOM
-[IO.Directory]::CreateDirectory((Join-Path $root 'runtime')) | Out-Null
-$manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $root 'runtime/runtime-manifest.json') -Encoding utf8NoBOM
-foreach ($name in @('LICENSE','LICENSE-Wintun')) {
- if (Test-Path -LiteralPath (Join-Path $unpacked $name)) {
-  [IO.Directory]::CreateDirectory((Join-Path $root 'licenses')) | Out-Null
-  Copy-Item -LiteralPath (Join-Path $unpacked $name) -Destination (Join-Path $root ('licenses/' + $name)) -Force
- }
-}
+. (Join-Path $PSScriptRoot 'runtime-inputs.ps1')
+Assert-SlxRuntimeInputs -Root $root -Unpacked $unpacked -Source $url -ArchiveSha256 $sha -XrayVersion '26.9.9' -Files $files
+# Build consumes reviewed source inputs. Updating the pinned runtime is a separate reviewed source change.
+Copy-Item -LiteralPath (Join-Path $root 'runtime/runtime-manifest.json') -Destination (Join-Path $out 'runtime-manifest.json') -Force
 Write-Output ('Verified official Xray 26.9.9 archive ' + $sha + '; Wintun signature Valid')
