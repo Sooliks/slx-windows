@@ -37,11 +37,11 @@
        <TextBlock x:Name="ActivityHint" Text="{Binding ActivityHint}" FontFamily="{DynamicResource FontUi}" FontSize="13" LineHeight="19" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Visibility="Hidden" p:Presence.Show="{Binding ShowActivityHint}" AutomationProperties.LiveSetting="Polite"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource Muted}"/><Style.Triggers><DataTrigger Binding="{Binding ActivityIsRouting}" Value="True"><Setter Property="Foreground" Value="{DynamicResource Accent}"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
       </Grid>
      </StackPanel>
-     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Visibility="{Binding HasSubscription, Converter={StaticResource VisibleWhen}}">
+     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Visibility="{Binding ShowConnectionAction, Converter={StaticResource VisibleWhen}}">
       <Button x:Name="ConnectAction" Content="{Binding ConnectionAction}" Command="{Binding ToggleConnectionCommand}" IsEnabled="{Binding CanConnect}" Style="{StaticResource PrimaryButton}" MinWidth="154" MinHeight="46" Padding="18,11"/>
       <Button Command="{Binding ReconnectCommand}" AutomationProperties.Name="{l:Tr Reconnect}" ToolTip="{l:Tr Reconnect}" Margin="9,0,0,0" Width="46" MinHeight="46" Padding="0"><Path Style="{StaticResource NavIcon}" Stroke="{DynamicResource Text}" StrokeThickness="1.6" Data="M14,5 A6,6 0 1 0 15,10 M10,5 H15 V0"/></Button>
      </StackPanel>
-     <Button Grid.Column="1" Content="{l:Tr ImportButton}" Command="{Binding OpenImportCommand}" Style="{StaticResource PrimaryButton}" VerticalAlignment="Center" Visibility="{Binding NoSubscription, Converter={StaticResource VisibleWhen}}"/>
+     <Button Grid.Column="1" Content="{l:Tr ImportButton}" Command="{Binding OpenImportCommand}" Style="{StaticResource PrimaryButton}" VerticalAlignment="Center" Visibility="{Binding ShowImportAction, Converter={StaticResource VisibleWhen}}"/>
     </Grid>
    </Border>
    <StackPanel Visibility="{Binding HasSubscription, Converter={StaticResource VisibleWhen}}">

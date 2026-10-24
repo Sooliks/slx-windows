@@ -6,7 +6,7 @@ using Slx.Client.Core;
 
 namespace Slx.Client.Service;
 
-internal sealed class ControlDispatcher(IControlTunnelEngine engine, ISessionGuard sessions)
+internal sealed partial class ControlDispatcher(IControlTunnelEngine engine, ISessionGuard sessions)
 {
     private readonly SemaphoreSlim gate = new(1, 1);
     private readonly Dictionary<Guid, Receipt> receipts = new();
@@ -21,25 +21,35 @@ internal sealed class ControlDispatcher(IControlTunnelEngine engine, ISessionGua
 
     public async Task<PipeReply> DispatchAsync(string sid, PipeRequest request, CancellationToken cancellationToken)
     {
+        if (request.Version != PipeContract.Version || request.RequestId == Guid.Empty
+            || request.Action is not ("status" or "connect" or "connect-if-idle" or "disconnect" or "reconnect" or "update-applications"))
+            return Rejected("IPC_INVALID");
+        if (request.Action == "status") return Observe(sid, request);
+        var mutation = AdmitMutation(sid, request);
+        using var identity = mutation.Admission;
+        if (mutation.Reply is { } denied) return denied;
+        var off = request.Action == "disconnect" ? PrepareDisconnect(sid, request) : default;
+        using var admission = off.Admission;
+        if (off.Reply is { } rejected) return rejected;
         await gate.WaitAsync(cancellationToken);
+        using var operation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         try
         {
-            if (request.Version != PipeContract.Version || request.RequestId == Guid.Empty
-                || request.Action is not ("status" or "connect" or "connect-if-idle" or "disconnect" or "reconnect" or "update-applications"))
-                return Rejected("IPC_INVALID");
-            owner ??= engine.OwnerSid;
-            if (owner is not null && owner != sid) return Rejected("CONTROLLER_OWNED");
-            if (request.Action == "status")
-                return request.Plan is null ? new PipeReply(true, "OK", engine.Status) : Rejected("IPC_INVALID");
             string fingerprint = Fingerprint(sid, request);
-            PruneReceipts();
-            if (receipts.TryGetValue(request.RequestId, out var prior))
-                return prior.Fingerprint == fingerprint ? prior.Reply with { Status = engine.Status }
-                    : Rejected("IPC_REPLAY_MISMATCH");
+            lock (observation)
+            {
+                RefreshOwner();
+                if (owner is not null && owner != sid) return Rejected("CONTROLLER_OWNED");
+                PruneReceipts();
+                if (receipts.TryGetValue(request.RequestId, out var prior))
+                    return prior.Fingerprint == fingerprint ? prior.Reply with { Status = engine.Status }
+                        : Rejected("IPC_REPLAY_MISMATCH");
+            }
             if ((request.Action is "connect" or "connect-if-idle" or "update-applications") && request.Plan is null
                 || request.Action == "disconnect" && request.Plan is not null)
                 return Rejected("IPC_INVALID");
-            bool receiptAvailable = receipts.Count < ReceiptCapacity;
+            bool receiptAvailable;
+            lock (observation) receiptAvailable = receipts.Count < ReceiptCapacity;
             // Explicit off is idempotent and must remain available when the replay cache is full.
             // Existing receipt fingerprints were checked first; no new connect/reconnect can bypass the cap.
             if (!receiptAvailable && request.Action != "disconnect") return Rejected("IPC_RECEIPT_LIMIT");
@@ -58,31 +68,44 @@ internal sealed class ControlDispatcher(IControlTunnelEngine engine, ISessionGua
             {
                 // Remember the no-op too: replaying this request after explicit off must never connect later.
                 var unchanged=new PipeReply(true,"OK",observed);
-                receipts.Add(request.RequestId,new(fingerprint,unchanged,Clock()));
+                lock (observation) receipts.Add(request.RequestId,new(fingerprint,unchanged,Clock()));
                 return unchanged;
             }
-            if (request.Plan is not null && request.Action != "update-applications") owner ??= sid;
+            lock (observation)
+            {
+                if (request.Plan is not null && request.Action != "update-applications") owner ??= sid;
+                active = new(request.RequestId, fingerprint, request.Action, operation);
+                if (request.Action != "disconnect" && pendingStops != 0) operation.Cancel();
+            }
             PipeReply result;
             try
             {
-                if (request.Action == "disconnect") await engine.StopAsync(cancellationToken);
-                else if (request.Action == "update-applications") await engine.UpdateApplicationsAsync(request.Plan!, sid, cancellationToken);
+                if (request.Action == "disconnect") await engine.StopAsync(operation.Token);
+                else if (request.Action == "update-applications") await engine.UpdateApplicationsAsync(request.Plan!, sid, operation.Token);
                 else
                 {
-                    if (request.Plan is not null) await engine.StartAsync(request.Plan, sid, cancellationToken);
-                    else await engine.ReconnectAsync(cancellationToken);
+                    if (request.Plan is not null) await engine.StartAsync(request.Plan, sid, operation.Token);
+                    else await engine.ReconnectAsync(operation.Token);
                 }
                 result = new(true, "OK", engine.Status);
             }
             catch (ClientFault fault) { result = new(false, fault.Code, engine.Status); }
             catch (OperationCanceledException) { result = new(false, "OPERATION_INTERRUPTED", engine.Status); }
             catch (Exception) { result = new(false, "SERVICE_FAILURE", engine.Status); }
-            if (request.Action == "disconnect" && result.Success
-                && result.Status.Phase == TunnelPhase.Disconnected && !result.Status.ProtectionActive) owner = null;
-            if (receiptAvailable) receipts.Add(request.RequestId, new(fingerprint, result, Clock()));
+            lock (observation)
+            {
+                if ((request.Action != "disconnect" || result.Success)
+                    && result.Status.Phase == TunnelPhase.Disconnected && !result.Status.ProtectionActive
+                    && engine.OwnerSid is null) owner = null;
+                if (receiptAvailable) receipts.Add(request.RequestId, new(fingerprint, result, Clock()));
+            }
             return result;
         }
-        finally { gate.Release(); }
+        finally
+        {
+            lock (observation) active = null;
+            gate.Release();
+        }
     }
 
     private void PruneReceipts()

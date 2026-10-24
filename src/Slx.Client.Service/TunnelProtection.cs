@@ -8,8 +8,10 @@ internal sealed partial class TunnelEngine
     private TrafficGuard? trafficGuard;
     private ConnectPlan? pinnedPlan;
     private bool desiredConnected,protectionActive;
+    private volatile bool confirmedUnprotected;
     private long retryAt,healthAt;
     public string? OwnerSid=>ownerSid;
+    public bool IsConfirmedOff=>confirmedUnprotected&&state.Phase==TunnelPhase.Disconnected&&!protectionActive&&ownerSid is null;
     public async Task RestoreAsync(CancellationToken cancellationToken)
     {
         await lifecycle.WaitAsync(cancellationToken);
@@ -44,6 +46,7 @@ internal sealed partial class TunnelEngine
         try
         {
             trafficGuard.Apply(plan,RuntimeTrust.Verify(),Environment.ProcessPath??throw new ClientFault("SERVICE_IDENTITY_FAILED"),adapter);
+            confirmedUnprotected=false;
             protectionActive=true;
         }
         catch{CloseProtectionSession();throw;}
@@ -56,7 +59,8 @@ internal sealed partial class TunnelEngine
         if(desiredConnected||currentPlan is not null){startupOffCleanup.Cancel();return false;}
         try
         {
-            if(startupOffCleanup.TryRelease(ReleaseProtection))state=new(TunnelPhase.Disconnected,DateTimeOffset.UtcNow);
+            if(startupOffCleanup.TryRelease(ReleaseProtection))
+            {state=new(TunnelPhase.Disconnected,DateTimeOffset.UtcNow);confirmedUnprotected=true;}
         }
         catch(ClientFault)
         {
@@ -78,6 +82,7 @@ internal sealed partial class TunnelEngine
     }
     public async Task ShutdownAsync()
     {
+        using var stopping = connectionWork.RequestStop();
         await lifecycle.WaitAsync();
         try{await StopChildAsync();}
         finally{CloseProtectionSession();lifecycle.Release();}

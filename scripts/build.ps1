@@ -59,7 +59,9 @@ foreach ($name in @('xray.exe','wintun.dll','runtime-manifest.json')) {
 foreach ($name in @('docs','licenses')) { Copy-Item -LiteralPath (Join-Path $root $name) -Destination $bundle -Recurse }
 foreach ($name in @('LICENSE','THIRD_PARTY_NOTICES.md','SECURITY.md','README.md')) { Copy-Item -LiteralPath (Join-Path $root $name) -Destination $bundle }
 [IO.Directory]::CreateDirectory((Join-Path $bundle 'scripts')) | Out-Null
-Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'manage-service.ps1') -Destination (Join-Path $bundle 'scripts/manage-service.ps1')
+foreach ($script in @('manage-service.ps1','repair-network.ps1')) {
+ Copy-Item -LiteralPath (Join-Path $PSScriptRoot $script) -Destination (Join-Path $bundle ('scripts/' + $script))
+}
 if (-not (Test-Path -LiteralPath $InnoCompiler)) { throw 'Inno Setup 6 not found; supply -InnoCompiler' }
 & $InnoCompiler /Qp ('/DAppVersion=' + $metadata.Version) ('/DAppFileVersion=' + $metadata.FileVersion) ('/DBundleDir=' + $bundle) ('/DReleaseDir=' + $metadata.ReleaseDirectory) (Join-Path $root 'installer/slx.iss')
 if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $installer)) { throw 'Inno Setup compile failed' }

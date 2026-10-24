@@ -1,3 +1,81 @@
+# Verification — 0.1.0-alpha.18 (2026-10-24)
+
+STATUS: PARTIAL. This work ran in a Linux workspace, not on the owner's or friends' Windows machines.
+The baseline is the supplied alpha.17 source archive. Screenshots show SERVICE_UNAVAILABLE and protected
+selected-app operation. The owner also reports that the affected PC has a Wi-Fi adapter; active Wi-Fi/default-route
+selection on that PC has not been measured. No production service, site, repository branch or release was mutated.
+
+The owner subsequently explicitly requested GitHub publication. The uploaded source baseline was compared with
+remote main `491d9255d1a0cf32fd9eb679cb8887ca8df91d2f`: all shared source contents matched after line-ending
+normalization. The remote-only `.github/workflows/verify.yml` was preserved; an archive-only generated TRX was excluded.
+The connected repository reports owner push permission, but GitHub rejected the actual create-tree mutation with
+HTTP 403 `Resource not accessible by integration`. No Git object, branch, tag or release was successfully written.
+Local GitHub CLI/credential authentication is unavailable. Prepared release automation must be pushed using the
+owner's Git access; its native Windows job and automatic publication have not run in this session.
+
+## Commands and results
+
+- SDK: official .NET 10.0.401, installed in a temporary directory for verification.
+- Initial `dotnet restore Slx.Windows.slnx --locked-mode`: exit 1, NU1004 in Desktop and UiTests. Their uploaded lock
+  files lacked the existing Windows project's ProtectedData dependency. Regenerated the locks against existing pinned
+  references, confirmed every existing external package version/content hash stayed unchanged, then repeated strict
+  restore. Only the existing ProtectedData 10.0.13 transitive entry and internal project versions were synchronized.
+- Final `dotnet restore Slx.Windows.slnx --locked-mode --packages /tmp/slx-nuget -m:1 -nr:false`: exit 0.
+- `dotnet build Slx.Windows.slnx -c Release --no-restore -m:1 -nr:false -p:UseSharedCompilation=false`: exit 0,
+  zero warnings/errors. This cross-compiles Core, Windows, Desktop/WPF, Service and both test projects.
+- Focused managed regression run: 203 executed, 203 passed, zero failures/skips, exit 0. Filtered to network,
+  configuration, pipe framing, dispatcher/replay/ownership, startup/health, rollback/cleanup, route updates and outbound
+  interface policy. Native Windows tests were deliberately not selected, not silently counted as passed.
+- The test runner requires a localhost socket; the first restricted invocation could not create it. The same tests
+  completed with reviewed local-runner access. No VPN/WFP/TUN or production endpoint was invoked by this test selection.
+- PowerShell 7.6.8 parser: all 12 source `.ps1` scripts parse, including emergency recovery. The administrative recovery
+  commands were not executed. The downloaded official PowerShell archive matched its GitHub release SHA-256.
+- Source size <=200 nonblank lines for authored `.cs`/`.xaml`, XML/resource-key consistency, and archive contents/hash
+  comparison are checked during handoff. Source archives omit generated binaries/caches and have no source deletions.
+- Release automation: `node --test --test-isolation=none scripts/tests/release-auth.test.mjs scripts/tests/release-base.test.mjs`
+  executed 24 checks, all passed, zero failures/skips, exit 0. Wrong repository/ref/event/workflow/commit, missing job
+  token, moved main, a missing/unrelated/mislabeled previous tag and local-token owner bypass are rejected.
+  `node --check` succeeds for the changed release script and both new modules. Workflow YAML parses; action references
+  are pinned to primary-source commit SHAs, and the release token is passed only to the final publication step.
+  These checks do not run GitHub Actions or create an installer. CI retains all original build/provenance/hash guards.
+
+The 203-test filter is reproducible on a built tree:
+
+```powershell
+$classes = @('Core','OutboundInterfaceTests','Service','TunnelRecoveryPolicyTests','InitialConnectionAttemptTests',
+ 'StartupReadinessTests','StartupOffCleanupTests','HealthConfirmationTests','ProbeRequestTests','OwnedAdapterCleanupTests',
+ 'BackgroundCleanupTests','RecoveryObservationTests','TrafficApplicationPolicyTests','ApplicationPlanChangeTests',
+ 'ApplicationUpdateTransactionTests','XrayRoute','PipeFramingTests')
+$filter = ($classes | ForEach-Object { 'FullyQualifiedName~Slx.Client.Tests.' + $_ }) -join '|'
+dotnet test tests/Slx.Client.Tests/Slx.Client.Tests.csproj -c Release --no-build --no-restore --filter $filter
+```
+
+## New scenarios covered
+
+Managed tests reproduce status and explicit-off responsiveness while connect waits; reject unauthorized/malformed
+off; preserve old-off replay without cancelling a new connection; admit fresh off during validation; reject changed
+same-ID off during that validation window; interrupt readiness without concurrent lifecycle mutation; retain and pace
+incomplete owned-off cleanup; allow first-connect rollback only from confirmed off; preserve protection on established
+failure/cancellation; surface failed cleanup; accept either strict startup HTTPS observation; select the Windows route
+identity regardless of Wi-Fi enumeration order; reject down/missing/own-TUN interfaces, including a renamed own GUID.
+
+Added Windows-only fixtures cover overlapping native pipe clients and first-instance ownership. Added WPF scenarios
+cover unknown-first-connect Disconnect, missing-subscription recovery, cancellation of busy connect, Stopping action,
+and retained original/early failure details. These fixtures compile but were not executed in this Linux environment.
+
+## Not verified
+
+Full Windows `scripts/verify.ps1`; native ACL/pipes, GetBestRoute2, WFP, TUN/PnP cleanup, DNS flush, emergency recovery,
+WPF runtime/layout, Windows 10, clean VM, real VPN protocols and CS2/Steam traffic, ExitLag coexistence, dual-stack
+uplinks, reboot/sleep/network changes, Inno installer, UAC/upgrade/uninstall/rollback and update publication.
+The explicit interface still uses the pinned core's single-interface model. Shared public Windows DNS stays protected
+and can affect unselected apps. Source fixes and managed tests do not prove the friends' individual root causes or
+complete game/UDP isolation. No production binaries or prior release assets were overwritten.
+
+Build/install/release instructions: [UPDATE_ALPHA18_RU.md](UPDATE_ALPHA18_RU.md).
+
+---
+
 # Verification — 0.1.0-alpha.17 (2026-10-23)
 
 STATUS: PARTIAL. Codex ran scripts/verify.ps1 on the Windows host: exit 0, completed 14:50:42 UTC. Locked restore and Release solution build passed with zero warnings/errors; 382 unit/Windows checks and one expanded WPF scenario passed, zero failed/skipped. Source size gate passed. Log: artifacts/handoff/verify-run5.txt. LayoutStabilityChecks covers stable connection/subscription positions, floating notice dismissal and suppression of short activity flashes. Current slx-floating-notice-ru-narrow.png was viewed. Synthetic WPF evidence does not establish installed product, physical DPI, real network or upgrade/rollback acceptance. No service/core/IPC/data/dependency change. Update download progress still appears when a transfer starts.

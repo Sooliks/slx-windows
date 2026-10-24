@@ -10,21 +10,38 @@ internal sealed class ControlWorker(ControlDispatcher dispatcher, TunnelEngine e
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await engine.RestoreAsync(stoppingToken);
-        try { await Task.WhenAll(RunPipeAsync(stoppingToken), MonitorAsync(stoppingToken)); }
+        try { await Task.WhenAll(RunPipesAsync(stoppingToken), MonitorAsync(stoppingToken)); }
         finally { await engine.ShutdownAsync(); }
     }
 
-    private async Task RunPipeAsync(CancellationToken stoppingToken)
+    private async Task RunPipesAsync(CancellationToken stoppingToken)
     {
-        await using var pipe = ControlPipe.Create(PipeContract.Name);
+        var pipes = new List<NamedPipeServerStream>();
+        try
+        {
+            // Keep the first-instance handle alive for the pool lifetime. Each worker owns one
+            // client at a time, while status/off can use a different slot during a long connect.
+            for (int index = 0; index < ControlPipe.MaxInstances; index++)
+                pipes.Add(ControlPipe.Create(PipeContract.Name, firstInstance: index == 0));
+            await Task.WhenAll(pipes.Select(pipe => RunPipeAsync(pipe, stoppingToken)));
+        }
+        finally { foreach (var pipe in pipes) await pipe.DisposeAsync(); }
+    }
+
+    private async Task RunPipeAsync(NamedPipeServerStream pipe, CancellationToken stoppingToken)
+    {
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
                 await pipe.WaitForConnectionAsync(stoppingToken);
+                using var readBudget = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+                readBudget.CancelAfter(TimeSpan.FromSeconds(5));
+                var caller = await ControlPipe.ReadRequestAsync(pipe, readBudget.Token);
                 using var budget = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
-                budget.CancelAfter(TimeSpan.FromSeconds(50));
-                var caller = await ControlPipe.ReadRequestAsync(pipe, budget.Token);
+                // DNS + tunnel readiness + owned cleanup can legitimately exceed the former 50s
+                // budget. Other pipe slots still serve status/off immediately during this wait.
+                budget.CancelAfter(TimeSpan.FromSeconds(caller.Request.Action == "status" ? 5 : 75));
                 var reply = await dispatcher.DispatchAsync(caller.Sid, caller.Request, budget.Token);
                 await PipeFraming.WriteReplyAndWaitAckAsync(pipe, reply, budget.Token);
             }

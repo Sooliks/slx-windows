@@ -6,6 +6,7 @@ internal interface IControlTunnelEngine
 {
     TunnelStatus Status { get; }
     string? OwnerSid => null;
+    bool IsConfirmedOff => false;
     Task StartAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken);
     Task ReconnectAsync(CancellationToken cancellationToken);
     Task UpdateApplicationsAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken);

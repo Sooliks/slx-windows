@@ -1,5 +1,20 @@
 # Boundaries
 
+Alpha.18: ControlWorker keeps a bounded four-instance pipe pool with one first-instance anchor. ControlDispatcher
+owns a short observation/ownership lock and a separate mutation gate. Authorized explicit-off admission interrupts
+active readiness and prevents a start from slipping between validation and off admission; receipts remain bounded,
+fingerprinted and SID-scoped. Status reads do not wait for network work. TunnelWork cancels health/launch readiness
+without permitting concurrent lifecycle mutation. PendingOffCleanup retries durable-off, owned child/adapter shutdown,
+WFP release and DNS-cache refresh until confirmed; IsConfirmedOff alone releases a controller after background cleanup.
+InitialConnectionAttempt separates a definite failure from cancellation/unknown outcome. Only confirmed previously
+unprotected attempts may roll back. The original failure code survives successful rollback; cleanup failure stays visible.
+Windows OutboundInterface reads GetBestRoute2 before TUN creation and passes an exact current alias into typed Xray
+configuration. The helper cannot change routes and rejects the SLX deterministic TUN identity, including renames.
+StartupReadiness checks both existing authenticated HTTPS origins; owned TUN and protected DNS checks remain required.
+Desktop unknown state offers explicit off without inferring an active tunnel or authorizing update installation.
+The recovery script is an explicit administrative operation, outside UI IPC, with fixed installation/provider scope.
+No stored-plan/IPC schema, server, subscription binding, driver or dependency version change.
+
 Alpha.15: Desktop/Presentation owns Motion (one-shot attached animations and the motion policy), Chrome
 (per-style hover fills), ScrollMemory (in-memory page offsets per view model) and the route-scene AmbientBackdrop.
 MotionLifetime owns active clocks and their temporary lifecycle/policy subscriptions; completion and cancellation

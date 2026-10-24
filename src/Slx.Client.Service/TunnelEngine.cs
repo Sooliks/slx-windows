@@ -9,6 +9,7 @@ namespace Slx.Client.Service;
 internal sealed partial class TunnelEngine : IControlTunnelEngine
 {
     private readonly SemaphoreSlim lifecycle = new(1, 1);
+    private readonly TunnelWork connectionWork = new();
     private volatile TunnelStatus state = new(TunnelPhase.Disconnected, DateTimeOffset.UtcNow);
     private Process? child;
     private ProcessJob? job;
@@ -29,15 +30,34 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
         await lifecycle.WaitAsync(cancellationToken);
         try
         {
-            ArmProtection(plan);
-            pendingApplicationUpdate = null;
-            startupOffCleanup.Cancel();
-            currentPlan=plan;ownerSid=sid;desiredConnected=true;pinnedPlan=pinned;retryAt=0;
-            state=new(TunnelPhase.Connecting,DateTimeOffset.UtcNow,plan.Profile.Name,Mode:plan.Mode,ProtectionActive:protectionActive);
-            try{intents.Save(new(sid,pinned,plan.Profile.Host));await StopChildAsync();}
-            catch(Exception error){ScheduleRecovery(error is ClientFault fault?fault.Code:"PROTECTION_STORAGE_FAILED");throw;}
-            recoveryAttempts=0;
-            await LaunchAsync(pinned, executable, TunnelPhase.Connecting, cancellationToken);
+            using var work = connectionWork.Begin(cancellationToken);
+            cancellationToken = work.Token;
+            cancellationToken.ThrowIfCancellationRequested();
+            if (offCleanup.Pending) throw new ClientFault("TUN_CLEANUP_PENDING");
+            bool rollback = confirmedUnprotected && InitialConnectionAttempt.CanRollback(state, desiredConnected,
+                currentPlan is not null, child is not null || ownedAdapterId is not null);
+            await InitialConnectionAttempt.RunAsync(rollback, async () =>
+            {
+                ArmProtection(plan);
+                pendingApplicationUpdate = null;
+                startupOffCleanup.Cancel();
+                currentPlan=plan;ownerSid=sid;desiredConnected=true;pinnedPlan=pinned;retryAt=0;
+                state=new(TunnelPhase.Connecting,DateTimeOffset.UtcNow,plan.Profile.Name,Mode:plan.Mode,ProtectionActive:protectionActive);
+                try{intents.Save(new(sid,pinned,plan.Profile.Host));await StopChildAsync();}
+                catch(Exception error)
+                {
+                    string code=error is ClientFault fault?fault.Code:"PROTECTION_STORAGE_FAILED";
+                    ScheduleRecovery(code);
+                    if(error is OperationCanceledException)throw;
+                    throw new ClientFault(code);
+                }
+                recoveryAttempts=0;
+                await LaunchAsync(pinned, executable, TunnelPhase.Connecting, cancellationToken);
+            }, async code =>
+            {
+                RequestOff(code);
+                await ContinueOffCleanupAsync(force: true);
+            }, cancellationToken);
         }
         finally { lifecycle.Release(); }
     }
@@ -51,21 +71,12 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        using var stopping = connectionWork.RequestStop();
         await lifecycle.WaitAsync(cancellationToken);
         try
         {
-            startupOffCleanup.Cancel();
-            if(state.Code==StartupOffCleanup.PendingCode)state=state with{Code=null};
-            intents.Save(null);
-            desiredConnected=false;
-            state = state with { Phase = TunnelPhase.Stopping, ObservedAt = DateTimeOffset.UtcNow, ProbePassed = false };
-            await StopChildAsync();
-            ReleaseProtection();
-            pendingApplicationUpdate = null;
-            currentPlan=pinnedPlan=null;
-            DnsCache.Refresh();
-            state = new(TunnelPhase.Disconnected, DateTimeOffset.UtcNow);
-            ownerSid=null;
+            RequestOff();
+            await ContinueOffCleanupAsync(force: true);
         }
         finally { lifecycle.Release(); }
     }
@@ -77,7 +88,8 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
         {
             if (LocalProbe.AdapterExists()) throw new ClientFault("TUN_ADAPTER_CONFLICT");
             probe = LocalProbe.ReserveCredentials();
-            string config = XrayConfigBuilder.Build(plan, probe.Port, probe.User, probe.Password);
+            string config = XrayConfigBuilder.Build(plan, probe.Port, probe.User, probe.Password,
+                OutboundInterface.ForEndpoint(plan.Profile.Host));
             var start = new ProcessStartInfo(executable)
             {
                 UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true,

@@ -8,6 +8,11 @@ internal sealed partial class TunnelEngine
         await lifecycle.WaitAsync(cancellationToken);
         try
         {
+            using var work = connectionWork.Begin(cancellationToken);
+            CancellationToken serviceToken = cancellationToken;
+            cancellationToken = work.Token;
+            if(cancellationToken.IsCancellationRequested){serviceToken.ThrowIfCancellationRequested();return;}
+            if(await ContinueOffCleanupAsync())return;
             if(TryStartupOffCleanup())return;
             if(!desiredConnected||currentPlan==null)return;
             if(Stopwatch.GetTimestamp()<retryAt)return;
@@ -44,7 +49,8 @@ internal sealed partial class TunnelEngine
                 await LaunchAsync(pinned,RuntimeTrust.Verify(),TunnelPhase.Reconnecting,cancellationToken);
                 retryAt=0;
             }
-            catch(OperationCanceledException) when(cancellationToken.IsCancellationRequested){throw;}
+            catch(OperationCanceledException) when(cancellationToken.IsCancellationRequested)
+            { serviceToken.ThrowIfCancellationRequested(); }
             catch(Exception error)
             {
                 await BackgroundCleanup.TryAsync(StopChildAsync);

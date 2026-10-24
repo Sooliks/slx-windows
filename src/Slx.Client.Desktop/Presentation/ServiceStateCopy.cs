@@ -4,6 +4,14 @@ public static class ServiceStateCopy
     public static string SafeCode(string? code) => code is { Length: > 0 and <= 64 }
         && (code.All(c => c is >= 'A' and <= 'Z' or '_') || IsNativeTrafficCode(code)) ? code : "SERVICE_FAILURE";
     public static bool IsTrafficFault(string? code) => code?.StartsWith("TRAFFIC_", StringComparison.Ordinal) == true;
+    // Retain only definite connection/preflight failures, never a transport timeout or unknown outcome.
+    public static bool IsDefinitiveConnectionFault(string? code) => code is
+        "ENDPOINT_TIMEOUT" or "ENDPOINT_UNREACHABLE" or "ENDPOINT_NOT_PUBLIC" or "OUTBOUND_INTERFACE_UNAVAILABLE"
+        or "RUNTIME_INSTALL_LOCATION" or "RUNTIME_MANIFEST_INVALID" or "RUNTIME_HASH_MISMATCH"
+        or "RUNTIME_UNSAFE_PATH" or "RUNTIME_UNSAFE_OWNER" or "RUNTIME_UNSAFE_ACL"
+        or "CORE_MISSING" or "CORE_FAILED" or "CORE_UNAVAILABLE" or "CORE_EXITED" or "CORE_START_FAILED" or "CORE_STOP_FAILED"
+        or "TUN_ADAPTER_CONFLICT" or "TUN_CLEANUP_PENDING" or "TUN_ADDRESS_FAILED" or "ADAPTER_QUERY_FAILED"
+        or "TUNNEL_NOT_READY" or "TUN_NOT_READY" or "VPN_PROBE_FAILED" or "VPN_DNS_FAILED";
     private static bool IsNativeTrafficCode(string code)
     {
         var parts = code.Split('_');
@@ -22,6 +30,16 @@ public static class ServiceStateCopy
         "IPC_INVALID" or "IPC_VERSION_MISMATCH" or "IPC_REPLAY_MISMATCH" => "ServiceRequestHelp",
         "SERVICE_TIMEOUT" or "OPERATION_INTERRUPTED" or "CANCELLED" => "ServiceUnknownHelp",
         "CONTROLLER_OWNED" => "FaultOwner",
+        "OUTBOUND_INTERFACE_UNAVAILABLE" => "FaultOutboundInterface",
+        "ENDPOINT_TIMEOUT" or "ENDPOINT_UNREACHABLE" => "FaultEndpointNetwork",
+        "ENDPOINT_NOT_PUBLIC" => "FaultEndpointRejected",
+        "RUNTIME_INSTALL_LOCATION" or "RUNTIME_MANIFEST_INVALID" or "RUNTIME_HASH_MISMATCH"
+            or "RUNTIME_UNSAFE_PATH" or "RUNTIME_UNSAFE_OWNER" or "RUNTIME_UNSAFE_ACL" => "FaultRuntimeValidation",
+        "TUN_ADAPTER_CONFLICT" => "FaultOtherVpn",
+        "TUN_CLEANUP_PENDING" => "FaultCleanup",
+        "VPN_PROBE_FAILED" or "VPN_DNS_FAILED" => "FaultVpnProbe",
+        "TUN_ADDRESS_FAILED" or "ADAPTER_QUERY_FAILED" or "CORE_MISSING" or "CORE_FAILED" or "CORE_UNAVAILABLE"
+            or "TUNNEL_NOT_READY" or "CORE_EXITED" or "CORE_START_FAILED" or "TUN_NOT_READY" or "CORE_STOP_FAILED" => "FaultCore",
         "TRAFFIC_APPLICATION_MISSING" => "FaultTrafficMissing",
         "TRAFFIC_APPLICATION_DENIED" => "FaultTrafficDenied",
         _ when IsTrafficFault(code) => "FaultTrafficProtection",

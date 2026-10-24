@@ -41,6 +41,7 @@ public sealed class PopulatedUiTests
             AppChoiceStateChecks.Run(window);
             UpdateReuseChecks.Run();
             LayoutStabilityChecks.Run(window);
+            ConnectionRecoveryChecks.Run();
         }
         finally { window.Close(); Sta.Pump(); }
     });

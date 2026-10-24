@@ -1,9 +1,11 @@
 import {createHash} from 'node:crypto';
 import {readFile,readdir,stat} from 'node:fs/promises';
 import {resolve} from 'node:path';
-import {root,owner,repo,git,releaseMetadata,authorizationHeaders,githubApi} from './release-metadata.mjs';
+import {root,owner,repo,git,releaseMetadata,githubApi} from './release-metadata.mjs';
+import {actionsReleaseContext,releaseAuthorizationHeaders,verifyReleaseAuthority,assertMainHead} from './release-auth.mjs';
+import {previousReleaseBase} from './release-base.mjs';
 
-const safe=['GITHUB_AUTH_REQUIRED','GITHUB_OWNER_MISMATCH','RELEASE_SCOPE','ASSET_FAILED','WORKTREE_NOT_CLEAN','RELEASE_VERSION','RELEASE_HASH_MISMATCH','RELEASE_BUILD_MISMATCH'];
+const safe=['GITHUB_AUTH_REQUIRED','GITHUB_OWNER_MISMATCH','GITHUB_CI_SCOPE','RELEASE_HEAD_MOVED','RELEASE_SCOPE','ASSET_FAILED','WORKTREE_NOT_CLEAN','RELEASE_VERSION','RELEASE_HASH_MISMATCH','RELEASE_BUILD_MISMATCH','RELEASE_BASE_REQUIRED','RELEASE_BASE_MISSING','RELEASE_BASE_MISMATCH'];
 try {
  const metadata=releaseMetadata();
  if(git(['status','--porcelain']))throw Error('WORKTREE_NOT_CLEAN');
@@ -36,8 +38,16 @@ try {
  const setupName=metadata.prefix+'-win-x64-setup.exe';
  if(provenance.build.installer!==setupName||provenance.build.installerSha256!==checksums.get(setupName))
   throw Error('RELEASE_BUILD_MISMATCH');
- const headers=authorizationHeaders(),api=githubApi(headers);
- const me=await api('/user');if(me.status!==200||me.data.login!==owner)throw Error('GITHUB_OWNER_MISMATCH');
+ const context=actionsReleaseContext(process.env,revision);
+ const headers=releaseAuthorizationHeaders(context,process.env),api=githubApi(headers);
+ await verifyReleaseAuthority(api,context);
+ if(context!==null){
+  const base=previousReleaseBase(metadata.version,revision);
+  if(provenance.baseCommit!==base.commit)throw Error('RELEASE_BASE_MISMATCH');
+  const previous=await api('/repos/'+owner+'/'+repo+'/releases/tags/'+encodeURIComponent(base.tag));
+  if(previous.status!==200||previous.data.draft!==false||previous.data.tag_name!==base.tag)
+   throw Error('RELEASE_BASE_MISMATCH');
+ }
  const reference=await api('/repos/'+owner+'/'+repo+'/git/ref/tags/'+encodeURIComponent(metadata.tag));
  if(reference.status===200){
   let object=reference.data.object;
@@ -69,6 +79,8 @@ try {
   if(upload.status!==201)throw Error('ASSET_FAILED');
   console.log(JSON.stringify({uploaded:name,bytes:bytes.length}));
  }
+ // An old queued/retried run must not publish after main advances while its assets upload.
+ await assertMainHead(api,context);
  const published=await api('/repos/'+owner+'/'+repo+'/releases/'+release.data.id,'PATCH',{draft:false,prerelease:true});
  if(published.status!==200)throw Error('RELEASE_SCOPE');
  console.log(JSON.stringify({release:published.data.html_url,commit:revision,version:metadata.version}));

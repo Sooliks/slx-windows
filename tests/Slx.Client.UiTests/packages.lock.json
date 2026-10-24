@@ -58,6 +58,11 @@
         "resolved": "13.0.3",
         "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
       },
+      "System.Security.Cryptography.ProtectedData": {
+        "type": "Transitive",
+        "resolved": "10.0.13",
+        "contentHash": "aUSmC6cPjFLSE0rDTsmkR3wvUOnscqewebOaaELEToh12sNmoltZqT3f0C81mJ1zhxKjWco25soHTvYwsXCsUw=="
+      },
       "xunit.abstractions": {
         "type": "Transitive",
         "resolved": "2.0.3",
@@ -102,8 +107,8 @@
         "type": "Project",
         "dependencies": {
           "CommunityToolkit.Mvvm": "[8.4.0, )",
-          "Slx.Client.Core": "[0.1.0-alpha.1, )",
-          "Slx.Client.Windows": "[0.1.0-alpha.1, )"
+          "Slx.Client.Core": "[0.1.0-alpha.18, )",
+          "Slx.Client.Windows": "[0.1.0-alpha.18, )"
         }
       },
       "slx.client.core": {
@@ -112,7 +117,8 @@
       "slx.client.windows": {
         "type": "Project",
         "dependencies": {
-          "Slx.Client.Core": "[0.1.0-alpha.1, )"
+          "Slx.Client.Core": "[0.1.0-alpha.18, )",
+          "System.Security.Cryptography.ProtectedData": "[10.0.13, )"
         }
       }
     },

@@ -15,7 +15,8 @@ internal static class TunnelDnsProbe
             {
                 using var udp=new UdpClient(AddressFamily.InterNetwork);
                 var query=new List<byte>(new byte[]{0,0,1,0,0,1,0,0,0,0,0,0});
-                foreach(var label in "www.gstatic.com".Split('.')){query.Add((byte)label.Length);query.AddRange(System.Text.Encoding.ASCII.GetBytes(label));}
+                string host=attempt%2==0?"www.gstatic.com":"slxvpn.com";
+                foreach(var label in host.Split('.')){query.Add((byte)label.Length);query.AddRange(System.Text.Encoding.ASCII.GetBytes(label));}
                 query.AddRange(new byte[]{0,0,1,0,1});var bytes=query.ToArray();RandomNumberGenerator.Fill(bytes.AsSpan(0,2));
                 using var deadline=CancellationTokenSource.CreateLinkedTokenSource(budget.Token);deadline.CancelAfter(TimeSpan.FromSeconds(3));
                 try

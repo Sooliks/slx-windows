@@ -35,7 +35,7 @@ internal static class LocalProbe
     }
 
     public static async Task<bool> CheckOnceAsync(int port, string user, string password, CancellationToken cancellationToken)
-        => (await ObserveAsync(port, user, password, ProbeTarget.Gstatic, cancellationToken)).Passed;
+        => await StartupReadiness.CheckAsync((target, token) => ObserveAsync(port, user, password, target, token), cancellationToken);
 
     public static async Task<ProbeObservation> ObserveAsync(int port, string user, string password,
         ProbeTarget target, CancellationToken cancellationToken)

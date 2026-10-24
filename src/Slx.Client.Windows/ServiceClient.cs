@@ -11,7 +11,7 @@ public sealed class ServiceClient
     public async Task<PipeReply> SendAsync(PipeRequest request, CancellationToken cancellationToken = default)
     {
         using var budget = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        budget.CancelAfter(TimeSpan.FromSeconds(55));
+        budget.CancelAfter(request.Action == "status" ? PipeContract.ClientStatusTimeout : PipeContract.ClientMutationTimeout);
         try
         {
             await using var pipe = new NamedPipeClientStream(".", PipeContract.Name, PipeDirection.InOut,

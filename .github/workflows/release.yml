@@ -1,0 +1,73 @@
+name: Publish Windows prerelease
+
+on:
+  push:
+    branches: [main]
+    paths: [Directory.Build.props]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: slx-windows-release-main
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: >-
+      github.repository == 'Sooliks/slx-windows' && github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: windows-2025
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Check out the triggering commit and release tags
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install the repository SDK
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          global-json-file: global.json
+      - name: Install release tooling runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24.10.0'
+      - name: Check release policy and exact previous tag
+        id: previous
+        run: |
+          node --test scripts/tests/release-auth.test.mjs scripts/tests/release-base.test.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'Release policy tests failed' }
+          $baseRef = node scripts/release-base.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'Exact previous release tag is required; no latest-release fallback is allowed' }
+          "base_ref=$baseRef" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+      - name: Check Inno Setup 6
+        run: |
+          $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path -LiteralPath $compiler -PathType Leaf)) { throw 'Inno Setup 6 is not installed on this runner' }
+          $version = (Get-Item -LiteralPath $compiler).VersionInfo
+          if ($version.FileMajorPart -ne 6) { throw 'Expected Inno Setup major version 6' }
+          Write-Output ('Inno Setup ' + $version.FileVersion)
+      - name: Locked restore, build and all Windows tests
+        run: ./scripts/verify.ps1
+      - name: Build the clean unsigned installer
+        run: |
+          ./scripts/build.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'Installer build failed' }
+          $dirty = git status --porcelain
+          if ($LASTEXITCODE -ne 0 -or $dirty) { throw 'Build changed tracked source; review generated inputs before releasing' }
+      - name: Package matching source, provenance and checksums
+        env:
+          SLX_BASE_REF: ${{ steps.previous.outputs.base_ref }}
+        run: ./scripts/package-source.ps1 -BaseRef $env:SLX_BASE_REF
+      - name: Publish immutable prerelease assets
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/release.mjs

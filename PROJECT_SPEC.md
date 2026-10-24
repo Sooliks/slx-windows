@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.17. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.18. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,27 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.18 — responsive control and failed-connect recovery
+
+Owner report 2026-10-24: two friends cannot connect; SERVICE_UNAVAILABLE, prolonged lost Internet after an error,
+and an unselected CS2 session affected by selected-app VPN. Screenshots establish symptoms, not each native cause.
+Keep four bounded authenticated pipe instances, with a first-instance anchor and unchanged protected ACL.
+Read status under a short ownership lock; serialize mutations and allow validated explicit off to interrupt readiness.
+Failed explicit off retains a paced owned cleanup retry, suppressing reconnect until complete. An unknown UI state
+keeps explicit Disconnect reachable, including after a first-connect lost reply or without a saved subscription.
+Only a definitively failed new connect from confirmed off rolls back its new intent/core/WFP policy and returns the
+original failure code with confirmed off. Cancellation/unknown outcomes and existing protected sessions stay protected.
+Read Windows GetBestRoute2 for the pinned endpoint before each new TUN and pass the exact chosen interface to Xray.
+Reject the owned TUN identity, unresolved/down/loopback mapping; do not change foreign routes or adapter settings.
+Startup HTTPS readiness accepts either existing strict authenticated-proxy origin; DNS readiness remains mandatory.
+Shared public Windows DNS remains VPN-protected and can affect unselected applications. Do not claim per-app DNS
+isolation, verified CS2 UDP behavior, or ExitLag coexistence from unit tests. The interface now explains this scope.
+Add explicit administrator repair-network.ps1 for dead/unavailable service recovery; it releases only SLX intent/WFP
+after confirmed service/core/adapter stop, and never resets the Windows firewall or deletes a foreign adapter.
+Update UI/service together with the alpha.18 installer. No IPC schema, stored-data or dependency version migration.
+Synchronize stale UI lock files with the existing ProtectedData dependency. Source build/portable tests are recorded
+separately from pending Windows native/WPF/installed acceptance in docs/VERIFICATION.md and UPDATE_ALPHA18_RU.md.
 
 ## Alpha.17 — stable layout for transient activity
 
@@ -198,6 +219,11 @@ For installed-system acceptance before the final commit, build.ps1 -Candidate us
 Candidates always record sourceClean=false and publicationAllowed=false and cannot enter package-source or release publication.
 Do not replace prior alpha.1 assets, installed files, existing published tags or release assets implicitly.
 Release tooling requires matching clean build/commit/version/provenance/checksums before GitHub mutations.
+The owner additionally requested publishing alpha.18 through GitHub so the site can consume the release.
+Windows release automation may run the existing verification/build/package/publish sequence on main version bumps
+or explicit manual dispatch. Its token path is limited to this repository, main and the exact workflow commit;
+local owner authentication and all clean-source/provenance/hash/immutable-release guards remain required.
+Hosted Windows checks do not establish real VPN, Windows 10, CS2 or the friends' machine acceptance.
 Unsigned application and installer remain intended; Wintun must retain its valid vendor signature.
 
 Full acceptance requires actual installed service/UI control, both live VPN protocols, selected/unselected application egress,

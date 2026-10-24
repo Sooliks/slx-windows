@@ -84,22 +84,28 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public string SubscriptionUpdated => saved?.Snapshot.FetchedAt.ToLocalTime().ToString("g") ?? "—";
     public string SubscriptionExpiry => saved?.Snapshot.ExpiresAt?.ToLocalTime().ToString("d") ?? Text.Catalog["ExpiryUnknown"];
     public bool IsConnected => statusFresh && status?.Phase == TunnelPhase.Connected && status.ProbePassed;
-    public bool IsTunnelActive => status?.ProtectionActive == true || status?.Phase is TunnelPhase.Connected or TunnelPhase.Connecting or TunnelPhase.Reconnecting;
+    public bool IsTunnelActive => status?.ProtectionActive == true || status?.Phase is TunnelPhase.Connected or TunnelPhase.Connecting or TunnelPhase.Reconnecting or TunnelPhase.Stopping;
+    // A lost connect reply may leave protection installed even when the last snapshot was Disconnected.
+    // Offer idempotent explicit off without turning an unknown observation into a claimed active tunnel.
+    private bool ShouldRequestDisconnect => IsTunnelActive || IsBusy || !statusFresh && lastServiceCode is not null;
+    public bool ShowConnectionAction => HasSubscription || ShouldRequestDisconnect;
+    public bool ShowImportAction => !ShowConnectionAction;
     public bool CanReconnect => !UpdateInProgress && statusFresh && HasSubscription && IsTunnelActive && !IsBusy;
     public bool CanEditRouting => !UpdateInProgress && !IsBusy;
     private bool IsStartupCleanupWait => statusFresh && status is { Phase: TunnelPhase.Faulted, ProtectionActive: false, Code: "SERVICE_STARTUP_CLEANUP_PENDING" };
-    public bool CanConnect => !UpdateInProgress && !IsStartupCleanupWait && ((HasSubscription && statusFresh) || IsTunnelActive || IsBusy);
-    public string ConnectionAction => Text.Catalog[IsTunnelActive || IsBusy ? "Disconnect" : "Connect"];
+    public bool CanConnect => !UpdateInProgress && !IsStartupCleanupWait && ((HasSubscription && statusFresh) || ShouldRequestDisconnect);
+    public string ConnectionAction => Text.Catalog[ShouldRequestDisconnect ? "Disconnect" : "Connect"];
     public string StatusText => Text.Catalog[IsStartupCleanupWait ? "StatusPreparing" : !statusFresh ? ServiceStateCopy.IsTrafficFault(lastServiceCode) ? "StatusOperationUnconfirmed" : lastServiceCode == null ? "StatusUnknown" : status == null ? "StatusUnavailable" : "StatusStale" : status?.Phase switch
     {
         TunnelPhase.Connected when status.ProbePassed => "Connected", TunnelPhase.Connecting => "Connecting",
         TunnelPhase.Reconnecting => "Reconnecting", TunnelPhase.Stopping => "Stopping",
         TunnelPhase.Faulted => "ConnectionFailed", _ => "NotConnected"
     }];
-    public string? LastServiceCode => lastServiceCode ?? (statusFresh && status?.Code != null ? ServiceStateCopy.SafeCode(status.Code) : null);
+    public string? LastServiceCode => lastServiceCode ?? (statusFresh && status?.Code != null ? ServiceStateCopy.SafeCode(status.Code) : RetainedConnectionFailure);
     public bool HasServiceCode => LastServiceCode != null;
     public string ServiceCodeLabel => LastServiceCode == null ? "" : $"{Text.Catalog["ErrorCode"]}: {LastServiceCode}";
     public string StatusDetail => Text.Catalog[!statusFresh || IsStartupCleanupWait || ServiceStateCopy.IsTrafficFault(LastServiceCode)
+        || (status?.Phase is TunnelPhase.Disconnected or TunnelPhase.Faulted) && LastServiceCode != null
         ? ServiceStateCopy.DetailKey(LastServiceCode) : status?.ProtectionActive == true ? "TrafficProtected" : "NoMetrics"];
     public string VersionLabel => "SLX VPN · " + (System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false).OfType<System.Reflection.AssemblyInformationalVersionAttribute>().FirstOrDefault()?.InformationalVersion.Split('+')[0] ?? "alpha");
     public RelayCommand<string> NavigateCommand { get; }
@@ -126,7 +132,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private void Notice(string key) { messageKey = key; OnPropertyChanged(nameof(Message)); OnPropertyChanged(nameof(ShowMessage)); ScheduleNoticeDismiss(key); }
     private void NotifyState()
     {
-        foreach (var name in new[] { nameof(StatusTone), nameof(HasConnectionFacts), nameof(HasActiveProtocol), nameof(ConnectionDuration), nameof(ActiveProtocol), nameof(LastConnectionCheck), nameof(RoutingUpdateText), nameof(IsConnected), nameof(CanEditRouting), nameof(CanConnect), nameof(CanReconnect), nameof(ConnectionAction), nameof(StatusText), nameof(StatusDetail), nameof(LastServiceCode), nameof(HasServiceCode), nameof(ServiceCodeLabel), nameof(HasSubscription), nameof(NoSubscription) }) OnPropertyChanged(name);
+        foreach (var name in new[] { nameof(StatusTone), nameof(HasConnectionFacts), nameof(HasActiveProtocol), nameof(ConnectionDuration), nameof(ActiveProtocol), nameof(LastConnectionCheck), nameof(RoutingUpdateText), nameof(IsConnected), nameof(CanEditRouting), nameof(CanConnect), nameof(CanReconnect), nameof(ConnectionAction), nameof(ShowConnectionAction), nameof(ShowImportAction), nameof(StatusText), nameof(StatusDetail), nameof(LastServiceCode), nameof(HasServiceCode), nameof(ServiceCodeLabel), nameof(HasSubscription), nameof(NoSubscription) }) OnPropertyChanged(name);
         NotifyActivity();
         ImportCommand?.NotifyCanExecuteChanged(); RefreshCommand?.NotifyCanExecuteChanged();
         ReconnectCommand?.NotifyCanExecuteChanged(); AskRemoveCommand?.NotifyCanExecuteChanged();

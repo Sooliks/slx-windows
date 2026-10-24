@@ -8,6 +8,7 @@ namespace Slx.Client.Service;
 
 internal static class ControlPipe
 {
+    internal const int MaxInstances = 4;
     internal sealed record CallerRequest(string Sid, PipeRequest Request);
 
     public static async Task<CallerRequest> ReadRequestAsync(NamedPipeServerStream pipe, CancellationToken cancellationToken)
@@ -22,7 +23,7 @@ internal static class ControlPipe
         return new(sid ?? throw new ClientFault("IPC_CALLER_INVALID"), request);
     }
 
-    public static NamedPipeServerStream Create(string name)
+    public static NamedPipeServerStream Create(string name, bool firstInstance = true)
     {
         var acl = new PipeSecurity();
         acl.SetAccessRuleProtection(true, false);
@@ -34,8 +35,17 @@ internal static class ControlPipe
         foreach (WellKnownSidType allowed in new[] { WellKnownSidType.LocalSystemSid, WellKnownSidType.BuiltinAdministratorsSid })
             acl.AddAccessRule(new PipeAccessRule(new SecurityIdentifier(allowed, null),
                 PipeAccessRights.FullControl, AccessControlType.Allow));
-        return NamedPipeServerStreamAcl.Create(name, PipeDirection.InOut, 1,
-            PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough | PipeOptions.FirstPipeInstance,
+        return CreateWithSecurity(name, firstInstance, acl);
+    }
+
+    // The overload lets isolated OS fixtures give their own SID server rights without broadening the service ACL.
+    internal static NamedPipeServerStream CreateWithSecurity(string name, bool firstInstance, PipeSecurity acl)
+    {
+        // Keep the first stream alive while its siblings serve status/off during a long connect request.
+        var options = PipeOptions.Asynchronous | PipeOptions.WriteThrough;
+        if (firstInstance) options |= PipeOptions.FirstPipeInstance;
+        return NamedPipeServerStreamAcl.Create(name, PipeDirection.InOut, MaxInstances,
+            PipeTransmissionMode.Byte, options,
             PipeContract.MaxBytes, PipeContract.MaxBytes, acl);
     }
 }

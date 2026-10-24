@@ -1,4 +1,31 @@
-# Network model and limits — alpha.14
+# Network model and limits — alpha.18
+
+## Alpha.18 recovery changes
+
+The service accepts concurrent status/off requests while a connect is waiting for readiness. Mutations remain
+serialized; only an authorized explicit off can interrupt active work. A failed off is retained and retried with
+bounded pacing, rather than leaving protection stranded after a single adapter/BFE cleanup failure.
+
+A definitively failed new connection from confirmed Disconnected/unprotected state rolls back its own attempt.
+Successful rollback persists off, waits for the owned process/TUN, removes SLX protection and flushes DNS; the
+original failure code remains visible. Cancellation, lost replies, unreadable startup state and established/protected
+sessions do not trigger automatic release. Explicit off remains available for an unknown result.
+
+Before each TUN launch, read the Windows best route to the pinned public VPN endpoint and pass that exact interface
+alias to Xray. This replaces the pinned core's preference for an available Wi-Fi interface with the Windows-selected
+route. A missing/down/loopback/own-TUN mapping produces OUTBOUND_INTERFACE_UNAVAILABLE or TUN_ADAPTER_CONFLICT.
+It does not modify another VPN or physical routes. The core still binds outbound sockets to one interface;
+distinct IPv4/IPv6 uplinks and ExitLag coexistence remain installed acceptance requirements.
+
+Startup readiness can succeed through either the existing gstatic HTTPS 204 or SLX HTTPS 200 origin; requests still
+use the authenticated loopback proxy and validate TLS/status without accepting redirects. TUN/DNS readiness remains
+mandatory. Shared public DNS policy is unchanged: unselected CS2/Steam can still depend on that shared resolver.
+No observed packet trace establishes a CS2-specific UDP defect or complete transport isolation in this release.
+
+`scripts/repair-network.ps1` performs an explicit administrator off when ordinary control is unavailable. It checks
+the installed service path, stops the service, refuses surviving/ambiguous core processes, waits for captured present
+PnP adapter identities to disappear, clears only SLX intent/WFP and the DNS cache, then starts the service idle.
+It never deletes adapters, force-kills a process, resets the firewall or changes a foreign VPN's settings.
 
 Startup resume also refreshes recognized exact versioned paths before native-ID preflight. One validated application
 list feeds WFP and Xray; changed encrypted intent is saved after committed protection. Unresolved paths remain fail-closed.
@@ -16,7 +43,7 @@ Alpha.11 refreshes recognized Discord `Discord/app-*/Discord.exe` and Roblox `Ro
 WFP owns one persistent provider/sublayer, applied atomically before starting the core. At ALE_AUTH_CONNECT_V4/V6, protected applications are blocked except LAN/loopback and the owned TUN next-hop interface. Whole-computer protection exempts only the verified core and network service so they can reconnect. Soft permits do not override other providers' firewall blocks. Only provider-owned filters are replaced/deleted.
 The TUN permit is nonpersistent: an interface LUID from an earlier boot must not become an exception for another interface. Persistent blocking rules survive core/service exit; on service startup encrypted intent reapplies the protection before recovery. This is not a promise about packets before Windows BFE has initialized at boot.
 Health failure or core exit schedules retries with pauses 2/5/10/20/40/60 seconds, capped at 60, without a total attempt limit. The saved pinned public endpoint enables service recovery without depending on a working shared DNS path. The original hostname is retained in encrypted intent; a validated cached IP is reused for the same endpoint on reconnect. Changing endpoint addresses needs an explicit refreshed connection. Multiple interactive users prevent recovery while protection stays on. SCM also restarts a failed SLX service.
-Only explicit Disconnect writes off-intent and releases protection after the owned child/adapter stops. Service shutdown preserves protection and intent. Uninstall is an explicit removal and invokes the installed service's restricted release command. Encrypted intent under ProgramData/SLX.NetworkService is SYSTEM/Administrators-only with machine DPAPI; it contains the local plan and owner SID, never plaintext subscription/configuration.
+Explicit Disconnect and the narrowly scoped alpha.18 initial-attempt rollback write off-intent and release protection after the owned child/adapter stops. Service shutdown preserves protection and intent. Uninstall and emergency recovery are explicit removal operations and invoke the installed service's restricted release command. Encrypted intent under ProgramData/SLX.NetworkService is SYSTEM/Administrators-only with machine DPAPI; it contains the local plan and owner SID, never plaintext subscription/configuration.
 Application-list edits use a separate validated operation and keep the owned core/TUN/ConnectedAt. Effective no-ops
 (disabled removal, metadata/order/case changes, toggles returning to the old set) perform no WFP or Xray mutation.
 Actual changes first resolve every new native ID, add union protection, persist the desired plan, atomically replace

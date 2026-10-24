@@ -11,6 +11,9 @@ public sealed partial class MainViewModel
     private readonly SemaphoreSlim mutationGate = new(1, 1);
     private readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromSeconds(3) };
     private CancellationTokenSource? operation;
+    private string? connectionFailureCode;
+    private string? RetainedConnectionFailure => statusFresh
+        && (status?.Phase is TunnelPhase.Disconnected or TunnelPhase.Faulted) ? connectionFailureCode : null;
     private long generation;
     private bool polling, disposed;
     public void Initialize(bool startupLaunch = false)
@@ -32,13 +35,14 @@ public sealed partial class MainViewModel
         var owner = generation;
         try
         {
-            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+            using var timeout = new CancellationTokenSource(PipeContract.ClientStatusTimeout);
             var reply = await SendControlAsync(new(PipeContract.Version, "status", Guid.NewGuid()), timeout.Token);
             if (owner != generation || disposed) return;
             if (!reply.Success) { MarkStatusUnknown(reply.Code); ShowFault(reply.Code); return; }
             status = reply.Status;
             statusFresh = true;
             ReconcileApplicationRevision();
+            if (status.Phase == TunnelPhase.Connected && status.ProbePassed) connectionFailureCode = null;
             if (!ServiceStateCopy.IsTrafficFault(lastServiceCode) || status.Phase == TunnelPhase.Connected && status.ProbePassed) lastServiceCode = null;
             if (status.Phase == TunnelPhase.Faulted && status.Code != null) ShowFault(status.Code);
         }
@@ -48,7 +52,7 @@ public sealed partial class MainViewModel
         ResumeDeferredRouting();
         await TryStartupConnectionAsync();
     }
-    private Task ToggleAsync() => IsTunnelActive || IsBusy ? ChangeTunnelAsync("disconnect") : ChangeTunnelAsync("connect");
+    private Task ToggleAsync() => ShouldRequestDisconnect ? ChangeTunnelAsync("disconnect") : ChangeTunnelAsync("connect");
     private async Task ChangeTunnelAsync(string action)
     {
         if (action != "connect-if-idle") CancelStartupConnection();
@@ -59,9 +63,10 @@ public sealed partial class MainViewModel
         ConnectPlan? plan = null;
         var owner = ++generation;
         operation?.Cancel();
-        using var current = new CancellationTokenSource(TimeSpan.FromSeconds(55));
+        using var current = new CancellationTokenSource(PipeContract.ClientMutationTimeout);
         operation = current;
         if (action == "connect-if-idle") startupConnectionOperation = current;
+        connectionFailureCode = null; lastServiceCode = null;
         IsBusy = true;
         ClearMessage();
         var entered = false;
@@ -77,6 +82,7 @@ public sealed partial class MainViewModel
             if (!reply.Success)
             {
                 if (action == "update-applications" && RetainLiveRoutingFailure(reply)) return;
+                RememberConnectionFailure(action, reply.Code);
                 MarkStatusUnknown(reply.Code); ShowFault(reply.Code); return;
             }
             status = reply.Status;
@@ -88,6 +94,7 @@ public sealed partial class MainViewModel
         {
             if (owner != generation) return;
             var code = error is ClientFault fault ? fault.Code : error is OperationCanceledException ? "SERVICE_TIMEOUT" : "SERVICE_UNAVAILABLE";
+            RememberConnectionFailure(action, code);
             MarkStatusUnknown(code);
             if (action == "update-applications") Notice("RulesApplyUnconfirmed"); else ShowFault(code);
         }
@@ -119,6 +126,7 @@ public sealed partial class MainViewModel
     }
     private void ShowFault(string code)
     {
+        if (ServiceStateCopy.IsDefinitiveConnectionFault(code)) { Notice(ServiceStateCopy.DetailKey(code)); return; }
         if (ServiceStateCopy.IsControlFault(code) || ServiceStateCopy.IsTrafficFault(code))
         {
             lastServiceCode = ServiceStateCopy.SafeCode(code);
@@ -133,9 +141,15 @@ public sealed partial class MainViewModel
         "STARTUP_UNAVAILABLE" => "FaultStartup", "STORAGE_UNAVAILABLE" => "FaultStorage", "SERVICE_UNAVAILABLE" => "ServiceHelp",
         "OWNER_MISMATCH" or "OTHER_USER" or "CONTROLLER_OWNED" => "FaultOwner",
         "MULTI_SESSION_UNSUPPORTED" => "FaultSessions", "TUN_ADAPTER_CONFLICT" => "FaultOtherVpn", "TUN_CLEANUP_PENDING" => "FaultCleanup", "CORE_STOP_FAILED" => "FaultCore",
+        "OUTBOUND_INTERFACE_UNAVAILABLE" => "FaultOutboundInterface", "VPN_PROBE_FAILED" => "FaultVpnProbe",
         "SERVICE_IDENTITY_FAILED" or "SERVICE_ACCESS_DENIED" => "FaultServiceSecurity", "CANCELLED" => "FaultCancelled",
-        "TUN_ADDRESS_FAILED" or "ADAPTER_QUERY_FAILED" or "CORE_MISSING" or "CORE_FAILED" or "CORE_UNAVAILABLE" or "TUNNEL_NOT_READY" or "CORE_EXITED" or "CORE_START_FAILED" or "VPN_PROBE_FAILED" or "TUN_NOT_READY" => "FaultCore", _ => "FaultUnknown"
+        "TUN_ADDRESS_FAILED" or "ADAPTER_QUERY_FAILED" or "CORE_MISSING" or "CORE_FAILED" or "CORE_UNAVAILABLE" or "TUNNEL_NOT_READY" or "CORE_EXITED" or "CORE_START_FAILED" or "TUN_NOT_READY" => "FaultCore", _ => "FaultUnknown"
         });
+    }
+    private void RememberConnectionFailure(string action, string code)
+    {
+        if ((action is "connect" or "connect-if-idle" or "reconnect") && ServiceStateCopy.IsDefinitiveConnectionFault(code))
+            connectionFailureCode = ServiceStateCopy.SafeCode(code);
     }
     public void ExitUiOnly() { Dispose(); Application.Current.Shutdown(); }
     private static void OpenLink(string url)

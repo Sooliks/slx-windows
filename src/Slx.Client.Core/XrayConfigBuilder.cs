@@ -5,11 +5,14 @@ namespace Slx.Client.Core;
 /// <summary>Only typed plans become configuration. Never accepts arbitrary Xray JSON.</summary>
 public static class XrayConfigBuilder
 {
-    public static string Build(ConnectPlan plan, int probePort, string probeUser, string probePassword)
+    public static string Build(ConnectPlan plan, int probePort, string probeUser, string probePassword,
+        string outboundInterface = "auto")
     {
         PlanValidator.Validate(plan);
         if (probePort is < 1024 or > 65535 || !SafeProbe(probeUser) || !SafeProbe(probePassword))
             throw new ClientFault("INVALID_PLAN");
+        if (string.IsNullOrWhiteSpace(outboundInterface) || outboundInterface.Length > 256
+            || outboundInterface.Any(char.IsControl)) throw new ClientFault("INVALID_PLAN");
         var config = new
         {
             api = new { tag = XrayRouteProtocol.ApiTag, services = new[] { "RoutingService" } },
@@ -32,7 +35,7 @@ public static class XrayConfigBuilder
                         gateway = new[] { "172.30.255.1/30", "fd73:6c78::1/126" },
                         dns = new[] { "1.1.1.1", "2606:4700:4700::1111" },
                         autoSystemRoutingTable = new[] { "0.0.0.0/0", "::/0" },
-                        autoOutboundsInterface = "auto"
+                        autoOutboundsInterface = outboundInterface
                     }
                 },
                 new
