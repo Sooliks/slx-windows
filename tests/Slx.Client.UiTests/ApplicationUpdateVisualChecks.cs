@@ -27,8 +27,7 @@ internal static class ApplicationUpdateVisualChecks
                     mutation = request;
                     return Task.FromResult(new PipeReply(false, "ROUTING_UPDATE_UNCONFIRMED", observed));
                 };
-                window.DataContext = model; window.Width = language == "ru" ? 940 : 1200;
-                window.Height = language == "ru" ? 660 : 820;
+                window.DataContext = model; Sta.Resize(window, language == "ru" ? 940 : 1200, language == "ru" ? 660 : 820);
                 model.PollAsync().GetAwaiter().GetResult(); Sta.Pump();
                 var hint = Sta.Descendants<TextBlock>(window).Single(item => item.Name == "RulesLiveHint");
                 Assert.True(hint.IsVisible); Assert.Equal(Text.Catalog["RulesNotice"], hint.Text);

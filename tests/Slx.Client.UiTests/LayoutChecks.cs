@@ -10,7 +10,7 @@ internal static class LayoutChecks
     public static void Run(MainWindow window, MainViewModel model)
     {
         Assert.Equal("olive", model.Theme);
-        model.Page = "connection"; window.Width = 1200; window.Height = 820; Sta.Pump();
+        model.Page = "connection"; Sta.Resize(window, 1200, 820);
         AssertAboveFold(window);
         UiScreenshots.Save(window, "slx-populated-selected");
         var selected = Sta.Descendants<StackPanel>(window).Single(x => x.Name == "SelectedAppsSection");
@@ -26,7 +26,7 @@ internal static class LayoutChecks
         UiFixtures.AllowSyntheticApplications(model);
         foreach (var name in new[] { "Design Studio", "Code Editor", "Music Player", "Video Player", "Research Browser", "Team Messenger" })
             model.AddDiscoveredCommand.Execute(new AppRule(Guid.NewGuid(), name, @"C:\SLX UI Fixture\" + name + ".exe"));
-        window.Width = 940; window.Height = 660; Sta.Pump();
+        Sta.Resize(window, 940, 660);
         var scroll = Sta.Descendants<ScrollViewer>(window).Single(x => x.Name == "ConnectionScroll");
         var bar=Sta.Descendants<System.Windows.Controls.Primitives.ScrollBar>(scroll).Single(x=>x.Orientation==Orientation.Vertical);
         var edge=bar.TransformToAncestor(window).TransformBounds(new Rect(bar.RenderSize));
@@ -39,7 +39,7 @@ internal static class LayoutChecks
         model.Page = "applications"; Sta.Pump();
         Assert.All(Sta.Descendants<TextBlock>(window).Where(x => x.Text == UiFixtures.Preferences(Slx.Client.Core.RoutingMode.SelectedApplications).Applications![1].Name), x => Assert.Equal(TextTrimming.CharacterEllipsis, x.TextTrimming));
         UiScreenshots.Save(window, "slx-populated-apps-narrow");
-        window.Width = 1200; window.Height = 820; model.Page = "settings"; model.Language = "en"; model.Theme = "terminal"; Sta.Pump();
+        model.Page = "settings"; model.Language = "en"; model.Theme = "terminal"; Sta.Resize(window, 1200, 820);
         UiScreenshots.Save(window, "slx-populated-settings-en");
     }
     private static void AssertAboveFold(MainWindow window)

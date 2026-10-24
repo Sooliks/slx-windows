@@ -27,7 +27,7 @@ internal static class LayoutStabilityChecks
         var observed = new TunnelStatus(TunnelPhase.Disconnected, DateTimeOffset.UtcNow);
         var pending = new TaskCompletionSource<PipeReply>(TaskCreationOptions.RunContinuationsAsynchronously);
         model.SendOverride = (request, _) => request.Action == "status" ? Task.FromResult(new PipeReply(true, "OK", observed)) : pending.Task;
-        window.DataContext = model; window.Width = 940; window.Height = 660;
+        window.DataContext = model; Sta.Resize(window, 940, 660);
         model.PollAsync().GetAwaiter().GetResult(); Sta.Pump();
         var card = Named<Border>(window, "StatusCard"); var subscription = Named<Border>(window, "SubscriptionSection");
         var hint = Named<TextBlock>(window, "ActivityHint");

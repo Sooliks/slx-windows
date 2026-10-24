@@ -29,9 +29,9 @@ internal static class UpdateChecks
             updates.LaterCommand.Execute(null); Assert.False(updates.ShowBanner);
             updates.Automatic = true; Assert.Equal(1, checks);
             updates.CheckAsync(true).GetAwaiter().GetResult(); Assert.True(updates.ShowBanner);
-            model.Language = "ru"; window.Width = 1200; window.Height = 820; Sta.Pump();
+            model.Language = "ru"; Sta.Resize(window, 1200, 820);
             UiScreenshots.Save(window, "slx-update-available-wide");
-            window.Width = 940; window.Height = 660; Sta.Pump(); UiScreenshots.Save(window, "slx-update-available-compact");
+            Sta.Resize(window, 940, 660); UiScreenshots.Save(window, "slx-update-available-compact");
             var pending = new TaskCompletionSource<UpdateCheckResult>();
             updates.CheckOverride = (_, _) => pending.Task;
             var checking = updates.CheckAsync(true);
@@ -70,7 +70,7 @@ internal static class UpdateChecks
             launching.SetResult(UpdateLaunchResult.Started); Sta.Pump(); Assert.True(install.IsCompletedSuccessfully);
             Assert.True(updates.InstallerOpened); Assert.False(model.CanConnect); Assert.False(updates.ApplyCommand.CanExecute(null));
             updates.ApplyCommand.ExecuteAsync(null).GetAwaiter().GetResult(); Assert.Equal(2, launches);
-            model.Language = "en"; model.Page = "settings"; window.Width = 1200; window.Height = 820; Sta.Pump();
+            model.Language = "en"; model.Page = "settings"; Sta.Resize(window, 1200, 820);
             UiScreenshots.Save(window, "slx-update-settings-en");
             CheckSafeDiagnostics(model);
             CheckDisposedInstall();

@@ -13,8 +13,10 @@ public sealed class PopulatedUiTests
     public Task PopulatedSelectionTemplatesAndLayoutRemainUsable() => Sta.Run(() =>
     {
         using var model = new MainViewModel(false, UiFixtures.Subscription, UiFixtures.Preferences(RoutingMode.SelectedApplications));
-        var window = new MainWindow(model, true) { ShowInTaskbar = false, Left = -20000, Top = -20000 };
-        window.Show(); Sta.Pump();
+        var window = new MainWindow(model, true)
+        { ShowInTaskbar = false, WindowStartupLocation = WindowStartupLocation.Manual, Left = -20000, Top = -20000 };
+        Assert.Equal(940, window.MinWidth); Assert.Equal(660, window.MinHeight);
+        window.Show(); Sta.Resize(window, 1200, 820);
         try
         {
             CaptionChecks.Run(window, model);

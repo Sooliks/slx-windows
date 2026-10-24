@@ -63,18 +63,22 @@ public sealed class ServiceResponsivenessTests
     [Fact]
     public async Task OffAdmittedDuringValidationCancelsTheStartBeforeItsNetworkWork()
     {
-        using var entered = new ManualResetEventSlim();
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         using var release = new ManualResetEventSlim();
         var engine = new WaitingTunnel();
         var dispatcher = new ControlDispatcher(engine, new Sessions(() =>
         {
-            entered.Set();
+            entered.SetResult();
             Assert.True(release.Wait(TimeSpan.FromSeconds(5)));
         }));
-        var connect = Task.Run(() => dispatcher.DispatchAsync("owner", Request("connect", CoreFixtures.Plan()), default));
-        Assert.True(entered.Wait(TimeSpan.FromSeconds(2)));
-        var off = dispatcher.DispatchAsync("owner", Request("disconnect"), default);
-        release.Set();
+        var connect = DispatchOnDedicatedThread(dispatcher, Request("connect", CoreFixtures.Plan()));
+        Task<PipeReply> off;
+        try
+        {
+            await entered.Task.WaitAsync(TimeSpan.FromSeconds(2));
+            off = dispatcher.DispatchAsync("owner", Request("disconnect"), default);
+        }
+        finally { release.Set(); }
         Assert.True((await off.WaitAsync(TimeSpan.FromSeconds(2))).Success);
         Assert.Equal("OPERATION_INTERRUPTED", (await connect).Code);
         Assert.False(engine.Started.Task.IsCompleted);
@@ -84,19 +88,19 @@ public sealed class ServiceResponsivenessTests
     [Fact]
     public async Task MismatchedOffDuringValidationCannotCancelTheAdmittedConnect()
     {
-        using var entered = new ManualResetEventSlim();
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         using var release = new ManualResetEventSlim();
         var engine = new WaitingTunnel();
         var dispatcher = new ControlDispatcher(engine, new Sessions(() =>
         {
-            entered.Set();
+            entered.SetResult();
             Assert.True(release.Wait(TimeSpan.FromSeconds(5)));
         }));
         var request = Request("connect", CoreFixtures.Plan());
-        var connect = Task.Run(() => dispatcher.DispatchAsync("owner", request, default));
-        Assert.True(entered.Wait(TimeSpan.FromSeconds(2)));
+        var connect = DispatchOnDedicatedThread(dispatcher, request);
         try
         {
+            await entered.Task.WaitAsync(TimeSpan.FromSeconds(2));
             var mismatch = await dispatcher.DispatchAsync("owner", request with { Action = "disconnect", Plan = null }, default)
                 .WaitAsync(TimeSpan.FromSeconds(2));
             Assert.Equal("IPC_REPLAY_MISMATCH", mismatch.Code);
@@ -109,6 +113,12 @@ public sealed class ServiceResponsivenessTests
             .WaitAsync(TimeSpan.FromSeconds(2))).Success);
         Assert.Equal("OPERATION_INTERRUPTED", (await connect).Code);
     }
+
+    // The session guard is synchronous. Do not block one pool worker while waiting for
+    // another pool worker to reach it: a parallel test run can starve that handshake.
+    private static Task<PipeReply> DispatchOnDedicatedThread(ControlDispatcher dispatcher, PipeRequest request) =>
+        Task.Factory.StartNew(() => dispatcher.DispatchAsync("owner", request, default), CancellationToken.None,
+            TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
 
     private static PipeRequest Request(string action, ConnectPlan? plan = null) => new(PipeContract.Version, action, Guid.NewGuid(), plan);
     private sealed class Sessions(Action? check = null) : ISessionGuard

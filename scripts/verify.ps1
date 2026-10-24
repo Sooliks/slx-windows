@@ -4,7 +4,7 @@ Set-Location ([IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..')))
 if ($LASTEXITCODE -ne 0) { throw 'Locked restore failed' }
 & dotnet build Slx.Windows.slnx -c Release --no-restore
 if ($LASTEXITCODE -ne 0) { throw 'Build failed' }
-& dotnet test Slx.Windows.slnx -c Release --no-build --no-restore
+& dotnet test Slx.Windows.slnx -c Release --no-build --no-restore --logger trx
 if ($LASTEXITCODE -ne 0) { throw 'Tests failed' }
 $large = Get-ChildItem src,tests -Recurse -File | Where-Object {
  $_.Extension -in '.cs','.xaml' -and $_.FullName -notmatch '[\\/](obj|bin)[\\/]' -and

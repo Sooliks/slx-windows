@@ -2,6 +2,7 @@ using System.Runtime.ExceptionServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Xunit;
 namespace Slx.Client.UiTests;
 internal static class Sta
 {
@@ -42,6 +43,16 @@ internal static class Sta
         if (failure != null) ExceptionDispatchInfo.Capture(failure).Throw();
     }
     public static void Pump() => Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.SystemIdle);
+    public static void Resize(Window window, double width, double height)
+    {
+        // WPF also clamps layout to the desktop's Win32 track limits. Fixture minima keep
+        // the requested viewport deterministic even when the hosted desktop is smaller.
+        window.MinWidth = width; window.MinHeight = height;
+        window.Width = width; window.Height = height;
+        window.UpdateLayout(); Pump();
+        Assert.Equal(width, window.ActualWidth);
+        Assert.Equal(height, window.ActualHeight);
+    }
     public static IEnumerable<T> Descendants<T>(DependencyObject root) where T : DependencyObject
     {
         for (var index = 0; index < VisualTreeHelper.GetChildrenCount(root); index++)

@@ -74,7 +74,7 @@ internal static class MotionChecks
     }
     private static void CheckScrollMemory(MainWindow window, MainViewModel model)
     {
-        window.Width = 940; window.Height = 660; model.Page = "applications"; Sta.Pump();
+        model.Page = "applications"; Sta.Resize(window, 940, 660);
         var scroll = Page(window, "applications");
         Assert.True(scroll.ScrollableHeight > 60);
         scroll.ScrollToVerticalOffset(120); Sta.Pump();
@@ -85,7 +85,7 @@ internal static class MotionChecks
         Assert.NotSame(scroll, restored);
         Assert.Equal(offset, restored.VerticalOffset, 1);
         restored.ScrollToTop(); Sta.Pump();
-        model.Page = "connection"; window.Width = 1200; window.Height = 820; Sta.Pump();
+        model.Page = "connection"; Sta.Resize(window, 1200, 820);
         Assert.Equal(0, ScrollMemory.Saved(model, "applications") ?? 0, 1);
     }
     private static ScrollViewer Page(Window window, string key) =>

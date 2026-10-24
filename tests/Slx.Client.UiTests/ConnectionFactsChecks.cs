@@ -10,7 +10,7 @@ internal static class ConnectionFactsChecks
 {
     public static void Run(MainWindow window, MainViewModel model)
     {
-        window.Width = 1200; window.Height = 820;
+        Sta.Resize(window, 1200, 820);
         using (var empty = new MainViewModel(false))
         {
             window.DataContext = empty; Sta.Pump();
@@ -35,7 +35,7 @@ internal static class ConnectionFactsChecks
         Assert.Equal("Hysteria2", model.ActiveProtocol); Assert.Matches(@"^00:02:\d{2}$", model.ConnectionDuration);
         Assert.Equal(now.ToLocalTime().ToString("HH:mm:ss"), model.LastConnectionCheck);
         UiScreenshots.Save(window, "slx-facts-connected-wide");
-        window.Width = 940; window.Height = 660; Sta.Pump();
+        Sta.Resize(window, 940, 660);
         var scroll = Sta.Descendants<ScrollViewer>(window).Single(item => item.Name == "ConnectionScroll");
         scroll.ScrollToBottom(); Sta.Pump();
         UiScreenshots.Save(window, "slx-facts-connected-compact");
@@ -54,7 +54,7 @@ internal static class ConnectionFactsChecks
         model.PollAsync().GetAwaiter().GetResult(); Sta.Pump();
         AssertHidden(window, model); UiScreenshots.Save(window, "slx-facts-hidden-unknown");
         Observe(model, new(TunnelPhase.Disconnected, now)); AssertHidden(window, model);
-        window.Width = 1200; window.Height = 820; Sta.Pump();
+        Sta.Resize(window, 1200, 820);
         UiScreenshots.Save(window, "slx-facts-off");
     }
     private static StackPanel Facts(MainWindow window) => Sta.Descendants<StackPanel>(window).Single(item => item.Name == "ConnectionFacts");

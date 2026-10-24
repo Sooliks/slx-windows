@@ -1,5 +1,36 @@
 # Verification — 0.1.0-alpha.18 (2026-10-24)
 
+## Windows verification follow-up after the compiler fix
+
+The owner pushed `0903212692104fc2cbe67b580c60a712de0cf751`.
+[Run 40097872743](https://github.com/Sooliks/slx-windows/actions/runs/40097872743) passed the corrected Inno check,
+locked restore and the full solution build with zero warnings/errors. The main Windows test assembly ran 416 tests:
+415 passed, one failed before reaching its dispatcher assertion at `entered.Wait(2s)`. The separate expanded WPF
+scenario failed at `AdaptiveNavigationChecks`: the expected wide sidebar was 204, but the observed compact sidebar
+was 76. Installer build, packaging and publication did not run.
+
+The two synchronous-validation fixtures now use a dedicated thread and an asynchronously awaited entry signal,
+with release in finally. Their original 2/5-second limits and replay/cancellation assertions are preserved. An isolated
+process with one ThreadPool worker reproduced the original failure at line 97; both corrected scenarios pass under
+that same constraint. Focused portable `ServiceResponsivenessTests` passed 5/5, with no skips or failures.
+
+The WPF fixture now explicitly sets its requested test viewport through `Sta.Resize` and checks ActualWidth/Height
+before applying the original layout assertions. This addresses WPF's desktop-dependent native track constraints;
+setting Width alone did not establish the required actual viewport. All 26 shared-window resize transitions use the
+helper. Production minimum 940x660 is asserted before test sizing; production UI, breakpoint, window constraints and
+the sidebar 204/76 assertions are unchanged. Exact runner desktop dimensions were not present in the failed log.
+The correction still requires a new native Windows run; local cross-compilation is not WPF execution.
+
+Final correction validation: locked restore with the existing package locks passed, and
+`dotnet build Slx.Windows.slnx -c Release --no-restore -m:1 -nr:false -p:UseSharedCompilation=false` passed with
+zero warnings/errors, including all updated WPF fixtures. A first restricted restore could not reach NuGet audit
+data (NU1900); the unchanged locked command succeeded with network access. Audit/lock checks were not disabled.
+PowerShell AST parsing, workflow YAML checks, the <=200-nonblank-line source gate and diff whitespace checks passed.
+
+`verify.ps1` additionally records TRX test results. Actions saves those and synthetic UI screenshots as a seven-day
+artifact even on verification failure. Only this diagnostic upload is nonblocking; failed tests still block installer
+build and publication. The workflow modification starts a new run on push without changing alpha.18.
+
 ## GitHub run and compiler preflight correction
 
 The owner successfully pushed `58e3c92541641c453199ba6237b98f59f20f58d3`; its tree matches the prepared source tree.

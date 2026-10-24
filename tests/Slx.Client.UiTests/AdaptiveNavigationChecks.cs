@@ -16,14 +16,14 @@ internal static class AdaptiveNavigationChecks
         var sidebar = Sta.Descendants<Border>(window).Single(element => element.Name == "Sidebar");
         var navigation = Sta.Descendants<Button>(sidebar).Where(button => ReferenceEquals(button.Command, model.NavigateCommand)).ToArray();
         Assert.Equal(4, navigation.Length);
-        window.Width = 1200; window.Height = 820; Sta.Pump();
+        Sta.Resize(window, 1200, 820);
         Assert.Equal(204, sidebar.ActualWidth);
         Assert.All(navigation, button => Assert.True(Assert.Single(Sta.Descendants<TextBlock>(button)).IsVisible));
         foreach (var button in Sta.Descendants<Button>(sidebar))
             Assert.All(Sta.Descendants<TextBlock>(button), text => AssertTextFits(text, button));
         CheckRoutingCaptions(window);
         UiScreenshots.Save(window, "slx-navigation-wide");
-        window.Width = 940; window.Height = 660; Sta.Pump();
+        Sta.Resize(window, 940, 660);
         Assert.Equal(76, sidebar.ActualWidth);
         Assert.All(navigation, button =>
         {
@@ -48,7 +48,7 @@ internal static class AdaptiveNavigationChecks
         var scroll = Sta.Descendants<ScrollViewer>(window).Single(element => element.Name == "ConnectionScroll");
         Assert.True(scroll.ExtentWidth <= scroll.ViewportWidth + 1);
         UiScreenshots.Save(window, "slx-connection-unknown-compact");
-        window.Width = 1200; window.Height = 820; Sta.Pump();
+        Sta.Resize(window, 1200, 820);
         UiScreenshots.Save(window, "slx-connection-unknown-wide");
         model.SendOverride = null;
     }

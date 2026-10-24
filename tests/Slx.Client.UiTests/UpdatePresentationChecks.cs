@@ -19,7 +19,7 @@ internal static class UpdatePresentationChecks
     {
         var original = window.DataContext;
         using var model = new MainViewModel(false, UiFixtures.Subscription, UiFixtures.Preferences(RoutingMode.SelectedApplications));
-        window.DataContext = model; model.Language = "ru"; window.Width = 940; window.Height = 660;
+        window.DataContext = model; model.Language = "ru"; Sta.Resize(window, 940, 660);
         var updates = model.Updates;
         try
         {
@@ -126,7 +126,7 @@ internal static class UpdatePresentationChecks
             Assert.True(settingsApply.IsEnabled); Assert.Contains(Offer.Version, new ButtonAutomationPeer(settingsApply).GetName());
             settings.BringIntoView(); Sta.Pump(); UiScreenshots.Save(window, "slx-update15-deferred-settings-ru-narrow");
             updates.CheckAsync(true).GetAwaiter().GetResult(); model.Page = "connection"; model.Language = "en";
-            window.Width = 1200; window.Height = 820; Sta.Pump();
+            Sta.Resize(window, 1200, 820);
             AssertFits(window, banner); UiScreenshots.Save(window, "slx-update15-available-en-wide");
         }
         finally { window.DataContext = original; Text.Catalog.SetLanguage("ru"); }

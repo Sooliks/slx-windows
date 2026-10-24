@@ -21,7 +21,7 @@ internal static class AppChoiceStateChecks
                 preferences.Applications![1]=preferences.Applications![1] with{Enabled=false};
                 using var model=new MainViewModel(false,UiFixtures.Subscription,preferences);
                 model.Language=language;window.DataContext=model;
-                window.Width=language=="ru"?940:1200;window.Height=language=="ru"?660:820;
+                Sta.Resize(window,language=="ru"?940:1200,language=="ru"?660:820);
                 int mutations=0;bool unavailable=false;
                 var observed=new TunnelStatus(TunnelPhase.Disconnected,DateTimeOffset.UtcNow);
                 model.SendOverride=(request,_)=>

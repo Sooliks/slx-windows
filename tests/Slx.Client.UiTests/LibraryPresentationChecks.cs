@@ -27,7 +27,7 @@ internal static class LibraryPresentationChecks
         finally
         {
             Text.Catalog.SetLanguage(original.Language); ThemeManager.Apply(original.Theme);
-            window.DataContext = original; window.Width = width; window.Height = height; Sta.Pump();
+            window.DataContext = original; Sta.Resize(window, width, height);
         }
     }
     private static void CheckPresentation(MainWindow window, string language, double width, double height, string suffix)
@@ -42,7 +42,7 @@ internal static class LibraryPresentationChecks
         model.CatalogFetchOverride = _ => Task.FromResult<IReadOnlyList<CatalogApplication>>([]);
         model.DiscoveryScanOverride = (_, callback, token) => { publish = callback; return completion.Task.WaitAsync(token); };
         model.WarmDiscoveryCacheAsync().GetAwaiter().GetResult();
-        window.DataContext = model; window.Width = width; window.Height = height; Sta.Pump();
+        window.DataContext = model; Sta.Resize(window, width, height);
         Assert.Equal(12, model.FilteredLibrary.Count); Assert.True(model.HasMoreLibraryResults);
         Assert.Equal(Text.Catalog["LibrarySaved"], model.LibraryStatusText);
         Assert.True(model.HasLibraryObservation); var observation = model.LibraryObservationText;

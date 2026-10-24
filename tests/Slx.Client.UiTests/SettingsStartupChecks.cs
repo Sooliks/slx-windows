@@ -20,7 +20,7 @@ internal static class SettingsStartupChecks
             UiFixtures.Preferences(RoutingMode.SelectedApplications) with { AutoStart = false, AutoConnectOnStartup = true });
         try
         {
-            enabled.Page = "settings"; window.DataContext = enabled; window.Width = 940; window.Height = 660; Sta.Pump();
+            enabled.Page = "settings"; window.DataContext = enabled; Sta.Resize(window, 940, 660);
             var option = Option(window); Assert.True(option.IsEnabled); Assert.True(option.IsChecked);
             var peer = new CheckBoxAutomationPeer(option);
             Assert.Equal(Text.Catalog["AutoConnectStartup"], peer.GetName());
@@ -29,7 +29,7 @@ internal static class SettingsStartupChecks
             toggle.Toggle(); Sta.Pump(); Assert.True(enabled.AutoConnectOnStartup);
             AssertCaptionsFit(window, option);
             UiScreenshots.Save(window, "slx-settings-startup-enabled-narrow");
-            enabled.Language = "en"; enabled.Theme = "terminal"; window.Width = 1200; window.Height = 820; Sta.Pump();
+            enabled.Language = "en"; enabled.Theme = "terminal"; Sta.Resize(window, 1200, 820);
             AssertCaptionsFit(window, option);
             UiScreenshots.Save(window, "slx-settings-startup-enabled-wide-en");
             disabled.Page = "settings"; window.DataContext = disabled; Sta.Pump();

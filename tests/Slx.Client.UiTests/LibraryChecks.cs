@@ -18,7 +18,7 @@ internal static class LibraryChecks
         foreach(var name in new[]{"Library Browser","Library Messenger","Library Music","Library Video","Library Editor","Library Game"})
             model.Discovered.Add(new(Guid.NewGuid(),name,@"C:\Synthetic Library\"+name+".exe"));
         model.DiscoverySearch="refresh";model.DiscoverySearch="";
-        model.Page="applications";model.Theme="olive";window.Width=1200;window.Height=820;Sta.Pump();
+        model.Page="applications";model.Theme="olive";Sta.Resize(window,1200,820);
         var icons=Sta.Descendants<Image>(window).Where(image=>image.Width==44).ToArray();
         Assert.Equal(6,icons.Length);
         Assert.All(icons,image=>Assert.NotNull(image.Source));
@@ -28,7 +28,7 @@ internal static class LibraryChecks
         Assert.Contains(Sta.Descendants<Button>(window),button=>ReferenceEquals(button.Command,model.AddExecutableCommand));
         Assert.Contains(Sta.Descendants<WrapPanel>(window),panel=>panel.IsItemsHost);
         UiScreenshots.Save(window,"slx-library-wide");
-        window.Width=940;window.Height=660;Sta.Pump();
+        Sta.Resize(window,940,660);
         Assert.All(Sta.Descendants<ScrollViewer>(window),scroll=>Assert.True(scroll.ExtentWidth<=scroll.ViewportWidth+1));
         UiScreenshots.Save(window,"slx-library-narrow");
         var first=new AppRule(Guid.NewGuid(),"Claude",@"C:\Synthetic Library\Claude\claude.exe");

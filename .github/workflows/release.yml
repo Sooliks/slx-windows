@@ -65,6 +65,17 @@ jobs:
           $global:LASTEXITCODE = 0
       - name: Locked restore, build and all Windows tests
         run: ./scripts/verify.ps1
+      - name: Save Windows verification evidence
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: windows-verification-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            tests/**/TestResults/*.trx
+            artifacts/ui/*.png
+          retention-days: 7
+          if-no-files-found: warn
       - name: Build the clean unsigned installer
         run: |
           ./scripts/build.ps1
