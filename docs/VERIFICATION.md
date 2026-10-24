@@ -1,4 +1,138 @@
+# Verification — 0.1.0-alpha.20 (2026-10-24)
+
+STATUS: PARTIAL. Source patch based on published alpha.19, commit `522cb9ec9c4f13ef2cd71d20c4918c76fbdfc37c`.
+No alpha.20 installer or successful alpha.20 native Windows workflow is claimed by this source handoff.
+
+## Observed problem and scope
+
+The friend's screenshot shows alpha.19, selected-app Hysteria2, Discord enabled, VPN off and VPN_DNS_FAILED.
+That code is emitted after the authenticated HTTPS readiness and adapter checks, during DNS readiness. It does not
+identify a resolver outage, a socket refusal, a foreign route, Wi-Fi, ICS or any particular security product.
+The owner explicitly confirmed alpha.19 works on his own PC. The reproduced defect reduces resilience when the first
+resolver fails; it does not imply that every alpha.19 connection fails. No production profile or server was accessed.
+
+## Confirmed defect and correction
+
+Exact Xray 26.9.9 `app/dns/dns.go` excludes fallback candidates when disableFallback=true; with the two current bare
+server entries and no matching domain rules, the empty selection uses clients[0] only. Enable fallback among the same
+two HTTPS-only peers and enable parallel queries. The normal four-second first-resolver wait otherwise exceeds a
+three-second individual DNS readiness attempt. No localhost/system/plaintext/+local resolver is added. Both peers
+retain the resolver tag routed to VPN before self bypass; production WFP and the pinned core/driver are unchanged.
+
+The unbound DNS socket keeps ordinary Windows routing. Read-only route checks before sending and before accepting a
+positive answer require the owned TUN identity; missing/foreign routes cannot send or pass. This prevents whole-PC
+service exemptions from turning a physical DNS response into proof of TUN DNS. Route observations are snapshots,
+not a packet-capture guarantee. The existing three attempts, three-second/overall nine-second deadlines and caller
+cancellation remain. The complete bounded response must contain the correct question and a real question-owner IN/A
+answer, as emitted by the pinned core. Header-only replies and late responses cannot falsely confirm readiness.
+
+Optional bounded DnsCheck status retains three typed attempts at most, survives rollback, and resets at the next core
+launch. Strict IPC framing, old statuses without DnsCheck and safe diagnostics are covered. UI/service must still be
+updated together: strict old clients are not promised to accept new status fields. RU/EN copy identifies DNS failure.
+No raw packets, exception text, addresses, adapter identities, profile names, app paths or credentials enter diagnostics.
+
+## Commands and actual results
+
+All local .NET commands used SDK 10.0.401, single-node MSBuild, the existing package cache and the unchanged locked
+external dependency versions/hashes. The host is Linux; Windows-targeted compilation is not native Windows execution.
+
+- `dotnet restore Slx.Windows.slnx --locked-mode --packages /tmp/slx-nuget -m:1 -nr:false`: exit 0, all six projects.
+- `dotnet build Slx.Windows.slnx -c Release --no-restore -m:1 -nr:false -p:UseSharedCompilation=false`:
+  exit 0, zero warnings, zero errors, 25.88 seconds. WPF and its expanded regression scenario compiled.
+- `dotnet test tests/Slx.Client.Tests/Slx.Client.Tests.csproj -c Release --no-restore -m:1 -nr:false
+  -p:UseSharedCompilation=false --filter <focused classes below> --logger 'console;verbosity=minimal'`:
+  final exit 0, 107 passed, 0 failed, 0 skipped, 3 seconds. This final run includes strict IPC round trips.
+- Focused classes: DnsProbePacketTests, TunnelDnsProbeTests, TunnelDnsRouteTests, CoreConfigTests,
+  RecoveryAndDiscoveryTests.PublicDnsRacesOnlyConfiguredHttpsResolversThroughVpn, RecoveryObservationTests,
+  InitialConnectionAttemptTests, TunnelRecoveryPolicyTests, StartupReadinessTests, OutboundInterfaceTests,
+  PipeFramingTests. The preceding integrated run without the framing class passed 101 tests.
+- Separate linked-source checks passed 46 probe/packet cases and 17 route-policy cases. These overlap the 107 above and
+  must not be added to that count. They inject native route reads rather than performing Windows route calls.
+- `node --test --test-isolation=none scripts/tests/release-auth.test.mjs scripts/tests/release-base.test.mjs`:
+  exit 0, 24 passed, 0 failed/skipped. Existing release and clean-source guards remain unchanged.
+- Source size limit, RU/EN key parity/duplicates, exact release-note match, no external package/hash changes,
+  unchanged WFP/release scripts and exact alpha.19 base checks passed. No tracked source deletions.
+
+The first source-archive byte check compared `.ps1` files to raw LF Git blobs and exited1 on the first PowerShell file.
+The archive correctly uses the repository's explicit `*.ps1 text eol=crlf` attribute. The corrected audit applies only
+the declared per-file Git EOL conversion before comparing complete bytes; arbitrary whitespace is not normalized.
+No PowerShell source was changed to accommodate this archive check.
+
+The configuration agent's earlier broader Linux filter ran 20 cases successfully and failed 3 existing
+PackageCacheIsNotAnApplicationLibrary cases because those assume Windows CommonApplicationData/C:\ProgramData.
+Those unrelated tests were left intact. The narrowed configuration filter passed 8 cases. An initial isolated-route
+harness command used unsupported `dotnet test --packages` and exited 1 before compilation; the corrected
+`-p:RestorePackagesPath=/tmp/slx-nuget` run passed 17 cases. Neither failed command is represented as successful.
+
+## Actual pinned-core reproduction and working-path controls
+
+Official Linux Xray 26.9.9, build 52a412d, was downloaded and checked before execution. Release archive SHA256:
+`1eb9175d0f0a8f8149c9230a7fc5ae66ce332ed20a53155ce61fe62e3f58b7df`.
+The isolated harness uses the real resolver-selection code with loopback UDP resolver stand-ins and a loopback inbound.
+It uses no TUN, WFP, physical DNS changes, remote VPN credentials or live production DoH server. It proves core policy,
+not installed transport availability. `python check.py` and `python control_cases.py` each exited0.
+
+| Scenario | First queries | Second queries | Observed result |
+| --- | ---: | ---: | --- |
+| Old configuration, first unavailable | 1 | 0 | No answer within 6 seconds |
+| Fallback enabled but serial, first unavailable | 1 | 1 | Valid answer after 4005 ms, beyond one 3-second probe |
+| New parallel configuration, first unavailable | 1 | 1 | Valid answer in 3 ms |
+| New parallel configuration, second unavailable | 1 | 1 | Valid answer in 2 ms |
+| New configuration, both unavailable | 1 | 1 | No successful answer |
+| Old configuration, both healthy | 1 | 0 | Valid answer in 2 ms |
+| New configuration, both healthy | 1 | 1 | Valid answer in 2 ms |
+| First immediately SERVFAIL, second positive 200 ms later | 1 | 1 | Positive answer in 202 ms |
+| First immediately NXDOMAIN, second positive 200 ms later | 1 | 1 | Positive answer in 202 ms |
+
+Local timing is a controlled observation, not a latency promise on the owner's/friend's network. Both negative-first
+cases verified that the negative reply was sent before the delayed positive reply; racing did not accept early failure.
+
+An independent parser harness consumed a response emitted by the actual pinned core: valid compressed/flattened A
+accepted; every proper truncation rejected; unrelated-owner A rejected; 20,000 seeded malformed/mutated packets produced
+no exception. `dotnet run --project Review.csproj -p:UseSharedCompilation=false -m:1 -nr:false` exited0.
+Independent review also caught and corrected answer-owner and expired-own-deadline acceptance before the final 107-test run.
+
+## Native checks still required
+
+Full `scripts/verify.ps1` on Windows, expanded WPF DNS-copy/diagnostics/screenshots, real GetBestRoute2/LUID/GUID,
+installed service/TUN/WFP and real DoH through HY2/VLESS remain pending for alpha.20. Native assertions and screenshots
+are committed for the existing release workflow; they are not silently skipped or treated as passed locally.
+The friend's exact cause, success after installation, owner's working PC, Wi-Fi/ExitLag/ICS coexistence, CS2 traffic,
+Windows 10, clean-machine/upgrade/rollback and system/network transitions need installed acceptance.
+Old successful alpha.19 Windows checks are history, not alpha.20 acceptance. No core upgrade or physical-network tweak
+was made for the adjacent upstream ICS report because the screenshot does not establish that cause.
+
+## Primary implementation references
+
+- https://github.com/XTLS/Xray-core/blob/v26.9.9/app/dns/dns.go
+- https://github.com/XTLS/Xray-core/blob/v26.9.9/proxy/dns/dns.go
+- https://github.com/XTLS/Xray-core/blob/v26.9.9/proxy/tun/tun_windows.go
+- https://xtls.github.io/en/config/dns.html
+- https://learn.microsoft.com/en-us/windows/win32/api/netioapi/nf-netioapi-getbestroute2
+- https://learn.microsoft.com/en-us/windows/win32/api/netioapi/nf-netioapi-convertinterfaceluidtoguid
+- https://learn.microsoft.com/en-us/windows/win32/fwp/filter-arbitration
+- https://learn.microsoft.com/en-us/windows/win32/winsock/windows-sockets-error-codes-2
+
+---
+
 # Verification — 0.1.0-alpha.19 (2026-10-24)
+
+## Published alpha.19 verification
+
+[Run 40107793607](https://github.com/Sooliks/slx-windows/actions/runs/40107793607) completed successfully for
+`522cb9ec9c4f13ef2cd71d20c4918c76fbdfc37c`: locked restore, full build with 0 warnings/errors, 434 main Windows tests and one
+expanded WPF scenario, 24 release-policy and 18 runtime-input checks, installer, clean-source packaging and publication.
+[Alpha.19](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.19) was published 24 October 2026 at 15:40:43 UTC.
+All six assets were independently downloaded: hashes matched SHA256SUMS and GitHub digests; full 361 / changed 25 source
+inventories and every file matched the reviewed commit and previously delivered source. Provenance had sourceClean=true,
+candidate=false, publicationAllowed=true and the correct alpha.18 base. Installer was not executed in this environment.
+Installer SHA256: `5219ae35917e249e17a5ae5700f72ad2f0321b42a3da78e4ed371926ae0d5326`.
+A final code-linked catalog check returned Available/alpha.19 from current alpha.17 and Current from current alpha.19,
+with the container-required proxy enabled only in that harness. On 24 October at 15:46:20 UTC, fresh site page/download
+requests still served alpha.18; immediate site propagation was not confirmed. The owner subsequently confirmed his own
+alpha.19 works, while the friend's screenshot exposed the DNS stage discussed in alpha.20 above.
+
+The following alpha.19 sections retain the earlier preparation evidence and its then-pending checks.
 
 STATUS: PARTIAL. This patch starts from published alpha.18, commit `ccb1b71fb0a5fd6842741298933003380db408c2`.
 The owner supplied direct Windows curl results using the updater's public URLs and headers. The release feed returned

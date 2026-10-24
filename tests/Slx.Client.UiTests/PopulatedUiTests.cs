@@ -44,6 +44,7 @@ public sealed class PopulatedUiTests
             UpdateReuseChecks.Run();
             LayoutStabilityChecks.Run(window);
             ConnectionRecoveryChecks.Run();
+            DnsDiagnosticsChecks.Run(window);
         }
         finally { window.Close(); Sta.Pump(); }
     });

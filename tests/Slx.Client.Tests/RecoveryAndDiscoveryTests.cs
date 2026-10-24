@@ -27,16 +27,28 @@ public sealed class RecoveryAndDiscoveryTests
         Assert.Contains("Codex",group.Name);Assert.Contains("ChatGPT",group.Name);
         Assert.Contains("ChatGPT.exe",group.Executables);Assert.Contains("codex.exe",group.Executables);
     }
-    [Fact]
-    public void PublicDnsCannotFallBackToPlainUdpOrBypassViaSelfRule()
+    [Theory]
+    [InlineData(RoutingMode.SelectedApplications)]
+    [InlineData(RoutingMode.WholeComputer)]
+    public void PublicDnsRacesOnlyConfiguredHttpsResolversThroughVpn(RoutingMode mode)
     {
-        using var json=System.Text.Json.JsonDocument.Parse(XrayConfigBuilder.Build(CoreFixtures.Plan(),18899,"probeUser00000000","probePassword0000"));
-        var root=json.RootElement;Assert.All(root.GetProperty("dns").GetProperty("servers").EnumerateArray(),x=>Assert.StartsWith("https://",x.GetString()));
-        Assert.True(root.GetProperty("dns").GetProperty("disableFallback").GetBoolean());
+        using var json=System.Text.Json.JsonDocument.Parse(XrayConfigBuilder.Build(CoreFixtures.Plan(mode),18899,"probeUser00000000","probePassword0000"));
+        var root=json.RootElement;var dns=root.GetProperty("dns");
+        // An empty list would enable Xray's localhost default; exact HTTPS peers exclude it and +local/plain DNS.
+        Assert.Equal(new[]{"https://1.1.1.1/dns-query","https://8.8.8.8/dns-query"},
+            dns.GetProperty("servers").EnumerateArray().Select(server=>server.GetString()).ToArray());
+        Assert.Equal("resolver",dns.GetProperty("tag").GetString());
+        Assert.Equal("UseIP",dns.GetProperty("queryStrategy").GetString());
+        // In pinned Xray, disabling fallback with no domain matches uses only the first server.
+        Assert.False(dns.GetProperty("disableFallback").GetBoolean());
+        Assert.True(dns.GetProperty("enableParallelQuery").GetBoolean());
         var rules=root.GetProperty("routing").GetProperty("rules").EnumerateArray().ToArray();
         int resolver=Array.FindIndex(rules,x=>x.TryGetProperty("inboundTag",out var tags)&&tags.EnumerateArray().Any(t=>t.GetString()=="resolver"));
         int self=Array.FindIndex(rules,x=>x.TryGetProperty("process",out _));Assert.InRange(resolver,0,self-1);
         Assert.Equal("vpn",rules[resolver].GetProperty("outboundTag").GetString());
-        Assert.Equal("dns",Assert.Single(rules,x=>x.TryGetProperty("port",out var port)&&port.GetString()=="53").GetProperty("outboundTag").GetString());
+        int captured=Array.FindIndex(rules,x=>x.TryGetProperty("port",out var port)&&port.GetString()=="53");
+        Assert.InRange(captured,0,self-1);
+        Assert.Equal("dns",rules[captured].GetProperty("outboundTag").GetString());
+        Assert.Equal(new[]{"tun"},rules[captured].GetProperty("inboundTag").EnumerateArray().Select(tag=>tag.GetString()).ToArray());
     }
 }

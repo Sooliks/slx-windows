@@ -37,7 +37,8 @@ public static class ServiceStateCopy
             or "RUNTIME_UNSAFE_PATH" or "RUNTIME_UNSAFE_OWNER" or "RUNTIME_UNSAFE_ACL" => "FaultRuntimeValidation",
         "TUN_ADAPTER_CONFLICT" => "FaultOtherVpn",
         "TUN_CLEANUP_PENDING" => "FaultCleanup",
-        "VPN_PROBE_FAILED" or "VPN_DNS_FAILED" => "FaultVpnProbe",
+        "VPN_PROBE_FAILED" => "FaultVpnProbe",
+        "VPN_DNS_FAILED" => "FaultVpnDns",
         "TUN_ADDRESS_FAILED" or "ADAPTER_QUERY_FAILED" or "CORE_MISSING" or "CORE_FAILED" or "CORE_UNAVAILABLE"
             or "TUNNEL_NOT_READY" or "CORE_EXITED" or "CORE_START_FAILED" or "TUN_NOT_READY" or "CORE_STOP_FAILED" => "FaultCore",
         "TRAFFIC_APPLICATION_MISSING" => "FaultTrafficMissing",

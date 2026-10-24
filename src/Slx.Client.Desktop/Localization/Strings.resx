@@ -181,7 +181,7 @@
 <data name="FaultTrafficMissing" xml:space="preserve"><value>A selected app executable is missing. Open Applications, remove its old entry and add the current app. Discord and Roblox paths are checked automatically before connecting.</value></data>
 <data name="FaultTrafficDenied" xml:space="preserve"><value>Windows denied access to a selected app executable. Check that it is accessible or add its current .exe in Applications.</value></data>
 <data name="DiagnosticsTitle" xml:space="preserve"><value>Connection diagnostics</value></data>
-<data name="DiagnosticsPrivacy" xml:space="preserve"><value>Only Windows and SLX versions, service state and error codes. No private link, servers or app list.</value></data>
+<data name="DiagnosticsPrivacy" xml:space="preserve"><value>Only Windows and SLX versions, service state, error codes and network check results. No private link, server addresses or app list.</value></data>
 <data name="DiagnosticsCopy" xml:space="preserve"><value>Copy diagnostics</value></data>
 <data name="DiagnosticsCopied" xml:space="preserve"><value>Diagnostics copied. You can send them to support.</value></data>
 <data name="DiagnosticsFailed" xml:space="preserve"><value>Could not access the clipboard. Try again.</value></data>
@@ -196,6 +196,7 @@
 <data name="TrayStatus" xml:space="preserve"><value>SLX VPN · {0}</value></data>
 <data name="FaultOutboundInterface" xml:space="preserve"><value>No usable Windows route to the VPN server. Check your internet connection and network adapters, then retry.</value></data>
 <data name="FaultVpnProbe" xml:space="preserve"><value>The VPN connection check failed. Check your internet connection or try the other connection method.</value></data>
+<data name="FaultVpnDns" xml:space="preserve"><value>DNS through VPN could not be verified. Try another connection method or copy diagnostics from Help.</value></data>
 <data name="FaultEndpointNetwork" xml:space="preserve"><value>Could not resolve the VPN server address. Check your internet connection, then retry or choose the other connection method.</value></data>
 <data name="FaultEndpointRejected" xml:space="preserve"><value>The VPN server address failed validation. Refresh your subscription or contact support.</value></data>
 <data name="FaultRuntimeValidation" xml:space="preserve"><value>The VPN engine files could not be verified. Repair SLX using its official installer.</value></data>

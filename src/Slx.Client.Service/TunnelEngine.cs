@@ -18,7 +18,7 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
     private string? ownedAdapterId;
     private (int Port, string User, string Password) probe;
     private int recoveryAttempts;
-    public TunnelStatus Status => state with { Recovery = recovery, HealthCheck = healthCheck };
+    public TunnelStatus Status => state with { Recovery = recovery, HealthCheck = healthCheck, DnsCheck = dnsCheck };
 
     public async Task StartAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken)
     {
@@ -83,6 +83,7 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
 
     private async Task LaunchAsync(ConnectPlan plan, string executable, TunnelPhase phase, CancellationToken cancellationToken)
     {
+        dnsCheck = null;
         state = new(phase, DateTimeOffset.UtcNow, plan.Profile.Name, Mode: plan.Mode, ProtectionActive:protectionActive);
         try
         {
@@ -121,7 +122,7 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
             TunnelSourcePolicy.Apply(ownedAdapterId);
             ArmProtection(plan,ownedAdapterId);
             DnsCache.Refresh();
-            await TunnelDnsProbe.CheckAsync(cancellationToken);
+            await TunnelDnsProbe.CheckAsync(ownedAdapterId, RecordDnsCheck, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             if (process.HasExited || !LocalProbe.TunnelReady()) throw new ClientFault("CORE_EXITED");
             state = new(TunnelPhase.Connected, DateTimeOffset.UtcNow, plan.Profile.Name,

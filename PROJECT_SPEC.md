@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.19. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.20. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,28 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.20 — resilient protected DNS and precise readiness evidence
+
+Owner supplied a friend's alpha.19 screenshot: selected-app Hysteria2, Discord enabled, VPN_DNS_FAILED and off state.
+That code occurs after the authenticated HTTPS/TUN checks; the screenshot does not establish the failed DNS transport.
+The pinned Xray 26.9.9 resolver selection was reproduced independently: disableFallback=true with bare server entries
+uses only the first resolver. Enable fallback among the exact two configured HTTPS peers and race equivalent peers,
+so the first resolver's four-second timeout cannot consume a three-second readiness attempt. Both remain routed through
+the VPN; no system/plain DNS fallback or new provider is added. Both resolvers failing still rejects readiness.
+
+Keep the real unbound IPv4 UDP probe, three attempts/one nine-second budget and explicit caller cancellation. Observe
+the ordinary Windows route before sending and before accepting a positive answer; require the captured owned TUN GUID.
+Do not force the socket onto TUN to hide a broken shared route. No route, WFP, adapter or physical-DNS mutation is added.
+Validate the complete bounded DNS response, question, flags and actual IN/A answer for the queried owner, as emitted by
+the pinned Xray DNS outbound. A header claiming answers is insufficient. Route snapshots are not packet-level proof.
+
+Optional IPC v2 DnsCheck retains at most three typed attempt results: fixed target/outcome enums, elapsed time, RCODE,
+numeric socket/native-route errors and UTC time. No raw packets, exception text, queried names, interface IDs or server
+addresses are exposed. Preserve this observation after failed-connect rollback, reset it for the next core launch and
+include it in Help's safe diagnostics. Give DNS failures their own RU/EN copy. Installation updates service/UI together;
+old statuses without DnsCheck remain readable. No stored-data, driver, dependency or server migration. The existing
+fresh-connect rollback and established-session protection rules remain intact. Real friend/Wi-Fi/CS2 acceptance is open.
 
 ## Alpha.19 — bounded update checks on slow connections
 

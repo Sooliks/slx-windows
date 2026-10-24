@@ -1,5 +1,12 @@
 # Boundaries
 
+Alpha.20: Core owns the exact HTTPS-only parallel DNS resolver policy and optional bounded DnsCheck observations.
+Windows TunnelDnsRoute observes ordinary GetBestRoute2/LUID/GUID selection without changing routes or binding sockets.
+Service TunnelDnsProbe owns unbound UDP, the existing deadlines, before/after owned-route checks and typed outcomes;
+DnsProbePacket owns bounded query/answer validation. TunnelEngine retains the last check through rollback and resets it
+at the next launch. Desktop formats only enums/numbers in safe diagnostics and maps VPN_DNS_FAILED to DNS-specific
+localized copy. IPC v2 gains only an optional status field; no new action, stored-data shape, WFP or driver change.
+
 Alpha.19: Windows UpdateTransport negotiates gzip only for the fixed release catalog and bounds both transferred and
 decoded bytes. Release assets retain their exact byte/length/hash policy. ReleaseUpdateClient owns one 30-second
 check deadline and returns UPDATE_TIMEOUT only for its own expired budget; caller cancellation still propagates.

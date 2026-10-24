@@ -13,6 +13,7 @@ internal static class PreflightFailureChecks
         {
             ("ENDPOINT_TIMEOUT", "FaultEndpointNetwork"), ("ENDPOINT_UNREACHABLE", "FaultEndpointNetwork"),
             ("ENDPOINT_NOT_PUBLIC", "FaultEndpointRejected"), ("CORE_MISSING", "FaultCore"),
+            ("VPN_DNS_FAILED", "FaultVpnDns"),
             ("RUNTIME_HASH_MISMATCH", "FaultRuntimeValidation"), ("RUNTIME_UNSAFE_PATH", "FaultRuntimeValidation")
         }) FailedPreflightSurvivesStatusAndClearsAtTheNextAction(code, key);
         foreach (var code in new[] { "SERVICE_UNAVAILABLE", "SERVICE_TIMEOUT", "OPERATION_INTERRUPTED", "IPC_REQUEST_TIMEOUT" })

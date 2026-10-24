@@ -181,7 +181,7 @@
 <data name="FaultTrafficMissing" xml:space="preserve"><value>Файл выбранного приложения больше не найден. Откройте «Приложения», удалите старую запись и добавьте актуальную программу. Discord и Roblox проверяются автоматически перед подключением.</value></data>
 <data name="FaultTrafficDenied" xml:space="preserve"><value>Windows не разрешила прочитать файл выбранного приложения. Проверьте его доступность или добавьте актуальный .exe в разделе «Приложения».</value></data>
 <data name="DiagnosticsTitle" xml:space="preserve"><value>Диагностика подключения</value></data>
-<data name="DiagnosticsPrivacy" xml:space="preserve"><value>Только версия Windows и SLX, состояние службы и коды ошибок. Без личной ссылки, серверов и списка программ.</value></data>
+<data name="DiagnosticsPrivacy" xml:space="preserve"><value>Только версии Windows и SLX, состояние службы, коды ошибок и результаты проверок сети. Без личной ссылки, адресов серверов и списка программ.</value></data>
 <data name="DiagnosticsCopy" xml:space="preserve"><value>Скопировать диагностику</value></data>
 <data name="DiagnosticsCopied" xml:space="preserve"><value>Диагностика скопирована. Её можно отправить в поддержку.</value></data>
 <data name="DiagnosticsFailed" xml:space="preserve"><value>Не удалось открыть буфер обмена. Повторите попытку.</value></data>
@@ -196,6 +196,7 @@
 <data name="TrayStatus" xml:space="preserve"><value>SLX VPN · {0}</value></data>
 <data name="FaultOutboundInterface" xml:space="preserve"><value>Нет маршрута Windows к серверу VPN. Проверьте интернет и сетевые адаптеры, затем повторите подключение.</value></data>
 <data name="FaultVpnProbe" xml:space="preserve"><value>Проверка соединения VPN не прошла. Проверьте интернет или выберите другой способ подключения.</value></data>
+<data name="FaultVpnDns" xml:space="preserve"><value>Не удалось проверить DNS через VPN. Попробуйте другой способ подключения или скопируйте диагностику из «Помощи».</value></data>
 <data name="FaultEndpointNetwork" xml:space="preserve"><value>Не удалось определить адрес сервера VPN. Проверьте интернет, затем повторите подключение или выберите другой способ.</value></data>
 <data name="FaultEndpointRejected" xml:space="preserve"><value>Адрес сервера VPN не прошёл проверку. Обновите подписку или обратитесь в поддержку.</value></data>
 <data name="FaultRuntimeValidation" xml:space="preserve"><value>Не удалось проверить файлы сетевого модуля. Восстановите SLX официальным установщиком.</value></data>

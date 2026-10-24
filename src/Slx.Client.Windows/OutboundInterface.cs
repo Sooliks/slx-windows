@@ -11,7 +11,7 @@ public static class OutboundInterface
 {
     // Pinned Xray v26.9.9 derives the Windows adapter GUID from the UTF-8 name "SLX VPN".
     // A user-renamed stale adapter must not become our outbound route back into the TUN.
-    private static readonly Guid TunnelIdentity = new("c5656347-93ca-8b73-7336-a92e8199b47b");
+    internal static readonly Guid TunnelIdentity = new("c5656347-93ca-8b73-7336-a92e8199b47b");
     [StructLayout(LayoutKind.Explicit, Size = 28)]
     internal struct SocketAddress
     {

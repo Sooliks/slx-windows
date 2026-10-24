@@ -1,4 +1,30 @@
-# Network model and limits — alpha.18
+# Network model and limits — alpha.20
+
+## Alpha.20 DNS readiness correction
+
+Pinned Xray 26.9.9 treats `disableFallback` as selection among configured resolvers. With the previous `true` value and
+no per-server domain matches, its empty candidate selection reverted to the first server only; the listed second
+HTTPS server was never tried. Alpha.20 uses `disableFallback=false` and `enableParallelQuery=true` for the same exact
+Cloudflare and Google HTTPS endpoints. Both are eligible and may be queried concurrently; an available peer can answer
+without waiting for a failed peer's four-second timeout. This adds no `localhost`, plaintext DNS or `+local` transport.
+The `resolver` inbound still routes through VPN before the self-process bypass, in both routing modes.
+
+The startup DNS check remains an ordinary unbound IPv4 UDP query to the TUN-captured public DNS destination. Before
+each send and again before accepting a valid answer, read the unrestricted Windows best route and require the captured
+SLX TUN identity. A missing/foreign route cannot send or pass this probe. This also closes a readiness gap in whole-PC
+mode, where the service's existing WFP exemption could otherwise permit a physical DNS answer. No WFP priorities,
+routes, adapter settings or socket binding are changed. A route snapshot narrows a race; it does not prove every packet.
+
+The complete response must match the query and contain a valid IN/A answer for its owner, as produced by the pinned
+Xray DNS outbound; malformed/truncated packets, failed RCODEs and claimed-but-missing answers cannot pass. The three
+attempts retain three-second individual and nine-second total budgets, with caller cancellation propagated.
+Help diagnostics retain at most three typed results (timeout, socket error, DNS rejection, invalid response or route
+failure), numeric error codes and UTC time. They contain no payloads, addresses, adapter identities or credentials.
+The result survives a failed first-connect rollback and resets when the next core launch begins.
+
+The friend's alpha.19 screenshot establishes this stage, not its native cause. Resolver selection was reproduced with
+the actual pinned core and controlled local resolvers. Actual DoH through HY2/VLESS, Windows routes, the friend's Wi-Fi
+and CS2 still require installed testing; shared Windows DNS remains shared.
 
 ## Alpha.18 recovery changes
 

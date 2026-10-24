@@ -4,6 +4,8 @@ internal sealed partial class TunnelEngine
 {
     private volatile RecoveryObservation? recovery;
     private volatile HealthCheckObservation? healthCheck;
+    private volatile DnsCheckObservation? dnsCheck;
+    internal void RecordDnsCheck(DnsCheckObservation observation) => dnsCheck = observation;
     internal void RecordRecovery(RecoveryCause cause)
     {
         var count=Math.Min(recovery?.Count??0,int.MaxValue-1)+1;
