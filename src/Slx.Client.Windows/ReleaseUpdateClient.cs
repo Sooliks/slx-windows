@@ -15,7 +15,7 @@ public sealed partial class ReleaseUpdateClient
     private readonly TimeSpan downloadTimeout;
     public ReleaseUpdateClient() : this(() => new HttpClientHandler { AllowAutoRedirect = false, UseProxy = false, UseCookies = false },
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SLX", "VPN", "Updates"),
-        start => { using var process = Process.Start(start); return process is not null; }, TimeSpan.FromSeconds(15), TimeSpan.FromMinutes(5)) { }
+        start => { using var process = Process.Start(start); return process is not null; }, TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(5)) { }
     internal ReleaseUpdateClient(Func<HttpMessageHandler> handlerFactory, string directory, Func<ProcessStartInfo, bool> start,
         TimeSpan checkDeadline, TimeSpan downloadDeadline)
     {
@@ -39,7 +39,7 @@ public sealed partial class ReleaseUpdateClient
         }
         catch (ClientFault fault) { return new(UpdateCheckState.Unavailable, ErrorCode: fault.Code); }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
-        { return new(UpdateCheckState.Unavailable, ErrorCode: "UPDATE_UNAVAILABLE"); }
+        { return new(UpdateCheckState.Unavailable, ErrorCode: "UPDATE_TIMEOUT"); }
         catch (Exception exception) when (exception is HttpRequestException or IOException or DecoderFallbackException)
         { return new(UpdateCheckState.Unavailable, ErrorCode: "UPDATE_UNAVAILABLE"); }
     }

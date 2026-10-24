@@ -31,7 +31,7 @@ internal sealed class UpdateFixtures : IDisposable
     internal static string Feed(params object[] releases) => JsonSerializer.Serialize(releases);
     internal ReleaseUpdateClient Client(HttpMessageHandler handler, Func<ProcessStartInfo, bool>? launch = null, TimeSpan? timeout = null) =>
         // Success fixtures exercise real ACL/ADS disk I/O, not a two-second performance contract.
-        // Timeout cases explicitly inject 100ms; production deadlines are unchanged.
+        // Timeout cases explicitly inject 100ms; fixture deadlines are independent of production policy.
         new(() => handler, Root, launch ?? (_ => throw new InvalidOperationException("Unexpected launch")), timeout ?? TimeSpan.FromSeconds(15), timeout ?? TimeSpan.FromSeconds(15));
     internal static HttpResponseMessage Response(byte[] content) => new(HttpStatusCode.OK) { Content = new ByteArrayContent(content) };
     internal static HttpResponseMessage Text(string content) => Response(Encoding.UTF8.GetBytes(content));

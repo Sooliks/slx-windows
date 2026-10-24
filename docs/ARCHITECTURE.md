@@ -1,5 +1,11 @@
 # Boundaries
 
+Alpha.19: Windows UpdateTransport negotiates gzip only for the fixed release catalog and bounds both transferred and
+decoded bytes. Release assets retain their exact byte/length/hash policy. ReleaseUpdateClient owns one 30-second
+check deadline and returns UPDATE_TIMEOUT only for its own expired budget; caller cancellation still propagates.
+Desktop maps only whitelisted update fault codes to localized copy, preserving existing offers and explicit install
+consent. Core release selection, service/IPC, proxy choice and source/release trust boundaries are unchanged.
+
 Alpha.18: ControlWorker keeps a bounded four-instance pipe pool with one first-instance anchor. ControlDispatcher
 owns a short observation/ownership lock and a separate mutation gate. Authorized explicit-off admission interrupts
 active readiness and prevents a start from slipping between validation and off admission; receipts remain bounded,

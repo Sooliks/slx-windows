@@ -14,4 +14,6 @@
 <data name="UpdateActionHide" xml:space="preserve"><value>Hide</value></data>
 <data name="UpdateHideDownload" xml:space="preserve"><value>Hide update notification</value></data>
 <data name="UpdateHideDownloadHint" xml:space="preserve"><value>Hide for 24 hours. The download continues; check its progress in Settings.</value></data>
+<data name="UpdateCheckTimeout" xml:space="preserve"><value>Checking for updates took too long. Try again.</value></data>
+<data name="UpdateCheckInvalid" xml:space="preserve"><value>The update information failed verification. Try again later.</value></data>
 </root>

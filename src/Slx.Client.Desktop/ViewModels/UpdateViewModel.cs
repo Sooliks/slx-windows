@@ -81,10 +81,10 @@ public sealed partial class UpdateViewModel : ObservableObject, IDisposable
                 stateKey = prepared == null ? "UpdateFound" : "UpdateReady";
             }
             else if (result.State == UpdateCheckState.Current) { offer = null; prepared = null; stateKey = "UpdateCurrent"; }
-            else stateKey = "UpdateCheckFailed";
+            else stateKey = CheckFailureKey(result.ErrorCode);
         }
         catch (OperationCanceledException) when (lifetime.IsCancellationRequested) { }
-        catch (ClientFault) { stateKey = "UpdateCheckFailed"; }
+        catch (ClientFault fault) { stateKey = CheckFailureKey(fault.Code); }
         finally { SetBusy(false); }
     }
     private async Task ApplyAsync()

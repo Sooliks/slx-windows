@@ -1,4 +1,4 @@
-# Application updates — alpha.13 (transport introduced in alpha.11)
+# Application updates — alpha.19 (transport introduced in alpha.11)
 
 The desktop checks the public `Sooliks/slx-windows` GitHub releases at startup and every six hours while running.
 Settings can disable automatic checks; Check for updates remains available. Remind me tomorrow persists a 24h pause.
@@ -8,6 +8,13 @@ An alpha installation can discover newer prereleases or stable releases; a stabl
 SemVer precedence is numeric (`alpha.12` follows `alpha.9`), independent of publication ordering.
 Only complete, non-draft releases with exact versioned x64 installer names and `SHA256SUMS.txt` qualify.
 The feed covers the newest 20 public releases. Missing/incomplete assets are not update candidates.
+
+The fixed catalog request advertises gzip. Encoded and decoded catalog bodies are bounded to 2 MiB; unsupported or
+invalid compressed content fails validation. Plain responses remain supported. Installer/checksum requests keep their
+existing byte-exact asset transfer policy. One 30-second deadline covers both catalog and checksum, including bodies
+and redirects. A deadline failure becomes UPDATE_TIMEOUT; caller cancellation is not converted to a failed check.
+The UI distinguishes timeout and invalid update data through fixed RU/EN copy. Unknown/unavailable errors stay generic;
+no response bodies, exception messages or signed asset URLs enter the UI. No automatic retry loop is introduced.
 
 ## User flow
 
@@ -48,6 +55,8 @@ Incomplete files are removed; completed stages are retained for explicit use. No
 ## Rollout and open acceptance
 
 Alpha.10 and earlier have no updater: install this version once manually from the SLX download page or its GitHub release.
+An alpha.17/18 client whose 15-second catalog check fails may also need one manual alpha.19 installer update: the new
+compression/deadline behavior is in the installed application, not a server-side change to the old executable.
 Future releases must preserve the versioned asset/checksum contract. Never overwrite a released version.
 The release tool still requires a reviewed clean build, matching provenance and checksums; candidate builds cannot publish.
 To roll back, explicitly disconnect, then run the previous version's installer. Server/DB migrations are unnecessary.

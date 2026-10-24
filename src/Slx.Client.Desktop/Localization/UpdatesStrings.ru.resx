@@ -14,4 +14,6 @@
 <data name="UpdateActionHide" xml:space="preserve"><value>Скрыть</value></data>
 <data name="UpdateHideDownload" xml:space="preserve"><value>Скрыть уведомление об обновлении</value></data>
 <data name="UpdateHideDownloadHint" xml:space="preserve"><value>Скрыть на 24 часа. Скачивание продолжится; прогресс доступен в настройках.</value></data>
+<data name="UpdateCheckTimeout" xml:space="preserve"><value>Проверка обновлений заняла слишком много времени. Повторите попытку.</value></data>
+<data name="UpdateCheckInvalid" xml:space="preserve"><value>Данные обновления не прошли проверку. Повторите попытку позже.</value></data>
 </root>

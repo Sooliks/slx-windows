@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.18. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.19. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,22 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.19 — bounded update checks on slow connections
+
+Owner diagnostics on 2026-10-24: the exact public GitHub release feed returned HTTP 200 with 56/60 API requests
+remaining, but curl timed out at 15 seconds after receiving 126432 of 149771 bytes. The checksum URL returned
+302 then 200. This establishes a body-transfer timeout in that direct request, not an API quota failure; the old UI
+did not expose the exact updater failure. The alpha.17 parser accepts the published alpha.18 metadata/checksum.
+Request gzip for the release catalog only, decode within both encoded/decoded resource bounds, and accept identity
+when compression is not used. Preserve the same exact repository, newest-20/SemVer selection, HTTPS and asset checks.
+Use a bounded 30-second check budget covering the feed and checksum; caller cancellation remains cancellation.
+Expose only localized whitelisted timeout/invalid-data messages. Unknown codes retain generic copy; no raw upstream
+body, exception, signed CDN query, subscription or installation identity is shown or logged. Download/install consent,
+prepared-offer preservation and the network-service installation gate stay intact. No proxy/transport route migration.
+Alpha.18 remains immutable; alpha.19 uses its exact tag as the source-archive/release base. A client stuck on alpha.17/18
+may need one explicit manual alpha.19 installer update before benefiting from the new updater. No server, dependency,
+IPC, storage, network-service or driver change. Real slow-network and installed upgrade acceptance remain required.
 
 ## Alpha.18 — responsive control and failed-connect recovery
 

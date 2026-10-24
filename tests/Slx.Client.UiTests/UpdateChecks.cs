@@ -74,6 +74,7 @@ internal static class UpdateChecks
             UiScreenshots.Save(window, "slx-update-settings-en");
             CheckSafeDiagnostics(model);
             CheckDisposedInstall();
+            UpdateFailureChecks.Run(window);
             UpdatePresentationChecks.Run(window);
         }
         finally { window.DataContext = previous; Text.Catalog.SetLanguage("ru"); }

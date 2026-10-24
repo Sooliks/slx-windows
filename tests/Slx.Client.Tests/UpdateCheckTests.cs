@@ -15,6 +15,9 @@ public sealed class UpdateCheckTests
         {
             Assert.Null(request.Headers.Authorization);
             Assert.False(request.Headers.Contains("X-Hwid")); Assert.False(request.Headers.Contains("Cookie"));
+            if (request.RequestUri!.Host == "api.github.com")
+                Assert.Equal("gzip", Assert.Single(request.Headers.AcceptEncoding).Value);
+            else Assert.Empty(request.Headers.AcceptEncoding);
             return Task.FromResult(request.RequestUri!.Host == "api.github.com"
                 ? UpdateFixtures.Text(UpdateFixtures.Feed(UpdateFixtures.Release())) : UpdateFixtures.Text(UpdateFixtures.Checksums()));
         });
@@ -83,6 +86,7 @@ public sealed class UpdateCheckTests
         using var handler = new UpdateFixtures.Handler(Stalled);
         var result = await fixture.Client(handler, timeout: TimeSpan.FromMilliseconds(100)).CheckAsync("0.1.0-alpha.10");
         Assert.Equal(UpdateCheckState.Unavailable, result.State);
+        Assert.Equal("UPDATE_TIMEOUT", result.ErrorCode);
         using var cancelledHandler = new UpdateFixtures.Handler(Stalled);
         using var cancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => fixture.Client(cancelledHandler).CheckAsync("0.1.0-alpha.10", cancellation.Token));

@@ -19,7 +19,7 @@
       "slx.client.windows": {
         "type": "Project",
         "dependencies": {
-          "Slx.Client.Core": "[0.1.0-alpha.18, )",
+          "Slx.Client.Core": "[0.1.0-alpha.19, )",
           "System.Security.Cryptography.ProtectedData": "[10.0.13, )"
         }
       }

@@ -1,4 +1,82 @@
+# Verification — 0.1.0-alpha.19 (2026-10-24)
+
+STATUS: PARTIAL. This patch starts from published alpha.18, commit `ccb1b71fb0a5fd6842741298933003380db408c2`.
+The owner supplied direct Windows curl results using the updater's public URLs and headers. The release feed returned
+HTTP 200, quota remaining 56/60, then timed out after 15004 ms with 126432 of 149771 bytes read. The checksum asset
+returned 302 then 200. This establishes a slow/stalled catalog-body failure at the old 15-second deadline; the screenshot
+alone did not identify its cause. No conclusion about the ISP or all connectivity failures is drawn.
+
+Before changing code, exact alpha.17 Core sources accepted the actual published alpha.18 feed and checksum. A linked
+production updater harness also returned Available/alpha.18 through the execution environment's required proxy.
+Default direct transport could not resolve DNS in this container; that result concerns the container, not the owner's PC.
+The update protocol/version/asset contract was not broken by publishing alpha.18.
+
+## Change and measured transfer reduction
+
+Only the fixed catalog request advertises gzip. Both transferred and decoded catalog bytes remain bounded to 2 MiB;
+ordinary identity responses remain supported. Installer/checksum requests keep their existing exact byte/length/hash
+rules and allowed HTTPS destinations. The single check budget is now 30 seconds, including catalog/checksum bodies and
+redirects; cancellation from the caller remains cancellation. Expiry of the check's own budget returns UPDATE_TIMEOUT.
+UI feedback uses fixed RU/EN mappings for timeout and invalid data; unknown fault codes remain generic. No retry loop,
+proxy change, server mutation, service/IPC/routing change or external dependency upgrade is included.
+
+The real unauthenticated GitHub feed was fetched in identity and gzip forms with the same updater headers:
+149771 bytes versus 23874 transferred bytes, with identical 149771-byte decoded content and SHA-256. This is 84.06%
+less transfer (6.27 times smaller). Measured latency in this environment is not a prediction for the owner's connection.
+
+## Commands and results for alpha.19
+
+- `dotnet restore Slx.Windows.slnx --locked-mode --packages /tmp/slx-nuget -m:1 -nr:false`: exit 0 with NuGet audit
+  available. The four existing lock files change only internal project-version ranges from alpha.18 to alpha.19;
+  every external package version/content hash is unchanged.
+- `dotnet build Slx.Windows.slnx -c Release --no-restore -m:1 -nr:false -p:UseSharedCompilation=false`: exit 0,
+  zero warnings/errors. All six projects, including WPF/Desktop and UI tests, cross-compiled. A generated local
+  `*_wpftmp.csproj` was moved outside the source tree; it is not a reviewed source file or part of either archive.
+- Focused tests in the actual compiled main test assembly: 61 passed, zero failures/skips, exit 0. Filter classes:
+  UpdateCheckTests, UpdateCompressionTests, UpdateCatalogTests and ReleaseVersionTests. Tests retain identity fallback,
+  source/asset/redirect guards and caller cancellation, cover the observed 126432-byte transfer ceiling, wire/decoded
+  oversize rejection, bad/unsupported/stacked encodings, gzip header/CRC/size corruption and truncated endings.
+- A linked final-source live HTTP check returned Available/alpha.18 through the container's required proxy: catalog
+  HTTP 200/gzip, checksum 302 then 200 with exactly 487 bytes. Asset requests do not advertise compression. This does
+  not establish timing or direct DNS behavior on the owner's PC; production `UseProxy=false` remains unchanged.
+- Independent actual-response decoding accepted 23874 gzip bytes as the exact 149771-byte identity JSON and rejected
+  endings truncated by 1/8/9 bytes. Standard GZipStream alone tolerated those endings, so the helper additionally
+  validates final CRC32/ISIZE against the full bounded decoded body. No new codec package or custom DEFLATE is used.
+- A portable UI behavior proof using the real view model/resources passed 21 assertions. Only WPF timer/markup
+  boundaries were stubbed. New native WPF checks cover RU/EN text, whitelisted errors, unknown-code privacy, retained
+  offer/prepared installer, no automatic download/launch and recovery to Current. Their rendering still requires Windows.
+- `node --test --test-isolation=none scripts/tests/release-auth.test.mjs scripts/tests/release-base.test.mjs`:
+  24 passed, zero failures/skips, exit 0. Existing release guards and workflow are unchanged.
+- Source-size <=200 nonblank lines, localization-key parity/duplicates, release-note consistency and diff whitespace
+  checks passed. Archives are built from the reviewed Git inventory and checked for CRC and exact patch/full contents.
+
+## Acceptance boundaries
+
+Alpha.19 source changes must pass a new native Windows workflow after the owner pushes them. This workspace cannot
+run the installed Windows application, WPF renderer or interactive upgrade. The owner's slow connection, the new
+timeout message on that PC, actual installer handoff and the website download-cache update remain unverified.
+Alpha.17/18 binaries retain their old updater; the owner may need one manual alpha.19 installer update.
+
+---
+
 # Verification — 0.1.0-alpha.18 (2026-10-24)
+
+## Published release verification
+
+[Run 40101079488](https://github.com/Sooliks/slx-windows/actions/runs/40101079488) completed successfully for
+`ccb1b71fb0a5fd6842741298933003380db408c2`. It passed 24 release-policy and 18 runtime-input checks, locked restore,
+the full solution build with zero warnings/errors, 416 main Windows tests and one expanded WPF scenario with zero
+failures/skips. Runtime provenance/signature checks, the native installer build, clean-source guard (`sourceClean=true`),
+packaging and publication all passed. Alpha.18 was published as a prerelease at 2026-10-24 14:11:24 UTC.
+
+All six public release assets were downloaded and hashed against both SHA256SUMS and GitHub asset digests. Full source
+contained 356 files and changed source 74 files from alpha.17; both inventories, ZIP CRCs and every source byte matched
+the reviewed Git commit. No source deletions. Provenance confirmed the exact commit/base, installer hash, candidate=false
+and publicationAllowed=true. Installer SHA-256: `90d4c874228999b232fd83d61d6008032031b7702315c2fbfca41090457915ac`.
+The downloaded installer was not executed here. The last successful site-download check at 14:13 UTC still redirected
+to alpha.17; subsequent site requests timed out. Website cache refresh and installed VPN/game acceptance were not proven.
+
+The following sections retain the preceding alpha.18 preparation and failed-run history.
 
 ## Windows tests passed; immutable build-input correction
 

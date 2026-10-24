@@ -24,7 +24,11 @@ internal sealed class UpdateTransport(HttpMessageHandler handler) : IDisposable
             using var request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.UserAgent.ParseAdd("SLX-Windows-Update");
             request.Headers.Accept.ParseAdd(asset ? "application/octet-stream" : "application/vnd.github+json");
-            if (!asset) request.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
+            if (!asset)
+            {
+                request.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
+                request.Headers.AcceptEncoding.ParseAdd("gzip");
+            }
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             if ((int)response.StatusCode is >= 300 and < 400)
             {
@@ -32,22 +36,39 @@ internal sealed class UpdateTransport(HttpMessageHandler handler) : IDisposable
                 uri = new Uri(uri, response.Headers.Location); continue;
             }
             if (response.StatusCode != HttpStatusCode.OK) throw new ClientFault("UPDATE_UNAVAILABLE");
+            var encodings = response.Content.Headers.ContentEncoding;
+            var gzip = encodings.Count == 1 && encodings.First().Equals("gzip", StringComparison.OrdinalIgnoreCase);
+            if (encodings.Count > 1 || (gzip && asset) ||
+                (encodings.Count == 1 && !gzip && !encodings.First().Equals("identity", StringComparison.OrdinalIgnoreCase)))
+                throw new ClientFault("UPDATE_INVALID");
             if (response.Content.Headers.ContentLength is long length && (length > maximum || (expected.HasValue && length != expected)))
                 throw new ClientFault("UPDATE_INVALID");
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            var chunk = new byte[65536]; long received = 0; var reported = -1; int count;
-            while ((count = await stream.ReadAsync(chunk, cancellationToken)) > 0)
+            if (gzip)
             {
-                received += count;
-                if (received > maximum || (expected.HasValue && received > expected)) throw new ClientFault("UPDATE_INVALID");
-                await output.WriteAsync(chunk.AsMemory(0, count), cancellationToken);
-                var percent = expected is > 0 ? (int)(received * 100 / expected.Value) : 0;
-                if (percent != reported) { progress?.Report(percent); reported = percent; }
+                using var encoded = new MemoryStream();
+                await CopyBodyAsync(stream, encoded, maximum, response.Content.Headers.ContentLength, null, cancellationToken);
+                var decoded = await UpdateCatalogCompression.DecodeAsync(encoded.ToArray(), maximum, cancellationToken);
+                await output.WriteAsync(decoded, cancellationToken);
             }
-            if (received == 0 || (expected.HasValue && received != expected)) throw new ClientFault("UPDATE_INVALID");
+            else await CopyBodyAsync(stream, output, maximum, expected, progress, cancellationToken);
             return;
         }
         throw new ClientFault("UPDATE_INVALID");
+    }
+    private static async Task CopyBodyAsync(Stream input, Stream output, long maximum, long? expected,
+        IProgress<int>? progress, CancellationToken cancellationToken)
+    {
+        var chunk = new byte[65536]; long received = 0; var reported = -1; int count;
+        while ((count = await input.ReadAsync(chunk, cancellationToken)) > 0)
+        {
+            received += count;
+            if (received > maximum || (expected.HasValue && received > expected)) throw new ClientFault("UPDATE_INVALID");
+            await output.WriteAsync(chunk.AsMemory(0, count), cancellationToken);
+            var percent = expected is > 0 ? (int)(received * 100 / expected.Value) : 0;
+            if (percent != reported) { progress?.Report(percent); reported = percent; }
+        }
+        if (received == 0 || (expected.HasValue && received != expected)) throw new ClientFault("UPDATE_INVALID");
     }
     private static bool Allowed(Uri uri, Uri original, bool asset)
     {

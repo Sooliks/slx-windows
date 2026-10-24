@@ -22,6 +22,12 @@ public sealed partial class UpdateViewModel
             ? InstallHint : Text.Catalog[stateKey];
     public string InstallHint => Text.Catalog[IsInstallBlocked
         ? installBlockReason?.Invoke() ?? "UpdateDisconnectFirst" : "UpdateInstallHint"];
+    private static string CheckFailureKey(string? code) => code switch
+    {
+        "UPDATE_TIMEOUT" => "UpdateCheckTimeout",
+        "UPDATE_INVALID" => "UpdateCheckInvalid",
+        _ => "UpdateCheckFailed"
+    };
     private static string Format(string key, params object[] arguments) =>
         string.Format(CultureInfo.CurrentCulture, Text.Catalog[key], arguments);
 }
