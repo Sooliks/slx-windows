@@ -3,7 +3,7 @@ name: Publish Windows prerelease
 on:
   push:
     branches: [main]
-    paths: [Directory.Build.props]
+    paths: [Directory.Build.props, .github/workflows/release.yml]
   workflow_dispatch:
 
 permissions:
@@ -52,9 +52,17 @@ jobs:
         run: |
           $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path -LiteralPath $compiler -PathType Leaf)) { throw 'Inno Setup 6 is not installed on this runner' }
-          $version = (Get-Item -LiteralPath $compiler).VersionInfo
-          if ($version.FileMajorPart -ne 6) { throw 'Expected Inno Setup major version 6' }
-          Write-Output ('Inno Setup ' + $version.FileVersion)
+          # ISCC 6 does not expose its product major through PE file-version metadata.
+          # Its documented help path prints this banner and exits with code 1.
+          $PSNativeCommandUseErrorActionPreference = $false
+          $helpText = (& $compiler '/?' 2>&1 | Out-String)
+          $helpExitCode = $LASTEXITCODE
+          if ($helpExitCode -ne 1 -or $helpText -cnotmatch '(?m)^Inno Setup 6 Command-Line Compiler\r?$') {
+            Write-Output $helpText
+            throw ('Expected Inno Setup 6 compiler; help exit code: ' + $helpExitCode)
+          }
+          Write-Output 'Verified Inno Setup 6 Command-Line Compiler'
+          $global:LASTEXITCODE = 0
       - name: Locked restore, build and all Windows tests
         run: ./scripts/verify.ps1
       - name: Build the clean unsigned installer

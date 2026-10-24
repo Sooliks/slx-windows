@@ -1,5 +1,28 @@
 # Verification — 0.1.0-alpha.18 (2026-10-24)
 
+## GitHub run and compiler preflight correction
+
+The owner successfully pushed `58e3c92541641c453199ba6237b98f59f20f58d3`; its tree matches the prepared source tree.
+[Run 40097168143](https://github.com/Sooliks/slx-windows/actions/runs/40097168143) used Windows image
+`windows-2025-vs2026` version `20261021.278.1`. Checkout, .NET 10.0.401, Node 24.10.0, all 24 release-policy tests and
+the exact alpha.17 predecessor check passed. The next step failed with `Expected Inno Setup major version 6`.
+The executable existed, but its PE FileMajorPart was not 6. Windows application tests, installer build, packaging and
+publication were skipped. The hosted image's software inventory lists Inno Setup 6.7.1.
+
+The corrected preflight uses the same absolute compiler path, requires the exact Inno Setup 6 help banner and the
+expected help exit code 1, then clears only that handled native exit code for the Actions PowerShell wrapper.
+Official `jrsoftware/issrc` tag `is-6_7_1`, `Projects/ISCC.dpr`, confirms ShowBanner and the `/?` → Halt(1) path.
+No native application test, build, provenance or release check was removed. A workflow-only push now also triggers a
+new run; re-running the old failed SHA would still use the old broken preflight. Version remains alpha.18.
+
+Local correction checks: workflow YAML parsing and `git diff --check` passed. The exact PowerShell step body was
+executed with five controlled native-command fixtures: Inno 6 help/exit 1 succeeds with final wrapper exit 0;
+Inno 7, an unexpected exit 2, a prefixed fake banner and an absent banner are rejected. All five expectations passed.
+Only the Windows compiler path was replaced by each fixture path. This checks exit handling and recognition;
+it does not count as running the real Windows compiler or passing the next hosted Windows build.
+
+The source-preparation evidence below predates the owner's push; it is retained as a record of that stage.
+
 STATUS: PARTIAL. This work ran in a Linux workspace, not on the owner's or friends' Windows machines.
 The baseline is the supplied alpha.17 source archive. Screenshots show SERVICE_UNAVAILABLE and protected
 selected-app operation. The owner also reports that the affected PC has a Wi-Fi adapter; active Wi-Fi/default-route
