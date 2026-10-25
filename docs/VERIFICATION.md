@@ -1,4 +1,118 @@
-# Verification — 0.1.0-alpha.20 (2026-10-24)
+# Verification — 0.1.0-alpha.21 (2026-10-25)
+
+STATUS: PARTIAL. Source patch based on published alpha.20, commit
+`9cd73831292c8e8ba34327ead0039969c70cea7d`, exact tag `v0.1.0-alpha.20`.
+The alpha.21 installer, Windows workflow and installed friend-machine result are not claimed by this handoff.
+
+## Observed problem
+
+The owner supplied an alpha.20 screenshot and safe diagnostics captured on 25 October 2026 at 04:55 Moscow
+(01:55 UTC). The selected path is Hysteria2, Applications mode, Discord enabled; the reported Windows kernel version
+is 10.0.26300.0. All three attempts are RouteMismatch, 0 ms, route=OtherInterface. The service reports current
+Disconnected / Protection=false. This establishes a pre-send route rejection and reported completed rollback;
+it does not establish which competing interface/prefix was chosen or prove a Wi-Fi, ExitLag or DoH-server fault.
+
+## Confirmed weaknesses and correction
+
+- Alpha.20 relied on the two default routes, with no host routes for its advertised TUN DNS addresses. Pinned Xray
+  26.9.9 installs exactly the configured prefixes and uses zero route/interface metrics. A more-specific ordinary
+  route can still beat a default route. Alpha.21 adds only 1.1.1.1/32 and 2606:4700:4700::1111/128 on the owned TUN,
+  alongside the unchanged defaults. Equal-prefix foreign routes can still conflict and must not be silently accepted.
+- Alpha.20 sampled three failed routes immediately without awaiting any work, exhausting its attempt count before
+  the route had time to settle. Each attempt now allows up to six ordinary route observations with 500 ms pauses,
+  sharing one three-second route-plus-exchange deadline and the original nine-second total budget. Caller cancellation
+  propagates. Awaited pause/exchange work is bounded even when a test adapter returns late. A late native observation
+  cannot overwrite the last timely route evidence or confirm readiness.
+- The UDP socket and native route lookup remain unbound/unrestricted. No packet is sent until the owned TUN wins;
+  the complete DNS answer and the ordinary route are checked before success. A final route failure now returns
+  VPN_DNS_ROUTE_FAILED; normal DNS transport/response failures retain VPN_DNS_FAILED. Initial-failure rollback,
+  established-session protection and explicit off are unchanged.
+- Optional PrefixLength and RouteMetric add only numeric evidence. Successful IPv4 prefixes above 32, lookup errors
+  and missing identities cannot pass. The route metric is an offset, not the combined interface-plus-route cost.
+  Safe copy uses prefix_length/route_metric; no address, adapter name/GUID, profile or raw exception is added.
+  UI/service are upgraded together; new readers accept old observations lacking these optional fields.
+
+## Commands and actual results
+
+Local host: Linux. SDK 10.0.401 and cached pinned NuGet packages; cross-compilation targets net10.0-windows.
+Windows native networking and WPF execution are not available on this host.
+
+- `dotnet restore Slx.Windows.slnx --locked-mode --packages /tmp/slx-nuget -m:1 -nr:false`: exit 0, all six projects.
+- `dotnet build Slx.Windows.slnx -c Release --no-restore -m:1 -nr:false -p:UseSharedCompilation=false`: exit 0,
+  zero warnings/errors. Initial integrated build 26.14 seconds; final build after shortening RU/EN copy 5.05 seconds.
+  Actual Desktop/WPF, Service, Windows/Core and both test assemblies compile.
+- `dotnet test tests/Slx.Client.Tests/Slx.Client.Tests.csproj -c Release --no-build --no-restore -m:1 -nr:false
+  --filter <focused classes below> --logger 'trx;LogFileName=alpha21-focused-permitted.trx'`: exit 0,
+  **129 passed, 0 failed, 0 skipped**, reported duration 3 seconds.
+- Focused classes: DnsRouteReadinessTests, TunnelDnsRouteLayoutTests, TunnelDnsRouteTests, TunnelDnsProbeTests,
+  DnsProbePacketTests, CoreConfigTests, InitialConnectionAttemptTests, TunnelRecoveryPolicyTests, StartupReadinessTests,
+  OutboundInterfaceTests, PipeFramingTests, RecoveryObservationTests, and
+  RecoveryAndDiscoveryTests.PublicDnsRacesOnlyConfiguredHttpsResolversThroughVpn.
+- The first test-runner launch exited 1 before executing tests because the sandbox prohibited its local socket.
+  Re-running with permitted local runner communication passed the same selected tests. No VPN, TUN, WFP policy,
+  physical route/DNS setting or live production profile was created by these tests.
+- `node --test --test-isolation=none scripts/tests/release-auth.test.mjs scripts/tests/release-base.test.mjs`:
+  exit 0, **24 passed**, 0 failed/skipped. Existing workflow and publication guards are unchanged.
+- `node scripts/release-base.mjs` on this uncommitted handoff: exit 1, RELEASE_BASE_MISMATCH, as required because
+  HEAD is still the alpha.20 base itself. The guide creates a new alpha.21 commit before the workflow runs this gate;
+  the base tag and its exact commit are present. The publication guard was not bypassed or changed.
+- Source-size check: all .cs/.xaml files at most 200 nonblank lines; largest 176. New route-readiness tests 165 lines
+  were independently reviewed. RU/EN resources: 201 matching unique keys. `git diff --check`: exit 0.
+- Four parsed lockfiles differ only in eight internal alpha.20-to-alpha.21 project ranges; external versions and
+  content hashes are unchanged. Current and versioned release notes match. Seven guide PowerShell blocks parse
+  successfully under PowerShell 7.6.8; rollout commands were not executed. No tracked source deletions.
+
+The 129 tests include controlled route convergence, permanent foreign/unavailable routes with zero sends, cancellation
+in cooperative/late-returning pauses, the real per-attempt deadline, late response rejection, post-response route loss,
+final-failure classification, metadata privacy/backward reads, exact native-layout bytes, both routing modes and
+rollback waiting before returning the new fault. The ten new settling cases are included, not additional to 129.
+WPF fixtures were extended for the distinct RU/EN error, retained off-state/action, and copied route numbers, but only
+compiled locally. Screenshots produced by those tests must be reviewed after the real Windows workflow.
+
+Run evidence is outside the source archives: /tmp/slx-alpha21-restore.log, /tmp/slx-alpha21-build-final.log,
+/tmp/slx-alpha21-tests-permitted.log, /tmp/slx-alpha21-results/alpha21-focused-permitted.trx,
+/tmp/slx-alpha21-release-tests.log. Test sources and the rollout guide make the checks reproducible.
+
+## Native acceptance still required
+
+The existing Windows workflow must run all main/WPF tests, build the clean installer, and package matching source,
+provenance and checksums before publication. These source ZIPs are review/apply handoffs, not clean-build publication
+artifacts. The normal main version bump still triggers that workflow; no guard or test was disabled.
+
+On the owner and friend's PCs: verify both modes and live protocols, ordinary DNS and selected apps, unselected CS2,
+the two owned DNS host routes while connected, successful Disconnect, and preservation of pre-existing foreign routes
+and physical DNS. Include a persistent equal-prefix conflict and explicit cancellation; false Connected is forbidden.
+Also verify owned-route removal after core termination. The service kills/waits for its core and waits for the owned
+adapter to disappear; the Go Close method is not assumed to execute on every termination. Unit/layout tests do not
+establish native Windows route creation, removal, packet isolation, Wi-Fi compatibility or clean-machine acceptance.
+
+The exact earlier competing route is not recoverable from the supplied bounded alpha.20 diagnostic. Its historical
+cause remains unproven; the new numeric fields support a more precise report if the failure persists. No server,
+subscription, account/HWID, dependency, driver, physical-DNS or website migration is introduced.
+
+## Primary implementation evidence
+
+- [Pinned Xray Windows TUN](https://github.com/XTLS/Xray-core/blob/v26.9.9/proxy/tun/tun_windows.go): exact prefixes,
+  owned LUID, zero metrics and normal close path.
+- [Pinned TUN handler](https://github.com/XTLS/Xray-core/blob/v26.9.9/proxy/tun/handler.go): external interface controller
+  is selected/registered before TUN route setup.
+- [Pinned WireGuard native-layout checks](https://github.com/WireGuard/wireguard-windows/blob/v1.0.1/tunnel/winipcfg/types_test.go):
+  row size 104, destination prefix offset 12 plus nested prefix-length offset 28, metric offset 84.
+- [Microsoft route preference](https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/microsoft-windows-tcpip-interfaces-interface-routes-route-metric),
+  [GetBestRoute2](https://learn.microsoft.com/en-us/windows/win32/api/netioapi/nf-netioapi-getbestroute2), and
+  [MIB_IPFORWARD_ROW2](https://learn.microsoft.com/en-us/windows/win32/api/netioapi/ns-netioapi-mib_ipforward_row2).
+
+## Alpha.20 publication evidence added after its source handoff
+
+Alpha.20 subsequently passed Windows workflow run
+[40136133276](https://github.com/Sooliks/slx-windows/actions/runs/40136133276): 499 main tests and the WPF scenario,
+24 release-policy tests and 18 runtime-input checks; the public release is
+[v0.1.0-alpha.20](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.20).
+Publication was 25 October 2026 at 00:56 Moscow (24 October 21:56 UTC). Source assets and installer were checked
+against their published hashes. That CI evidence did not establish the friend's installed routing behavior.
+The older alpha.20 source report below is preserved as historical evidence, not the later publication status.
+
+## History — 0.1.0-alpha.20 source handoff (2026-10-24)
 
 STATUS: PARTIAL. Source patch based on published alpha.19, commit `522cb9ec9c4f13ef2cd71d20c4918c76fbdfc37c`.
 No alpha.20 installer or successful alpha.20 native Windows workflow is claimed by this source handoff.

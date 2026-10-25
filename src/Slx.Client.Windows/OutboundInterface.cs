@@ -21,12 +21,15 @@ public static class OutboundInterface
         [FieldOffset(16)] public ulong Last;
     }
 
-    // MIB_IPFORWARD_ROW2 is 104 bytes on supported Windows x64. Only identity fields are consumed.
+    // MIB_IPFORWARD_ROW2 is 104 bytes on supported Windows x64; DestinationPrefix starts at 12.
+    // IP_ADDRESS_PREFIX.PrefixLength is at +28; route Metric is at 84 (winipcfg v1.0.1 types_test.go).
     [StructLayout(LayoutKind.Explicit, Size = 104)]
     internal struct RouteRow
     {
         [FieldOffset(0)] public ulong Luid;
         [FieldOffset(8)] public uint Index;
+        [FieldOffset(40)] public byte PrefixLength;
+        [FieldOffset(84)] public uint Metric;
     }
 
     [DllImport("iphlpapi.dll", ExactSpelling = true)]

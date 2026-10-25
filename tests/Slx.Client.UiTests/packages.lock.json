@@ -107,8 +107,8 @@
         "type": "Project",
         "dependencies": {
           "CommunityToolkit.Mvvm": "[8.4.0, )",
-          "Slx.Client.Core": "[0.1.0-alpha.20, )",
-          "Slx.Client.Windows": "[0.1.0-alpha.20, )"
+          "Slx.Client.Core": "[0.1.0-alpha.21, )",
+          "Slx.Client.Windows": "[0.1.0-alpha.21, )"
         }
       },
       "slx.client.core": {
@@ -117,7 +117,7 @@
       "slx.client.windows": {
         "type": "Project",
         "dependencies": {
-          "Slx.Client.Core": "[0.1.0-alpha.20, )",
+          "Slx.Client.Core": "[0.1.0-alpha.21, )",
           "System.Security.Cryptography.ProtectedData": "[10.0.13, )"
         }
       }

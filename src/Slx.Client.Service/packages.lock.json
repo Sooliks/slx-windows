@@ -316,7 +316,7 @@
       "slx.client.windows": {
         "type": "Project",
         "dependencies": {
-          "Slx.Client.Core": "[0.1.0-alpha.20, )",
+          "Slx.Client.Core": "[0.1.0-alpha.21, )",
           "System.Security.Cryptography.ProtectedData": "[10.0.13, )"
         }
       }

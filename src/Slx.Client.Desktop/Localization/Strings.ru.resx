@@ -197,6 +197,7 @@
 <data name="FaultOutboundInterface" xml:space="preserve"><value>Нет маршрута Windows к серверу VPN. Проверьте интернет и сетевые адаптеры, затем повторите подключение.</value></data>
 <data name="FaultVpnProbe" xml:space="preserve"><value>Проверка соединения VPN не прошла. Проверьте интернет или выберите другой способ подключения.</value></data>
 <data name="FaultVpnDns" xml:space="preserve"><value>Не удалось проверить DNS через VPN. Попробуйте другой способ подключения или скопируйте диагностику из «Помощи».</value></data>
+<data name="FaultVpnDnsRoute" xml:space="preserve"><value>Не удалось направить DNS через SLX. Отключите другой VPN, если он запущен, и повторите попытку. Диагностика — в «Помощи».</value></data>
 <data name="FaultEndpointNetwork" xml:space="preserve"><value>Не удалось определить адрес сервера VPN. Проверьте интернет, затем повторите подключение или выберите другой способ.</value></data>
 <data name="FaultEndpointRejected" xml:space="preserve"><value>Адрес сервера VPN не прошёл проверку. Обновите подписку или обратитесь в поддержку.</value></data>
 <data name="FaultRuntimeValidation" xml:space="preserve"><value>Не удалось проверить файлы сетевого модуля. Восстановите SLX официальным установщиком.</value></data>

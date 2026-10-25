@@ -50,6 +50,8 @@ public sealed partial class MainViewModel
         {
             text.Append($", route={route.Status}");
             if (route.NativeError is {} native) text.Append($", route_error={native}");
+            if (route.PrefixLength is {} prefix) text.Append($", prefix_length={prefix}");
+            if (route.RouteMetric is {} metric) text.Append($", route_metric={metric}");
         }
         text.AppendLine();
     }

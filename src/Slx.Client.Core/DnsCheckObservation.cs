@@ -1,7 +1,8 @@
 namespace Slx.Client.Core;
 
 public enum DnsRouteStatus { OwnedTunnel, OtherInterface, Unavailable }
-public sealed record DnsRouteObservation(DnsRouteStatus Status, uint? NativeError = null);
+public sealed record DnsRouteObservation(DnsRouteStatus Status, uint? NativeError = null,
+    byte? PrefixLength = null, uint? RouteMetric = null);
 public enum DnsProbeOutcome
 {
     Success, Timeout, SocketError, Rejected, InvalidResponse, RouteMismatch, RouteUnavailable

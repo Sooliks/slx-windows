@@ -97,9 +97,11 @@ public sealed class TunnelDnsProbeTests
     {
         int sends = 0;
         var observations = new List<DnsCheckObservation>();
-        await Assert.ThrowsAsync<ClientFault>(() => TunnelDnsProbe.CheckAsync((query, _) =>
+        var fault = await Assert.ThrowsAsync<ClientFault>(() => TunnelDnsProbe.CheckAsync((query, _) =>
         { sends++; return Task.FromResult(DnsProbeFixtures.Reply(query)); },
-            () => new(route, route == DnsRouteStatus.Unavailable ? 1168u : null), observations.Add, default));
+            () => new(route, route == DnsRouteStatus.Unavailable ? 1168u : null), observations.Add, default,
+            (_, token) => { token.ThrowIfCancellationRequested(); return Task.CompletedTask; }));
+        Assert.Equal("VPN_DNS_ROUTE_FAILED", fault.Code);
         Assert.Equal(0, sends); Assert.Equal(3, observations.Count);
         Assert.Equal(expected, observations[^1].Third!.Outcome);
         Assert.Equal(route, observations[^1].Third!.Route!.Status);
@@ -111,9 +113,11 @@ public sealed class TunnelDnsProbeTests
     {
         int routes = 0, sends = 0;
         var observations = new List<DnsCheckObservation>();
-        await Assert.ThrowsAsync<ClientFault>(() => TunnelDnsProbe.CheckAsync((query, _) =>
+        var fault = await Assert.ThrowsAsync<ClientFault>(() => TunnelDnsProbe.CheckAsync((query, _) =>
         { sends++; return Task.FromResult(DnsProbeFixtures.Reply(query)); },
-            () => ++routes == 1 ? Owned() : new(DnsRouteStatus.OtherInterface), observations.Add, default));
+            () => ++routes == 1 ? Owned() : new(DnsRouteStatus.OtherInterface), observations.Add, default,
+            (_, token) => { token.ThrowIfCancellationRequested(); return Task.CompletedTask; }));
+        Assert.Equal("VPN_DNS_ROUTE_FAILED", fault.Code);
         Assert.Equal(1, sends);
         Assert.Equal(DnsProbeOutcome.RouteMismatch, observations[0].First.Outcome);
         Assert.Equal(0, observations[0].First.ResponseCode);

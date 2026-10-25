@@ -39,14 +39,19 @@ public sealed class CoreConfigTests
         Assert.Equal("vpn", rules[^1].GetProperty("outboundTag").GetString());
     }
 
-    [Fact]
-    public void TunIsDualStackAndProbeIsAuthenticatedLocalhostOnly()
+    [Theory]
+    [InlineData(RoutingMode.SelectedApplications)]
+    [InlineData(RoutingMode.WholeComputer)]
+    public void TunProtectsBothConfiguredDnsHostsAndProbeIsAuthenticatedLocalhostOnly(RoutingMode mode)
     {
-        using var config = Build(CoreFixtures.Plan());
+        using var config = Build(CoreFixtures.Plan(mode));
         var inbounds = config.RootElement.GetProperty("inbounds");
         var tun = inbounds[0].GetProperty("settings");
         Assert.Equal("SLX VPN", tun.GetProperty("name").GetString());
-        Assert.Equal(["0.0.0.0/0", "::/0"], tun.GetProperty("autoSystemRoutingTable").EnumerateArray().Select(item => item.GetString()!).ToArray());
+        Assert.Equal(["1.1.1.1", "2606:4700:4700::1111"],
+            tun.GetProperty("dns").EnumerateArray().Select(item => item.GetString()!).ToArray());
+        Assert.Equal(["0.0.0.0/0", "::/0", "1.1.1.1/32", "2606:4700:4700::1111/128"],
+            tun.GetProperty("autoSystemRoutingTable").EnumerateArray().Select(item => item.GetString()!).ToArray());
         Assert.Equal("auto", tun.GetProperty("autoOutboundsInterface").GetString());
         Assert.Equal("127.0.0.1", inbounds[1].GetProperty("listen").GetString());
         Assert.Equal("probePassword0000", inbounds[1].GetProperty("settings").GetProperty("accounts")[0].GetProperty("pass").GetString());

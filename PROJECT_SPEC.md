@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.20. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.21. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,34 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.21 — explicit DNS routes and bounded route readiness
+
+The friend's alpha.20 diagnostics captured 25 October 2026 show all three DNS attempts as RouteMismatch,
+OtherInterface and 0 ms. The ordinary route guard rejected them before sending DNS; this does not establish a
+Hysteria2/DoH outage or identify the competing adapter. Disconnected/Protection=false is the reported completed
+first-connect rollback. The owner reports a working PC; friend/Wi-Fi/CS2 acceptance remains open.
+
+Add only the existing configured TUN DNS destinations as host routes: 1.1.1.1/32 and
+2606:4700:4700::1111/128, alongside the existing IPv4/IPv6 defaults in typed Xray autoSystemRoutingTable.
+The pinned core owns creation and cleanup on the owned TUN, using its existing route lifecycle. This prevents a
+less-specific route from outranking the DNS path by prefix; it does not promise to override a competing host route.
+No new resolver, physical-adapter DNS/metric change, foreign route deletion, socket binding or WFP change.
+The IPv4 readiness probe still uses ordinary Windows routing and requires the owned TUN before sending and after
+the validated DNS answer. Neither a proxy health response nor a forced-interface answer substitutes for shared DNS.
+
+Allow bounded route settling inside the existing three-second attempt/nine-second total budgets: at most six
+route samples with 500 ms between unsuccessful samples. Cancellation interrupts the wait; expired readiness cannot
+publish Connected. Up to three attempt observations remain, rather than retaining every route sample. A final
+unconfirmed DNS route reports VPN_DNS_ROUTE_FAILED separately from DNS response/transport failure. Protection and
+confirmed-first-attempt rollback retain their existing ownership rules.
+
+Optional numeric PrefixLength/RouteMetric extend only the existing optional DnsCheck route observation. Native
+reads must not invent a prefix/metric after a failed lookup; route metrics are not the full interface-plus-route
+selection cost. Safe diagnostics include these numbers without names, identifiers, addresses or raw native text.
+Update the service and UI together; no stored-data, IPC version, driver, external dependency or server migration.
+Alpha.21 uses the exact published alpha.20 tag as its release/source-archive base. Production distribution remains
+the authorized prerelease channel with PARTIAL acceptance; no claimed friend success or publication before evidence.
 
 ## Alpha.20 — resilient protected DNS and precise readiness evidence
 

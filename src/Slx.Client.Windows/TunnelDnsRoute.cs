@@ -20,7 +20,7 @@ public static class TunnelDnsRoute
         => Observe(ownedAdapterId, destination, ReadRoute, ReadIdentity);
 
     internal static DnsRouteObservation Observe(string ownedAdapterId, IPAddress destination,
-        Func<IPAddress, (uint Error, ulong Luid)> readRoute,
+        Func<IPAddress, (uint Error, ulong Luid, byte PrefixLength, uint Metric)> readRoute,
         Func<ulong, (uint Error, Guid Identity)> readIdentity)
     {
         if (!Guid.TryParse(ownedAdapterId, out var expected) || expected != OutboundInterface.TunnelIdentity
@@ -30,21 +30,22 @@ public static class TunnelDnsRoute
 
         var route = readRoute(destination);
         if (route.Error != 0) return new(DnsRouteStatus.Unavailable, route.Error);
-        if (route.Luid == 0) return new(DnsRouteStatus.Unavailable);
+        if (route.Luid == 0 || route.PrefixLength > 32) return new(DnsRouteStatus.Unavailable);
 
         var adapter = readIdentity(route.Luid);
         if (adapter.Error != 0) return new(DnsRouteStatus.Unavailable, adapter.Error);
         if (adapter.Identity == Guid.Empty) return new(DnsRouteStatus.Unavailable);
 
-        return new(adapter.Identity == expected ? DnsRouteStatus.OwnedTunnel : DnsRouteStatus.OtherInterface);
+        return new(adapter.Identity == expected ? DnsRouteStatus.OwnedTunnel : DnsRouteStatus.OtherInterface,
+            PrefixLength: route.PrefixLength, RouteMetric: route.Metric);
     }
 
-    private static (uint Error, ulong Luid) ReadRoute(IPAddress destination)
+    private static (uint Error, ulong Luid, byte PrefixLength, uint Metric) ReadRoute(IPAddress destination)
     {
         var address = OutboundInterface.CreateAddress(destination);
         // An interface/source restriction would hide a competing ordinary Windows route.
         uint error = GetBestRoute2(0, 0, 0, in address, 0, out var route, out _);
-        return (error, route.Luid);
+        return error == 0 ? (0, route.Luid, route.PrefixLength, route.Metric) : (error, 0, 0, 0);
     }
 
     private static (uint Error, Guid Identity) ReadIdentity(ulong luid)

@@ -36,14 +36,16 @@ public sealed class RecoveryObservationTests
         var observation = new DnsCheckObservation(DateTimeOffset.UtcNow,
             new(ProbeTarget.Gstatic, DnsProbeOutcome.Timeout, 3000, Route: new(DnsRouteStatus.OwnedTunnel)),
             new(ProbeTarget.Slx, DnsProbeOutcome.SocketError, 2, SocketError: 10013,
-                Route: new(DnsRouteStatus.OwnedTunnel)));
+                Route: new(DnsRouteStatus.OwnedTunnel)),
+            new(ProbeTarget.Gstatic, DnsProbeOutcome.RouteMismatch, 2500,
+                Route: new(DnsRouteStatus.OtherInterface, PrefixLength: 32, RouteMetric: 10)));
         engine.RecordDnsCheck(observation);
         var status = engine.Status;
         Assert.Equal(TunnelPhase.Disconnected, status.Phase);
         Assert.False(status.ProbePassed); Assert.False(status.ProtectionActive);
         Assert.Null(status.ConnectedAt); Assert.Equal(observation, status.DnsCheck);
         Assert.Same(observation, engine.Status.DnsCheck);
-        var reply = new PipeReply(false, "VPN_DNS_FAILED", status);
+        var reply = new PipeReply(false, "VPN_DNS_ROUTE_FAILED", status);
         using var stream = new MemoryStream();
         await PipeFraming.WriteAsync(stream, reply);
         Assert.InRange(stream.Length, 1, PipeContract.MaxBytes);

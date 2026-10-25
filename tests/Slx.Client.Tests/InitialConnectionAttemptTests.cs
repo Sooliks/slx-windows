@@ -6,21 +6,23 @@ namespace Slx.Client.Tests;
 
 public sealed class InitialConnectionAttemptTests
 {
-    [Fact]
-    public async Task FailedInitialConnectAwaitsRollbackBeforeReportingTheOriginalFailure()
+    [Theory]
+    [InlineData("VPN_PROBE_FAILED")]
+    [InlineData("VPN_DNS_ROUTE_FAILED")]
+    public async Task FailedInitialConnectAwaitsRollbackBeforeReportingTheOriginalFailure(string failureCode)
     {
         var released = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var rollbackStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        var attempt = InitialConnectionAttempt.RunAsync(true, () => throw new ClientFault("VPN_PROBE_FAILED"), async code =>
+        var attempt = InitialConnectionAttempt.RunAsync(true, () => throw new ClientFault(failureCode), async code =>
         {
-            Assert.Equal("VPN_PROBE_FAILED", code);
+            Assert.Equal(failureCode, code);
             rollbackStarted.SetResult();
             await released.Task;
         }, default);
         await rollbackStarted.Task.WaitAsync(TimeSpan.FromSeconds(2));
         Assert.False(attempt.IsCompleted);
         released.SetResult();
-        Assert.Equal("VPN_PROBE_FAILED", (await Assert.ThrowsAsync<ClientFault>(() => attempt)).Code);
+        Assert.Equal(failureCode, (await Assert.ThrowsAsync<ClientFault>(() => attempt)).Code);
     }
 
     [Fact]

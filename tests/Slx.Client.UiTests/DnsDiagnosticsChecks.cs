@@ -55,6 +55,24 @@ internal static class DnsDiagnosticsChecks
             model.PollAsync().GetAwaiter().GetResult();
             Assert.Contains("route=Unavailable, route_error=1168", model.SafeDiagnostics);
             Assert.DoesNotContain("DNS attempt 2", model.SafeDiagnostics);
+            observed = observed with { Code = "VPN_DNS_ROUTE_FAILED", DnsCheck = new(DateTimeOffset.UtcNow,
+                new(ProbeTarget.Gstatic, DnsProbeOutcome.RouteMismatch, 2500,
+                    Route: new(DnsRouteStatus.OtherInterface, PrefixLength: 32, RouteMetric: 10))) };
+            foreach (var language in new[] { "ru", "en" })
+            {
+                model.Language = language;
+                model.PollAsync().GetAwaiter().GetResult();
+                model.PollAsync().GetAwaiter().GetResult();
+                Sta.Resize(window, 940, 660);
+                Assert.Equal("VPN_DNS_ROUTE_FAILED", model.LastServiceCode);
+                Assert.Equal(Text.Catalog["FaultVpnDnsRoute"], model.StatusDetail);
+                Assert.Contains("route=OtherInterface, prefix_length=32, route_metric=10", model.SafeDiagnostics);
+                Assert.DoesNotContain("1.1.1.1", model.SafeDiagnostics);
+                Assert.Contains(Sta.Descendants<TextBlock>(window), block => block.Text == model.StatusDetail);
+                Assert.Equal(Text.Catalog["Connect"], model.ConnectionAction);
+                Assert.False(model.IsConnected); Assert.False(model.IsTunnelActive);
+                if (language == "ru") UiScreenshots.Save(window, "slx-dns-route-failure-ru-compact");
+            }
             observed = new(TunnelPhase.Disconnected, DateTimeOffset.UtcNow);
             model.PollAsync().GetAwaiter().GetResult();
             Assert.DoesNotContain("DNS attempt", model.SafeDiagnostics);

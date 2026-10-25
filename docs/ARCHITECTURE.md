@@ -1,5 +1,15 @@
 # Boundaries
 
+Alpha.21: Core's typed TUN configuration adds host routes only for its two existing DNS addresses alongside the
+defaults. The pinned Xray owns their lifecycle on its TUN; no independent route mutator or foreign-interface cleanup
+is introduced. Windows TunnelDnsRoute still reads the unrestricted native route and now returns bounded numeric
+prefix/route-metric evidence. Service waits for that owned route with bounded samples inside the existing per-attempt
+and total DNS budgets, then performs the same unbound UDP exchange and after-answer route check. Final route failure
+has its own VPN_DNS_ROUTE_FAILED code; a direct physical DNS response cannot establish readiness. Existing initial
+rollback, established-session protection and explicit cancellation semantics remain authoritative. Desktop maps only
+whitelisted copy and numeric diagnostic fields. Optional DnsCheck fields are additive to IPC v2; UI/service update
+together, with no new action, stored-data shape, dependency, WFP or driver change.
+
 Alpha.20: Core owns the exact HTTPS-only parallel DNS resolver policy and optional bounded DnsCheck observations.
 Windows TunnelDnsRoute observes ordinary GetBestRoute2/LUID/GUID selection without changing routes or binding sockets.
 Service TunnelDnsProbe owns unbound UDP, the existing deadlines, before/after owned-route checks and typed outcomes;

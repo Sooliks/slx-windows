@@ -1,4 +1,36 @@
-# Network model and limits — alpha.20
+# Network model and limits — alpha.21
+
+## Alpha.21 DNS route readiness
+
+The friend's alpha.20 diagnostics show three immediate RouteMismatch/OtherInterface results. The service did not
+send those DNS queries: the ordinary-route guard rejected the selected Windows interface first. This narrows the
+failure to the observed route, without identifying a particular adapter, a persistent competing route or a resolver
+outage. The captured Disconnected/Protection=false reports successful rollback of that initial connection attempt.
+
+Typed Xray TUN configuration now includes 1.1.1.1/32 and 2606:4700:4700::1111/128 as well as the existing
+0.0.0.0/0 and ::/0. These are the already configured TUN DNS addresses, not additional resolvers. Their host prefixes
+prevent a less-specific ordinary route from winning DNS traffic merely by being more specific than a default route.
+An equal-prefix foreign route can still compete; the route guard must reject it if Windows chooses another interface.
+Creation and cleanup remain with the pinned core's existing owned-TUN route lifecycle. No physical-interface DNS,
+interface metric, foreign route, WFP priority or socket binding is changed by the client.
+
+The route may not be ready at the first observation. Within each existing three-second attempt, sample at most six
+times with 500 ms between unsuccessful observations, sharing the existing nine-second total budget. Do not count
+three immediate rejections as elapsed network attempts. Cancellation stops settling immediately. Only the owned
+route permits an unbound UDP send, and the owned route is checked again before accepting a validated DNS response.
+Waiting does not waive route ownership or DNS response validation. Expired work cannot confirm a connection.
+
+The existing three attempt observations retain their typed outcomes. A final route failure reports
+VPN_DNS_ROUTE_FAILED with distinct RU/EN guidance; DNS transport/response failure retains VPN_DNS_FAILED.
+Optional PrefixLength and RouteMetric describe the successfully read native route without exposing its address or
+interface identity. RouteMetric is the route's own offset, not the complete route-plus-interface preference.
+Failed native reads do not supply fabricated numeric evidence. The result survives initial rollback as before.
+
+Installed acceptance must confirm the host routes on the actual SLX TUN while connected, ordinary-route ownership,
+real DNS through the selected VPN, removal of owned routes on Disconnect, and preservation of pre-existing foreign
+routes/DNS settings. Both modes, the owner's working PC and the friend's Wi-Fi case remain required. No unit test
+proves that alpha.21 works on the friend's machine, and this change does not provide per-app shared-DNS isolation.
+See [the alpha.21 rollout guide](UPDATE_ALPHA21_RU.md) and [verification](VERIFICATION.md).
 
 ## Alpha.20 DNS readiness correction
 
