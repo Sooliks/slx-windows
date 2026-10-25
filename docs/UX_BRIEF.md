@@ -1,5 +1,31 @@
 # Windows client UX brief
 
+## Alpha.23 observable connection progress and one active UI (2026-10-25)
+
+Audience: a returning user whose apps have no VPN traffic despite an apparent connection attempt. Friction: a busy
+mutation froze the previous status read, so Help could label an earlier off snapshot current. Keep status reads
+available during connect/reconnect/off; render only accepted service observations, retaining explicit off and the
+existing fixed status-card geometry. Starting an operation invalidates the prior read until a new one arrives.
+Help reports pending UI action/start time, last accepted service-read time and state publication time separately;
+historical DNS success does not imply current ordinary-route or application success. Late replies must never restore
+an older state or hide a later uncertain result. Service route failures have specific RU/EN copy and a safe code.
+If status advanced during an operation, its delayed acknowledgement retains its command result while one bounded
+fresh read reconciles the current view; read failure remains unknown and explicit off can supersede the wait.
+
+A manual second launch restores the existing window; a duplicate --tray launch stays quiet. It creates no second
+model/tray and cannot disconnect the shared tunnel on exit. Render checks remain isolated. Known installed package
+paths refresh before connection; paths containing commas stay intact during discovery. No generic executable rules,
+forced process termination or inventory upload. App switches continue to affect new sessions.
+Enabled selected-app paths must identify the same installed executable for Xray and WFP even when saved casing
+differs. Unsupported reparse/alias paths and native identity mismatches report actionable service codes rather than
+silently matching another executable. Whole-PC and disabled rows do not gain a native path-resolution dependency.
+
+Required controlled evidence: blocked-connect status reads; late read success/failure across mutation completion;
+unknown results without retry; read-time/pending diagnostics; independent route diagnostics and unchanged layout;
+isolated single-instance activation/tray/disposal/reacquisition; local discovery/path contracts. Actual friend traffic,
+installed upgrade, Windows/DPI/accessibility and real network transitions remain separate open acceptance. Current
+commands/results belong in VERIFICATION.md; the historical alpha.22 report is not alpha.23 evidence.
+
 ## Unreleased stable layout for transient activity (2026-10-23)
 
 Owner report: short "Please wait…" / loading lines made the page jump. Contract: transient copy never changes the

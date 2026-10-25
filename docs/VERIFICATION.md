@@ -1,4 +1,68 @@
-# Verification — 0.1.0-alpha.22 (2026-10-25)
+# Verification — 0.1.0-alpha.23 (2026-10-25)
+
+STATUS: PARTIAL. Current source preparation starts at published alpha.22 commit
+`f694b51c8a815ce041fe67b26c8e21627aaa5cda`. The owner reports alpha.22's successful Windows release with
+538 main tests and one composite WPF test. That historical report is separate from the alpha.23 execution below.
+At completion of local verification, alpha.23 had not yet been committed or published. The owner then explicitly
+authorized Codex to commit/push and release through the existing Windows workflow. CI publication must be confirmed
+separately. No installed-service mutation or real-profile VPN connection was performed for local testing.
+
+## Current alpha.23 execution
+
+Local host: Windows, repository-pinned SDK 10.0.401 and runtime 10.0.13. Tests use isolated fixtures and synthetic
+profiles. Native route reads and temporary application identity fixtures are not real tunnel or packet acceptance.
+
+- `pwsh -NoProfile -File scripts/verify.ps1`: **exit 0**, finished `2026-10-25T15:03:25Z`. Locked restore of all six
+  projects succeeded. Release solution build: **0 warnings, 0 errors**. Main tests: **617 passed, 0 failed, 0 skipped**,
+  reported 6 seconds. Composite WPF regression: **1 passed, 0 failed, 0 skipped**, 34 seconds. Source-size contract passed.
+- The composite includes busy status polling, overlapping/late replies, known mutation followed by fresh status,
+  failed read without mutation replay, explicit off superseding the read, scoped single-instance activation,
+  route-failure RU/EN copy and narrow layout, plus the existing UI scenarios.
+- Main fixtures cover split routes, optional route IPC serialization, ordinary-route readiness/cancellation/recovery,
+  route identity/prefix validation, IPv6 source classification, comma-bearing executable paths, package refresh,
+  native case normalization, equal WFP identity, reparse rejection and cancellation without partial intent adoption.
+- Native casing uses an owned temporary copy of `cmd.exe`, launched hidden with AutoRun disabled and closed afterward.
+  Its uppercase launch spelling produced `QueryFullProcessImageNameW` equal to the normalized path prepared for Xray.
+  This is an application-path contract fixture; it neither replaces Xray nor measures VPN traffic.
+- A preparatory main-test build found xUnit2010 in the new equality assertion. The assertion was corrected without
+  disabling the analyzer; the next build passed. Integrated WPF preparation also corrected nullable postcondition
+  and xUnit2031 diagnostics. The final full verify above ran after those corrections.
+- `node --test --test-isolation=none scripts/tests/release-auth.test.mjs scripts/tests/release-base.test.mjs`:
+  **exit 0, 24 passed**, 0 failed/skipped. `pwsh -NoProfile -File scripts/tests/runtime-inputs.test.ps1`:
+  **exit 0, 18 checks passed**. Release policy, vendor trust, workflow and source-cleanliness guards remain enabled.
+- `git diff --check`: exit 0. Four lock files differ only in **eight internal project version ranges** from .22 to .23;
+  the remaining JSON entries, external dependency versions and hashes are identical.
+- RU/EN resource keys are unique and identical: main **207**, library **10**, routing **4**, updates **16**.
+  Four PowerShell blocks in `UPDATE_ALPHA23_RU.md` parse successfully. Release notes equal their versioned copy.
+  Guide commands were syntax-checked only at that point; actual subsequent release work is recorded separately.
+- Fresh WPF captures `slx-data-route-failed-ru.png` and `slx-data-route-failed-en.png`, written at `15:03:19Z`, were
+  inspected at 940 × 660: route error wraps, action controls remain visible, and the page has no horizontal overflow.
+
+Evidence in the local working tree: `artifacts/handoff/verify-alpha23.txt`, `runtime-inputs-alpha23.txt`,
+`restore-alpha23.txt`, `build-main-alpha23.txt`, `test-main-alpha23.txt`; main TRX under
+`artifacts/test-results/alpha23/` and full-run TRX under each test project's ignored `TestResults/`.
+Preparatory route and WPF reports are under `artifacts/test-results/alpha23-routes/` and `alpha23-status/`.
+These local reports and screenshots are excluded from source ZIPs.
+
+## Alpha.23 boundaries and outstanding acceptance
+
+The friend's alpha.22 report shows Disconnected and an earlier successful DNS route. Busy polling could expose an
+old snapshot as current; this confirmed UI defect does not establish why the friend's application traffic failed.
+No manual disconnect, Wi-Fi culprit, provider restriction or particular DNS problem is inferred from that report.
+
+Split `/1` routes take precedence over ordinary `/0` defaults; more-specific or competing routes can still exist.
+The new bounded checks inspect representative IPv4 halves and conditional IPv6 routing, not packets or every destination.
+Existing authenticated proxy/DNS checks and native route observations together still do not prove every application's
+process match, TCP/UDP delivery, public egress, or behavior under all operators, DNS configurations and network software.
+
+Before considering the release accepted, run CI on the new clean commit, build/install the matching UI/service pair,
+and repeat both modes on the owner's and friends' PCs. Cover Hysteria2/VLESS, real IPv4/IPv6 and shared DNS, Steam/CS2
+outside the selection, newly opened versus existing app sessions, updated package/manual apps, startup/reboot/sleep,
+network changes, owned-route cleanup, recovery and explicit off. Include Windows 10, installer upgrade/rollback and
+clean-machine checks. GitHub Actions remains the publication path and builds source ZIPs from the clean commit.
+The website and its separate cache fix were not changed or deployed in this iteration.
+
+## Historical alpha.22 source handoff (not the current result)
 
 STATUS: PARTIAL. The source handoff starts at published alpha.21 commit
 `0b2979d5358b5467516dd18738379f3707d744ee`, exact tag `v0.1.0-alpha.21`.

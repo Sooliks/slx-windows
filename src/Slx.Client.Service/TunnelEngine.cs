@@ -18,11 +18,12 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
     private string? ownedAdapterId;
     private (int Port, string User, string Password) probe;
     private int recoveryAttempts;
-    public TunnelStatus Status => state with { Recovery = recovery, HealthCheck = healthCheck, DnsCheck = dnsCheck };
+    public TunnelStatus Status => state with { Recovery = recovery, HealthCheck = healthCheck, DnsCheck = dnsCheck,
+        TrafficRoutes = trafficRoutes };
 
     public async Task StartAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken)
     {
-        PlanValidator.Validate(plan);
+        plan = ExactApplicationPlan.Prepare(plan, cancellationToken);
         var pinned = pinnedPlan is not null && currentPlan is not null
             && (plan.Profile.Id==currentPlan.Profile.Id || string.Equals(plan.Profile.Host,currentPlan.Profile.Host,StringComparison.OrdinalIgnoreCase))
             ? plan with{Profile=plan.Profile with{Host=pinnedPlan.Profile.Host}} : await PinEndpointAsync(plan, cancellationToken);
@@ -84,6 +85,7 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
     private async Task LaunchAsync(ConnectPlan plan, string executable, TunnelPhase phase, CancellationToken cancellationToken)
     {
         dnsCheck = null;
+        trafficRoutes = null;
         state = new(phase, DateTimeOffset.UtcNow, plan.Profile.Name, Mode: plan.Mode, ProtectionActive:protectionActive);
         try
         {
@@ -123,8 +125,10 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
             ArmProtection(plan,ownedAdapterId);
             DnsCache.Refresh();
             await TunnelDnsProbe.CheckAsync(ownedAdapterId, RecordDnsCheck, cancellationToken);
+            await TrafficRouteProbe.CheckAsync(ownedAdapterId, RecordTrafficRoutes, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             if (process.HasExited || !LocalProbe.TunnelReady()) throw new ClientFault("CORE_EXITED");
+            cancellationToken.ThrowIfCancellationRequested();
             state = new(TunnelPhase.Connected, DateTimeOffset.UtcNow, plan.Profile.Name,
                 ConnectedAt: DateTimeOffset.UtcNow, Mode: plan.Mode, ProbePassed: true, ProtectionActive:protectionActive,
                 ApplicationRevision: XrayRouteRevision.For(currentPlan ?? plan));

@@ -204,4 +204,7 @@
 <data name="FaultEndpointNetwork" xml:space="preserve"><value>Could not resolve the VPN server address. Check your internet connection, then retry or choose the other connection method.</value></data>
 <data name="FaultEndpointRejected" xml:space="preserve"><value>The VPN server address failed validation. Refresh your subscription or contact support.</value></data>
 <data name="FaultRuntimeValidation" xml:space="preserve"><value>The VPN engine files could not be verified. Repair SLX using its official installer.</value></data>
+<data name="FaultVpnTrafficRoute" xml:space="preserve"><value>Windows is sending ordinary traffic outside the SLX tunnel. Check other VPN or traffic-routing software, then reconnect. SLX keeps protection active while recovering; Disconnect releases it.</value></data>
+<data name="FaultTrafficPath" xml:space="preserve"><value>The application path could not be verified. Select its installed .exe again in Applications. Aliases and redirected folders are not supported yet.</value></data>
+<data name="FaultTrafficIdentity" xml:space="preserve"><value>Windows could not confirm the same application file for VPN routing and protection. Select its current installed .exe again in Applications.</value></data>
 </root>

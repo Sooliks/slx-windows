@@ -10,7 +10,7 @@ internal sealed partial class TunnelEngine
         ConnectPlan Before, ConnectPlan After, ConnectPlan PinnedBefore, ConnectPlan PinnedAfter);
     public async Task UpdateApplicationsAsync(ConnectPlan plan, string sid, CancellationToken token)
     {
-        PlanValidator.Validate(plan);
+        plan = ExactApplicationPlan.Prepare(plan, token);
         await lifecycle.WaitAsync(token);
         try
         {

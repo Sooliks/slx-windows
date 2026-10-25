@@ -1,5 +1,36 @@
 # Boundaries
 
+Alpha.23: Core XraySystemRoutes owns the four split-default prefixes and the existing two DNS host routes. Windows
+TunnelRouteLookup shares unrestricted GetBestRoute2/GUID observation between TunnelDnsRoute and TunnelDataRoute;
+it neither binds a probe socket nor edits routes. PublicIpv6Source limits the extra IPv6 read to a usable preferred
+public source on an up interface. Service TrafficRouteProbe owns six-snapshot/three-second launch settling and typed
+failure; TunnelHealth rechecks representative ordinary routes before retaining connection success. Owned Xray still
+creates/removes routes, and initial rollback/established protection rules remain authoritative. Optional TrafficRoutes
+is additive to IPC v2 and contains only bounded enums/numbers/time. DNS, proxy and traffic-route evidence are distinct.
+
+Desktop MainViewModel.Status owns one concurrent bounded status read, last accepted read time and pending-action
+diagnostics. Mutation generation plus observationRevision fence obsolete read success/failure without wall-clock
+ordering or unknown mutation replay. All accepted status paths share AcceptStatus, including update-install admission
+and retained live-routing failures.
+When a read/unknown marker advances revision during a mutation, command Success/Code remains distinct from its obsolete
+snapshot. Status owner fences old polls and performs one fresh bounded read linked to the operation deadline;
+failure stays unknown and a superseding off cancels reconciliation. The completed command clears its pending label
+before that read; periodic reads are gated until reconciliation ends. It never replays the mutation.
+Presentation UiSingleInstance owns a user/session-scoped Local mutex and one show-only AutoResetEvent; App acquires
+before model creation and releases on its dispatcher at Exit. Activation waits register after the window is ready,
+cancel on disposal, and never carry service commands or arbitrary payloads.
+
+Windows DisplayIconPath owns quoted-path/index parsing. ApplicationGroups.Refresh resolves only the existing known
+package family in the current user's context; Desktop refreshes recognized versioned/package rules before a new
+connection plan. Missing resolutions preserve exact intent for fail-closed validation. Discovery and icon lookup do
+not alter an active route set by themselves. Dependency, driver, server and database ownership is unchanged.
+Windows ExactExecutablePath owns the bounded local relative-handle walk with OBJ_DONT_REPARSE and no delete
+sharing; it reads attributes only and holds ancestors/file through native ID comparison. ExactApplicationPlan prepares
+enabled SelectedApplications paths only, permitting case/slash changes and requiring equal original/canonical WFP
+IDs. Unsupported aliases/reparses and identity mismatch fail closed. Service prepares one canonical list before
+start/update/restore/recovery policy or core replacement; current/pinned plans, Xray, WFP, revision and durable intent
+use that same list. Whole-PC and disabled rows do not perform native path resolution. No arbitrary name matching.
+
 Alpha.22: Core appends Checking to TunnelPhase while retaining all prior enum values. Service distinguishes the
 periodic confirmation stage from actual Reconnecting: unconfirmed health clears ProbePassed but retains the owned
 core/TUN, WFP policy and connection start; successful confirmation restores Connected without relaunch. Recovery

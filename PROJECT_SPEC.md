@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.22. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.23. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,55 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.23 — ordinary traffic routes, live observations and local application identity
+
+The friend's alpha.22 report captured 25 October 2026 at 13:55:36 UTC contains Disconnected, protection/probe false,
+Code:none and state publication at 13:55:15 UTC, with a successful owned DNS /32 observation from 13:54:36 UTC.
+It does not establish current ordinary application routes, a resolver failure, a Wi-Fi cause or manual Disconnect.
+Desktop previously suspended status reads during mutations while retaining the old snapshot's current flag; the
+report may describe that earlier snapshot. Do not claim this explains the friend's actual packet failure.
+
+Replace the owned Xray default entries with 0.0.0.0/1, 128.0.0.0/1, ::/1 and 8000::/1; retain the two existing DNS
+host routes. Xray owns their creation/removal. No foreign-route deletion, physical DNS/metric change or WFP weakening.
+Launch readiness reads ordinary Windows routes for representative destinations in both IPv4 halves, plus IPv6 only
+when an up interface has a preferred usable public IPv6 source. Allow at most six snapshots, 500 ms between failed
+samples, within a three-second budget. The snapshots send no packets and do not test every destination or application.
+Unconfirmed ordinary routes report VPN_TRAFFIC_ROUTE_FAILED and cannot publish Connected. Periodic health also
+requires ordinary-route ownership; route failure invalidates success before owned cleanup and protected recovery.
+Optional IPC v2 TrafficRoutes holds only bounded route enums, numeric errors/prefix/metric and UTC observation time.
+
+Keep one independent status request in flight during UI mutations, using the existing ten-second status timeout and
+four-slot service transport. Mutation generation plus local observation revision reject obsolete replies/errors;
+timestamps never order operations. Starting a mutation invalidates the previous snapshot until another accepted
+read. Help separates last accepted service-read time, pending UI action/start time and service state publication;
+DNS/health/route observations retain their own timestamps. An uncertain mutation is never automatically replayed.
+If a read or unknown marker advanced the local revision while awaiting a mutation reply, retain its command Success/Code
+separately and discard the reply's older status snapshot. Fence pending reads, invalidate freshness and perform one
+bounded fresh status read linked to the current operation deadline. Failed reconciliation stays unknown; superseding
+off changes generation/cancels it. Clear the pending-action label once its command result is known, even if the fresh
+read is still pending. Neither an old reply nor wall-clock comparison can restore a claimed success.
+
+One UI instance per Windows user/session owns a local mutex until App.Exit. Repeated manual launch sends only a
+show-window event; duplicate --tray stays quiet. Neither duplicate constructs a model or sends service commands.
+--render-check bypasses this guard. Registered waits and handles are disposed; no elevated activation channel exists.
+Installed-app discovery parses DisplayIcon's final unquoted numeric index without truncating commas inside paths.
+Known Codex/ChatGPT package paths refresh for the current user before connect/reconnect, retaining unresolved exact
+intent for validation. No generic executable-name matching, forced application termination or inventory upload.
+For enabled selected-app rules, resolve casing through a bounded local-drive, relative-handle walk without following
+reparse points. Hold ancestor/file handles against rename until original and canonical native WFP application IDs
+match. Permit only case/slash changes; reject short-name, reparse, device, remote or remapped aliases with
+TRAFFIC_APPLICATION_PATH_UNSUPPORTED, and mismatched native IDs with TRAFFIC_APPLICATION_IDENTITY_MISMATCH.
+Use the same canonical list for WFP, Xray, desired intent and revision at start, app update, restore and recovery.
+Whole-PC and disabled rules require no native application resolution. This separate selected-app defect does not
+establish the cause of the friend's whole-PC failure; native fixture results do not substitute for installed traffic.
+
+UI and service install together; dependency/driver, stored-plan, server and database contracts remain unchanged.
+The source/archive base is the exact published v0.1.0-alpha.22 tag at f694b51c8a815ce041fe67b26c8e21627aaa5cda.
+Current source preparation is not publication or installed acceptance. Deliver changed/full source archives and
+commands for the owner's commit
+and push to main; the existing Windows CI owns verification, installer build and prerelease publication. Record actual
+current results in VERIFICATION.md, separately from the owner's historical alpha.22 report of 538 checks plus WPF.
 
 ## Alpha.22 — distinguish health confirmation from tunnel recovery
 

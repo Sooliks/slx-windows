@@ -50,7 +50,7 @@ public sealed class CoreConfigTests
         Assert.Equal("SLX VPN", tun.GetProperty("name").GetString());
         Assert.Equal(["1.1.1.1", "2606:4700:4700::1111"],
             tun.GetProperty("dns").EnumerateArray().Select(item => item.GetString()!).ToArray());
-        Assert.Equal(["0.0.0.0/0", "::/0", "1.1.1.1/32", "2606:4700:4700::1111/128"],
+        Assert.Equal(["0.0.0.0/1", "128.0.0.0/1", "::/1", "8000::/1", "1.1.1.1/32", "2606:4700:4700::1111/128"],
             tun.GetProperty("autoSystemRoutingTable").EnumerateArray().Select(item => item.GetString()!).ToArray());
         Assert.Equal("auto", tun.GetProperty("autoOutboundsInterface").GetString());
         Assert.Equal("127.0.0.1", inbounds[1].GetProperty("listen").GetString());

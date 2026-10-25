@@ -30,7 +30,7 @@ public sealed partial class MainViewModel
             timeout.CancelAfter(TimeSpan.FromSeconds(3));
             var reply = await SendControlAsync(new(PipeContract.Version, "status", Guid.NewGuid()), timeout.Token);
             if (!reply.Success) { MarkStatusUnknown(reply.Code); throw new ClientFault("UPDATE_CONNECTION_ACTIVE"); }
-            status = reply.Status; statusFresh = true;
+            AcceptStatus(reply.Status);
             if (status.Phase != TunnelPhase.Disconnected || status.ProtectionActive) throw new ClientFault("UPDATE_CONNECTION_ACTIVE");
             return new InstallLease(() => { updateInstalling = false; mutationGate.Release(); NotifyState(); });
         }

@@ -1,4 +1,53 @@
-# Network model and limits — alpha.22
+# Network model and limits — alpha.23
+
+## Alpha.23 ordinary traffic readiness and evidence limits
+
+The friend's alpha.22 report was captured at 2026-10-25T13:55:36Z. It contains an off-state publication from
+13:55:15Z and successful startup DNS from 13:54:36Z. That DNS host-route success does not establish ordinary data
+routes or packet flow at capture time. Disconnected/Code:none does not identify who requested off or prove a manual
+Disconnect: the UI previously skipped polling during a pending mutation while labelling its old snapshot current.
+The report does not establish Wi-Fi, ISP/DNS filtering or a specific application's executable as the cause.
+
+Xray's owned autoSystemRoutingTable now uses 0.0.0.0/1 and 128.0.0.0/1, plus ::/1 and 8000::/1, instead of ordinary
+/0 defaults. The existing 1.1.1.1/32 and 2606:4700:4700::1111/128 DNS routes remain. A split default outranks a
+competing /0 by prefix; more-specific routes and equal-prefix competition still exist. The client does not delete
+foreign routes, change physical DNS/interface metrics, disable another VPN or weaken WFP. Xray owns lifecycle.
+
+After authenticated proxy, owned-adapter and protected DNS readiness, launch samples ordinary GetBestRoute2 routes
+to fixed representative destinations in both IPv4 halves. It also samples a representative IPv6 route only if an up
+interface has a preferred usable public IPv6 source. No usable source means IPv6 is explicitly not checked, not an
+assertion of IPv6 success. At most six snapshots and 500 ms between unsuccessful samples share a three-second
+budget; cancellation stops acceptance. These are read-only route snapshots, with no packets or DNS queries sent to
+those representative destinations. They are not an every-destination, every-app, MTU or real throughput test.
+
+Each required destination in a passing snapshot must select the recorded owned TUN. Failure reports
+VPN_TRAFFIC_ROUTE_FAILED independently
+from VPN_DNS_ROUTE_FAILED/VPN_DNS_FAILED. First-connect rollback and established-session protection retain their
+existing ownership rules. Periodic health requires another ordinary-route snapshot before retaining Connected; a
+route failure publishes Reconnecting/ProbePassed=false before awaiting owned cleanup, then uses protected recovery.
+The last TrafficRoutes observation survives rollback/off and resets at the next core launch. Help reports only UTC,
+fixed sample labels, route outcome and optional numeric native error/prefix/metric, without addresses/interface IDs.
+
+Desktop polls during mutations with one bounded request at a time. Service-read time is distinct from state
+ObservedAt and from historical DNS/health/traffic-route times. Generation/revision order replies; clock comparison
+cannot authorize a mutation or replay an unknown result. A duplicate UI launch only activates the existing window,
+preventing a second model's exit path from accidentally sending off to the shared tunnel.
+If a read/unknown marker advanced while a mutation reply was pending, its command outcome is kept separately from its old
+snapshot. One bounded fresh read reconciles state within the current operation deadline; failure remains unknown,
+and explicit off can supersede/cancel it. No connect/update is resent to obtain a newer observation.
+
+Selected-app identity is separate from ordinary-route readiness. Enabled exact executable paths are canonicalized
+for casing through bounded local handle traversal without following reparses; ancestor/file handles prevent rename
+until original and canonical native WFP IDs compare equal. Only case/slash differences are accepted. Short names,
+reparses, remote/device/remapped aliases fail with TRAFFIC_APPLICATION_PATH_UNSUPPORTED; differing IDs fail with
+TRAFFIC_APPLICATION_IDENTITY_MISMATCH. Start, app update, restore and recovery use the same prepared list for WFP,
+Xray, revision and desired intent. Whole-PC and disabled rules do not resolve native application identities. This
+addresses a separate selected-app mismatch risk, without explaining the friend's whole-PC case or proving real flow.
+
+Installed acceptance remains open: both modes on the friend's and owner's PCs, ordinary IPv4/IPv6 route ownership,
+real selected/unselected app traffic and shared DNS, existing-session behavior, route cleanup, foreign-route/DNS
+preservation, reboot/sleep/network changes, Windows 10, physical DPI, upgrade/rollback and CS2. Unit/native fixtures
+cannot establish all-PC/all-network reliability or successful friend acceptance. STATUS remains PARTIAL.
 
 ## Alpha.22 health-check state and evidence
 

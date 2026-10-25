@@ -60,9 +60,7 @@ public static class AppDiscovery
                     cancellationToken.ThrowIfCancellationRequested();
                     using var entry = entries.OpenSubKey(name);
                     if (entry?.GetValue("DisplayIcon") is not string icon) continue;
-                    var path = icon.Trim().Trim('"');
-                    var comma = path.LastIndexOf(','); if (comma > 0) path = path[..comma].Trim().Trim('"');
-                    path = Environment.ExpandEnvironmentVariables(path);
+                    var path = DisplayIconPath.Parse(icon);
                     if (!LibraryApplication.IsCandidate(path)) continue;
                     try { var app = FromExecutable(path); found.TryAdd(app.ExecutablePath, app); }
                     catch (Exception ex) when (ex is ClientFault or IOException or UnauthorizedAccessException or ArgumentException) { }

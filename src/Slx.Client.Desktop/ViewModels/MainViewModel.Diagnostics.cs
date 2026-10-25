@@ -22,11 +22,15 @@ public sealed partial class MainViewModel
             text.AppendLine("Windows: " + Environment.OSVersion.Version);
             text.AppendLine("Captured UTC: " + DateTimeOffset.UtcNow.ToString("O"));
             text.AppendLine("Service observation: " + (statusFresh ? "current" : "unknown/stale"));
+            text.AppendLine("Service read UTC: " + (serviceReadAt?.ToString("O") ?? "none"));
+            text.AppendLine("UI operation: " + (pendingControlAction is null ? "none" : pendingControlAction + ", pending"));
+            if (controlOperationStartedAt is {} started) text.AppendLine($"UI operation started UTC: {started:O}");
             text.AppendLine("Phase: " + (status?.Phase.ToString() ?? "unknown"));
             text.AppendLine("Protection: " + (status?.ProtectionActive.ToString() ?? "unknown"));
             text.AppendLine("Probe passed: " + (status?.ProbePassed.ToString() ?? "unknown"));
             text.AppendLine("Code: " + (LastServiceCode ?? "none"));
             text.AppendLine("Observed UTC: " + (status?.ObservedAt.ToString("O") ?? "unknown"));
+            text.AppendLine("Observed meaning: service state publication; DNS and health observations have separate timestamps");
             if (status?.ConnectedAt is {} connected) text.AppendLine($"Connected UTC: {connected:O}");
             if (status?.Recovery is {} recovery)
                 text.AppendLine($"Recovery: {recovery.Count}, {recovery.Cause}, {recovery.At:O}");
@@ -44,6 +48,7 @@ public sealed partial class MainViewModel
                 if (dns.Second is {} second) AppendDnsAttempt(text, 2, second);
                 if (dns.Third is {} third) AppendDnsAttempt(text, 3, third);
             }
+            TrafficRouteDiagnostics.Append(text, status?.TrafficRoutes);
             return text.ToString();
         }
     }

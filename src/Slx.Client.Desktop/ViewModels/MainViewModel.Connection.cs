@@ -27,31 +27,6 @@ public sealed partial class MainViewModel
         _ = WarmDiscoveryCacheAsync();
         Updates.Start();
     }
-    private async void PollTick(object? sender, EventArgs e) => await PollAsync();
-    internal async Task PollAsync()
-    {
-        if (polling || IsBusy || disposed) return;
-        polling = true;
-        var owner = generation;
-        try
-        {
-            using var timeout = new CancellationTokenSource(PipeContract.ClientStatusTimeout);
-            var reply = await SendControlAsync(new(PipeContract.Version, "status", Guid.NewGuid()), timeout.Token);
-            if (owner != generation || disposed) return;
-            if (!reply.Success) { MarkStatusUnknown(reply.Code); ShowFault(reply.Code); return; }
-            status = reply.Status;
-            statusFresh = true;
-            ReconcileApplicationRevision();
-            if (status.Phase == TunnelPhase.Connected && status.ProbePassed) connectionFailureCode = null;
-            if (!ServiceStateCopy.IsTrafficFault(lastServiceCode) || status.Phase == TunnelPhase.Connected && status.ProbePassed) lastServiceCode = null;
-            if (status.Phase == TunnelPhase.Faulted && status.Code != null) ShowFault(status.Code);
-        }
-        catch (Exception error) when (error is ClientFault or OperationCanceledException or IOException)
-        { if (owner == generation) MarkStatusUnknown(error is ClientFault fault ? fault.Code : "SERVICE_TIMEOUT"); }
-        finally { polling = false; NotifyState(); }
-        ResumeDeferredRouting();
-        await TryStartupConnectionAsync();
-    }
     private Task ToggleAsync() => ShouldRequestDisconnect ? ChangeTunnelAsync("disconnect") : ChangeTunnelAsync("connect");
     private async Task ChangeTunnelAsync(string action)
     {
@@ -67,6 +42,7 @@ public sealed partial class MainViewModel
         operation = current;
         if (action == "connect-if-idle") startupConnectionOperation = current;
         connectionFailureCode = null; lastServiceCode = null;
+        BeginControlObservation(action);
         IsBusy = true;
         ClearMessage();
         var entered = false;
@@ -77,18 +53,27 @@ public sealed partial class MainViewModel
             await mutationGate.WaitAsync(current.Token);
             entered = true;
             if (action == "update-applications" && plan != null) RememberApplicationRevision(plan, routingOwner);
+            var requestObservationRevision = observationRevision;
             var reply = await SendControlAsync(new(PipeContract.Version, action, Guid.NewGuid(), plan), current.Token);
             if (owner != generation || disposed) return;
+            bool reconcile = requestObservationRevision != observationRevision;
             if (!reply.Success)
             {
-                if (action == "update-applications" && RetainLiveRoutingFailure(reply)) return;
-                RememberConnectionFailure(action, reply.Code);
-                MarkStatusUnknown(reply.Code); ShowFault(reply.Code); return;
+                if (!(action == "update-applications" && RetainLiveRoutingFailure(reply, !reconcile)))
+                {
+                    RememberConnectionFailure(action, reply.Code);
+                    if (!reconcile) MarkStatusUnknown(reply.Code);
+                    ShowFault(reply.Code);
+                }
             }
-            status = reply.Status;
-            statusFresh = true; lastServiceCode = null;
-            if (status.Phase == TunnelPhase.Faulted && status.Code != null) ShowFault(status.Code);
-            if (action != "disconnect" || status.Phase == TunnelPhase.Disconnected) ConfirmRoutingMutation(routingOwner);
+            else
+            {
+                if (!reconcile) AcceptStatus(reply.Status);
+                lastServiceCode = null;
+                if (!reconcile && status!.Phase == TunnelPhase.Faulted && status.Code != null) ShowFault(status.Code);
+                if (action != "disconnect" || reply.Status.Phase == TunnelPhase.Disconnected) ConfirmRoutingMutation(routingOwner);
+            }
+            if (reconcile) await ReconcileControlObservationAsync(owner, current.Token);
         }
         catch (Exception error) when (error is ClientFault or OperationCanceledException or IOException)
         {
@@ -102,7 +87,7 @@ public sealed partial class MainViewModel
         {
             if (entered) mutationGate.Release();
             if (ReferenceEquals(startupConnectionOperation, current)) startupConnectionOperation = null;
-            if (owner == generation) { operation = null; IsBusy = false; }
+            if (owner == generation) { operation = null; EndControlObservation(); IsBusy = false; }
         }
     }
     public async Task<bool> ExitAsync()
@@ -121,6 +106,7 @@ public sealed partial class MainViewModel
     }
     private void MarkStatusUnknown(string code)
     {
+        observationRevision++;
         routingUnconfirmed |= RulesPending;
         statusFresh = false; lastServiceCode = ServiceStateCopy.SafeCode(code);
     }
@@ -142,6 +128,7 @@ public sealed partial class MainViewModel
         "OWNER_MISMATCH" or "OTHER_USER" or "CONTROLLER_OWNED" => "FaultOwner",
         "MULTI_SESSION_UNSUPPORTED" => "FaultSessions", "TUN_ADAPTER_CONFLICT" => "FaultOtherVpn", "TUN_CLEANUP_PENDING" => "FaultCleanup", "CORE_STOP_FAILED" => "FaultCore",
         "OUTBOUND_INTERFACE_UNAVAILABLE" => "FaultOutboundInterface", "VPN_PROBE_FAILED" => "FaultVpnProbe",
+        "VPN_TRAFFIC_ROUTE_FAILED" => "FaultVpnTrafficRoute",
         "SERVICE_IDENTITY_FAILED" or "SERVICE_ACCESS_DENIED" => "FaultServiceSecurity", "CANCELLED" => "FaultCancelled",
         "TUN_ADDRESS_FAILED" or "ADAPTER_QUERY_FAILED" or "CORE_MISSING" or "CORE_FAILED" or "CORE_UNAVAILABLE" or "TUNNEL_NOT_READY" or "CORE_EXITED" or "CORE_START_FAILED" or "TUN_NOT_READY" => "FaultCore", _ => "FaultUnknown"
         });

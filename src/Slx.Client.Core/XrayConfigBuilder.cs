@@ -41,10 +41,9 @@ public static class XrayConfigBuilder
                         name = "SLX VPN", desc = "SLX VPN", mtu = 1500,
                         gateway = new[] { "172.30.255.1/30", "fd73:6c78::1/126" },
                         dns = new[] { "1.1.1.1", "2606:4700:4700::1111" },
-                        // Protect the configured shared DNS from a more-specific route on another interface.
-                        // Xray owns these routes and removes them with the TUN; physical routes stay untouched.
-                        autoSystemRoutingTable = new[]
-                        { "0.0.0.0/0", "::/0", "1.1.1.1/32", "2606:4700:4700::1111/128" },
+                        // The core owns these split defaults and DNS hosts. Equal/more-specific foreign
+                        // routes can still win; service readiness observes ordinary data routes separately.
+                        autoSystemRoutingTable = XraySystemRoutes.Build(),
                         autoOutboundsInterface = outboundInterface
                     }
                 },

@@ -44,7 +44,10 @@ public sealed class PopulatedUiTests
             UpdateReuseChecks.Run();
             LayoutStabilityChecks.Run(window);
             ConnectionRecoveryChecks.Run();
+            StatusObservationChecks.Run();
+            SingleInstanceChecks.Run();
             DnsDiagnosticsChecks.Run(window);
+            TrafficRouteDiagnosticsChecks.Run(window);
             CheckingConnectionChecks.Run(window);
             HealthDiagnosticsChecks.Run();
         }

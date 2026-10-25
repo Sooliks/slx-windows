@@ -28,7 +28,7 @@ internal sealed partial class TunnelEngine
                     healthAt=Stopwatch.GetTimestamp()+15*Stopwatch.Frequency;
                     var result = await ConnectionHealthCheck.CheckAsync(state,
                         (target, token) => LocalProbe.ObserveAsync(probe.Port, probe.User, probe.Password, target, token),
-                        () => child is not null && !child.HasExited && LocalProbe.TunnelReady(),
+                        () => HealthResourcesReady(cancellationToken),
                         observed => state = observed, cancellationToken);
                     RecordHealthIncident(result.Confirmation, result.Retained);
                     if(result.Retained)return;
@@ -36,6 +36,7 @@ internal sealed partial class TunnelEngine
                 if(wasConnected)
                     RecordRecovery(child is null||child.HasExited?RecoveryCause.CoreExited
                         :LocalProbe.TunnelReady()?RecoveryCause.ProbeFailed:RecoveryCause.AdapterUnavailable);
+                PrepareExactApplicationPaths(cancellationToken);
                 state=state with{Phase=TunnelPhase.Reconnecting,ObservedAt=DateTimeOffset.UtcNow,ProbePassed=false,ProtectionActive=protectionActive};
                 await StopChildAsync();
                 ArmProtection(currentPlan);
@@ -53,5 +54,34 @@ internal sealed partial class TunnelEngine
             }
         }
         finally{lifecycle.Release();}
+    }
+
+    private bool HealthResourcesReady(CancellationToken cancellationToken)
+    {
+        if(child is null || child.HasExited || !LocalProbe.TunnelReady() || ownedAdapterId is null)return false;
+        using var budget = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        budget.CancelAfter(TimeSpan.FromSeconds(3));
+        try
+        {
+            var observed = TrafficRouteProbe.Observe(ownedAdapterId, budget.Token);
+            cancellationToken.ThrowIfCancellationRequested();
+            RecordTrafficRoutes(observed);
+            TrafficRouteProbe.RequireReady(observed);
+            return true;
+        }
+        catch(OperationCanceledException) when(!cancellationToken.IsCancellationRequested)
+        { throw TrafficRouteFailure(cancellationToken); }
+        catch(ClientFault fault) when(fault.Code == TrafficRouteProbe.FailureCode)
+        { throw TrafficRouteFailure(cancellationToken); }
+    }
+
+    private ClientFault TrafficRouteFailure(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        // Invalidate the success observation before awaiting owned process/adapter cleanup.
+        RecordRecovery(RecoveryCause.ProbeFailed);
+        state=state with{Phase=TunnelPhase.Reconnecting,ObservedAt=DateTimeOffset.UtcNow,
+            ProbePassed=false,Code=TrafficRouteProbe.FailureCode,ProtectionActive=protectionActive};
+        return new(TrafficRouteProbe.FailureCode);
     }
 }

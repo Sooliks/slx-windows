@@ -81,10 +81,11 @@ public sealed partial class MainViewModel
         ConfirmRoutingMutation(pendingAppVersion);
         if (messageKey is "RulesApplyFailed" or "RulesApplyUnconfirmed" or "RulesConnectionChanged") ClearMessage();
     }
-    private bool RetainLiveRoutingFailure(PipeReply reply)
+    private bool RetainLiveRoutingFailure(PipeReply reply, bool applyStatus = true)
     {
         if (reply.Status is not { Phase: TunnelPhase.Connected, ProbePassed: true, ProtectionActive: true }) return false;
-        status = reply.Status; statusFresh = true; lastServiceCode = ServiceStateCopy.SafeCode(reply.Code);
+        if (applyStatus) AcceptStatus(reply.Status);
+        lastServiceCode = ServiceStateCopy.SafeCode(reply.Code);
         RulesPending = true; routingUnconfirmed = true;
         Notice(reply.Code switch
         {

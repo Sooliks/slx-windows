@@ -5,7 +5,7 @@ using Windows.Win32;
 using Windows.Win32.Foundation;
 namespace Slx.Client.Windows;
 /// <summary>Known OpenAI desktop family, resolved for the current user. Exact paths, never generic node/shell rules.</summary>
-public static class ApplicationGroups
+public static partial class ApplicationGroups
 {
     private const string Family="OpenAI.Codex_2p2nqsd0c76g0";
     private static string Bin=>Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"OpenAI","Codex","bin");
@@ -44,7 +44,8 @@ public static class ApplicationGroups
         path.StartsWith(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),"WindowsApps","OpenAI.Codex_"),StringComparison.OrdinalIgnoreCase)
         &&Path.GetFileName(path).Equals("ChatGPT.exe",StringComparison.OrdinalIgnoreCase)
         ||path.StartsWith(Bin+Path.DirectorySeparatorChar,StringComparison.OrdinalIgnoreCase)
-        &&Path.GetFileName(path) is "codex.exe" or "codex-code-mode-host.exe";
+        &&(Path.GetFileName(path).Equals("codex.exe",StringComparison.OrdinalIgnoreCase)
+            ||Path.GetFileName(path).Equals("codex-code-mode-host.exe",StringComparison.OrdinalIgnoreCase));
     private static IEnumerable<string> Helpers()
     {
         if(!Directory.Exists(Bin))return [];
