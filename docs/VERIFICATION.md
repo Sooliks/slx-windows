@@ -4,6 +4,27 @@ STATUS: PARTIAL for installed acceptance. Release base is the exact published al
 `85b514ffc317c92c14e34153bfbdc611cdebfe34`; the working branch also contains its later documentation-only evidence commit.
 Codex is authorized to commit/push and publish through the existing Windows CI. Local results below precede publication.
 
+## Published alpha.24 evidence
+
+- Source commit `4df36d2517b5077b121158689d553775d0470065` was committed/pushed to main. The exact previous release
+  base checker returned `v0.1.0-alpha.23`. [Windows CI 40209908805](https://github.com/Sooliks/slx-windows/actions/runs/40209908805)
+  completed successfully, including all guards, installer build, clean-source packaging and immutable publication.
+- CI logs confirm **664 main tests passed**, 0 failed/skipped, 9 seconds; **1 composite WPF passed**, 0 failed/skipped,
+  38 seconds; build **0 warnings/errors**, source-size and 18 runtime-input checks passed.
+- [Alpha.24](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.24) published at `2026-10-25T16:07:28Z`,
+  draft=false, prerelease=true in the existing public update channel. All six assets exist. Downloaded files are in
+  ignored `artifacts/published/0.1.0-alpha.24/`; SHA-256 matches the published list, and the list matches its GitHub digest.
+- Installer: **82,742,318 bytes**, SHA-256 `256aead241242280e7c544df13c705bb68b355fb35520c034f775c347c412b61`.
+  Provenance identifies the exact source/base commits, sourceClean=true and publicationAllowed=true.
+- Full source ZIP **433 files** and changed ZIP **59 files** match release Git blobs, accounting for reviewed
+  PowerShell CRLF export. No tracked files were deleted. Published assets were not replaced after the release.
+- Public website GET initially returned cached alpha.23 and later **302 to the alpha.24 installer**. No website
+  edit/deployment, cache purge or account mutation was performed. This documentation follow-up records results;
+  published source archives and installer remain outputs of the original release source commit.
+- Remaining sanity checks: `git diff --check` exit0; RU/EN unique equal keys main208/library10/routing4/updates16;
+  four guide PowerShell blocks parse; release notes equal their versioned copy; the four lock changes are exactly
+  eight internal .23→.24 project ranges, with every other dependency entry/hash unchanged.
+
 ## Current alpha.24 local execution
 
 - `pwsh -NoProfile -File scripts/verify.ps1`: **exit 0**, completed `2026-10-25T15:55:35Z`. Locked restore succeeded.
