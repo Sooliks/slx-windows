@@ -1,4 +1,38 @@
-# Verification — 0.1.0-alpha.24 (2026-10-25)
+# Verification — 0.1.0-alpha.25 (2026-10-25)
+
+## Alpha.25 current execution
+
+STATUS: PARTIAL for installed acceptance. Source base: exact published alpha.24 at
+4df36d2517b5077b121158689d553775d0470065, plus its documentation follow-up a1b1035.
+`dotnet restore Slx.Windows.slnx --force-evaluate` exit0 synchronized internal project version lock entries, the new
+updater and WPF-pruned transitive ProtectedData entries; the direct Windows package/external versions remain pinned. First `scripts/verify.ps1` compiled with zero
+warnings/errors and passed composite WPF1/1. Main tests passed689/697; eight prior exact status assertions failed
+solely because authorized replies now include ServiceVersion. Their correction retains all old status fields and
+asserts the actual service assembly version. Log: artifacts/handoff/verify-alpha25-first.txt, completed19:23:57 UTC.
+Final full `scripts/verify.ps1` exit0: **715 main tests +1 composite WPF**, zero failed/skipped, build zero warnings/errors,
+source-size checks passed. Log artifacts/handoff/verify-alpha25-final.txt, completed19:50:37 UTC. It includes real WPF
+captures for the integrated active confirmation and updater waiting/permission/install/failure/restart RU/EN at530/440,
+125% content scale and simulated High Contrast palette. Root inspected current RU530 installing, RU440 failure and
+RU940 confirmation frames. These fixtures never construct an installer/service session. Native physical DPI/OS HC
+acceptance remains open. A later beta/rc file-version case is covered by the final CI run.
+
+`scripts/build.ps1 -Candidate` exit0 compiled all three self-contained bundles and Inno, including native environment
+sanitization and fixed claim preflight. Completed19:39:59 UTC, artifacts/handoff/build-alpha25-candidate.txt. This
+intermediate candidate is not final publication evidence; final clean source is rebuilt in CI. Its helper manifest has
+401 files/146973259 bytes within bounds. Official Xray/Wintun verification passed; runtime-input checks18/18 and release
+policy tests24/24 passed. Git diff --check passed. Unique RU/EN keys match:208 main,10 library,4 routing,42 updates.
+
+A temporary ignored .NET10 console invoked the actual compiled IntegratedUpdateBoot.ReadAsync method: exit0,
+LOCAL_CIM_BOOT_OBSERVATION=VALID_UTC (artifacts/handoff/cim-probe.txt). This verifies local bounded read/parse only,
+not an actual reboot or3010 installation. WMI LastBootUpTime behavior under system-clock correction remains unverified.
+Publication/CI evidence follows only after completion.
+
+No local installation or live service/network/settings mutation was used for verification. Actual installed upgrade,
+UAC with standard-user alternate administrator, reboot/power interruption, recovery from mixed binaries, DPI/high
+contrast and clean Windows10/11 remain open. The first bootstrap from alpha.24 still uses its existing installer;
+the new integrated flow is exercised by installed alpha.25 for a subsequent release.
+
+## Historical alpha.24 evidence
 
 STATUS: PARTIAL for installed acceptance. Release base is the exact published alpha.23 source commit
 `85b514ffc317c92c14e34153bfbdc611cdebfe34`; the working branch also contains its later documentation-only evidence commit.

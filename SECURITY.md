@@ -18,5 +18,12 @@ command. It does not kill processes, delete adapters, reset the firewall, change
 
 Imports use this installation's own ID; existing Happ bindings require official website transfer. No device-slot or server authorization bypass.
 Runtime and Wintun provenance remain pinned; vendor signatures are not changed. Unsigned SLX installer/application are intentional. Updates require Windows elevation; no silent arbitrary downloader exists.
+Alpha.25 stages an unprivileged updater and elevates only the verified native installer. Fixed typed maintenance
+GUIDs, protected durable service state and the installed admin-only claim command exclude tunnel start during file
+replacement. Neither IPC nor result receipts accept executable paths or commands. The same-repository HTTPS hash
+is integrity evidence, not independent signing. See docs/UPDATES.md for cancellation, expiry, partial-install and
+one-time resume boundaries; clean-machine/UAC/power-loss acceptance remains open.
+Native Inno clears the pinned runtime's startup-hook, alternate runtime/root/GC/JIT and profiler environment before
+managed preflight/service actions, and restricts PowerShell module/PATH resolution to Windows system directories.
 Uninstall stops the service, clears its encrypted intent and removes only its WFP filters. If removal fails, report the failure and repair using the installer; never silently remove foreign firewall rules.
 Windows 10, clean-machine, sleep/network, full IPv6/HTTP3 and multi-user acceptance remain open. A successful build alone is not system/security acceptance.

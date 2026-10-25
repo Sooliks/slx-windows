@@ -6,7 +6,7 @@ using Slx.Client.Core;
 namespace Slx.Client.Windows;
 public sealed record ProtectedTunnelIntent(string OwnerSid,ConnectPlan Plan,string? EndpointHost=null);
 /// <summary>Service-only resume state; machine DPAPI plus SYSTEM/Administrators-only directory and inherited file ACL.</summary>
-public sealed class TunnelIntentStore
+public sealed partial class TunnelIntentStore
 {
     private readonly string root=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),"SLX.NetworkService");
     private static readonly byte[] Entropy=SHA256.HashData("SLX.NetworkService.Intent.v1"u8);

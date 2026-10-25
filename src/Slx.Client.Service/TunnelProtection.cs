@@ -11,14 +11,17 @@ internal sealed partial class TunnelEngine
     private volatile bool confirmedUnprotected;
     private long retryAt,healthAt;
     public string? OwnerSid=>ownerSid;
-    public bool IsConfirmedOff=>confirmedUnprotected&&state.Phase==TunnelPhase.Disconnected&&!protectionActive&&ownerSid is null;
-    public async Task RestoreAsync(CancellationToken cancellationToken)
+    public bool IsConfirmedOff=>confirmedUnprotected&&state.Phase==TunnelPhase.Disconnected&&!protectionActive&&ownerSid is null
+        &&!desiredConnected&&!offCleanup.Pending&&!startupOffCleanup.Pending&&child is null&&ownedAdapterId is null&&currentPlan is null;
+    public async Task RestoreAsync(CancellationToken cancellationToken, bool suppressResume = false)
     {
         await lifecycle.WaitAsync(cancellationToken);
         try
         {
             var saved=intents.Load();
             if(saved==null){startupOffCleanup.Begin();TryStartupOffCleanup();return;}
+            if(suppressResume)
+            {state=new(TunnelPhase.Faulted,DateTimeOffset.UtcNow,Code:"UPDATE_MAINTENANCE_UNCONFIRMED");return;}
             startupOffCleanup.Cancel();
             pinnedPlan=saved.Plan;currentPlan=saved.EndpointHost is null?saved.Plan:saved.Plan with{Profile=saved.Plan.Profile with{Host=saved.EndpointHost}};ownerSid=saved.OwnerSid;desiredConnected=true;
             var restored=ExactApplicationPlan.Prepare(RestoredTunnelPlan.Refresh(saved,cancellationToken),cancellationToken);

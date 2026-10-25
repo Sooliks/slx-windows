@@ -16,4 +16,30 @@
 <data name="UpdateHideDownloadHint" xml:space="preserve"><value>Скрыть на 24 часа. Скачивание продолжится; прогресс доступен в настройках.</value></data>
 <data name="UpdateCheckTimeout" xml:space="preserve"><value>Проверка обновлений заняла слишком много времени. Повторите попытку.</value></data>
 <data name="UpdateCheckInvalid" xml:space="preserve"><value>Данные обновления не прошли проверку. Повторите попытку позже.</value></data>
+<data name="UpdateActionUpdate" xml:space="preserve"><value>Обновить SLX</value></data>
+<data name="UpdateBackgroundDownloading" xml:space="preserve"><value>Загружаем обновление в фоне. Настройки и подключение не меняются.</value></data>
+<data name="UpdateReadyActive" xml:space="preserve"><value>Обновление готово. VPN продолжает работать. Можно обновить сейчас или после отключения.</value></data>
+<data name="UpdateActiveWarning" xml:space="preserve"><value>Для обновления ненадолго отключим VPN. После перезапуска SLX попробует подключиться снова. Текущие соединения приложений могут прерваться.</value></data>
+<data name="UpdateConfirmActive" xml:space="preserve"><value>Отключить и обновить</value></data>
+<data name="UpdateCancelActive" xml:space="preserve"><value>Продолжить работу</value></data>
+<data name="UpdateIntegratedHint" xml:space="preserve"><value>SLX установит обновление и перезапустится. Настройки сохранятся. Windows может запросить разрешение.</value></data>
+<data name="UpdatePhasePreparing" xml:space="preserve"><value>Подготавливаем обновление…</value></data>
+<data name="UpdatePhaseAuthorizing" xml:space="preserve"><value>Подтвердите обновление в окне Windows…</value></data>
+<data name="UpdatePhaseInstalling" xml:space="preserve"><value>Устанавливаем обновление…</value></data>
+<data name="UpdatePhaseVerifying" xml:space="preserve"><value>Проверяем установленную версию…</value></data>
+<data name="UpdatePhaseRestarting" xml:space="preserve"><value>Перезапускаем SLX…</value></data>
+<data name="UpdateIntegratedFailed" xml:space="preserve"><value>Не удалось завершить обновление. Можно повторить попытку. Состояние VPN показано на странице подключения.</value></data>
+<data name="UpdateRebootRequired" xml:space="preserve"><value>Для завершения обновления нужен перезапуск Windows. Перезагрузите компьютер, когда будет удобно.</value></data>
+<data name="UpdateCountdown" xml:space="preserve"><value>Перезапустим SLX для обновления через {0} с. Нажмите «Позже», чтобы продолжить работу.</value></data>
+<data name="UpdateInstallAutomatically" xml:space="preserve"><value>Устанавливать обновления, когда VPN выключен</value></data>
+<data name="UpdateInstallAutomaticallyHint" xml:space="preserve"><value>Перед установкой покажем уведомление на 15 секунд. Активный VPN автоматически не отключается. Windows может запросить разрешение.</value></data>
+<data name="UpdateIntegratedPrivacy" xml:space="preserve"><value>Проверка при запуске и раз в 6 часов; новые версии загружаются в фоне. Только публичные релизы SLX, без передачи подписки и списка программ.</value></data>
+<data name="UpdateNoInstallProgress" xml:space="preserve"><value>Обновление SLX</value></data>
+<data name="UpdateMaintenanceWait" xml:space="preserve"><value>SLX завершает обновление. Подключение станет доступно после завершения.</value></data>
+<data name="UpdateMaintenanceUnconfirmed" xml:space="preserve"><value>Не удалось подтвердить завершение обновления службы. Перезапустите SLX или восстановите установку.</value></data>
+<data name="UpdateCompleted" xml:space="preserve"><value>SLX обновлён. Настройки сохранены.</value></data>
+<data name="UpdateCancelled" xml:space="preserve"><value>Обновление отменено. Его можно установить позже.</value></data>
+<data name="UpdateResultUnconfirmed" xml:space="preserve"><value>Не удалось подтвердить завершение обновления. Проверьте состояние службы или повторите установку.</value></data>
+<data name="UpdateVersionMismatch" xml:space="preserve"><value>Версии приложения и службы различаются. Завершите или восстановите обновление SLX перед подключением.</value></data>
+<data name="UpdateChecksAndDownloads" xml:space="preserve"><value>Автоматически проверять и загружать обновления</value></data>
 </root>

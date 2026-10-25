@@ -11,16 +11,17 @@ internal sealed partial class ControlDispatcher
         public int Users { get; set; }
     }
 
-    private (PipeReply? Reply, IDisposable? Admission) AdmitMutation(string sid, PipeRequest request)
+    private (PipeReply? Reply, IDisposable? Admission) AdmitMutation(string sid, PipeRequest request, bool administrator)
     {
         string fingerprint = Fingerprint(sid, request);
         lock (observation)
         {
             RefreshOwner();
-            if (owner is not null && owner != sid) return (Rejected("CONTROLLER_OWNED"), null);
+            if (owner is not null && owner != sid || !CanReadMaintenance(sid)
+                && !(request.Action == "claim-update" && administrator)) return (Rejected("CONTROLLER_OWNED"), null);
             PruneReceipts();
             if (receipts.TryGetValue(request.RequestId, out var prior))
-                return (prior.Fingerprint == fingerprint ? prior.Reply with { Status = engine.Status }
+                return (prior.Fingerprint == fingerprint ? prior.Reply with { Status = ObservedStatus }
                     : Rejected("IPC_REPLAY_MISMATCH"), null);
             // Reserve identity before waiting for the mutation gate or performing validation.
             // A changed disconnect with this ID must not cancel an admitted connect while no

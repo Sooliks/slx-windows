@@ -1,5 +1,14 @@
 # Boundaries
 
+Alpha.25: IntegratedUpdateClient verifies and stages a separately published unprivileged WPF Updater using the
+protected installed manifest. GUID/PID/start-time ready plus committed handoff precede original UI shutdown. Typed
+DPAPI job/result state never supplies executable commands. Fixed native Inno arguments perform silent/no-reboot
+installation with an open verified package/MOTW handle through UAC and exit. Service-owned prepare/claim/release
+maintenance atomically excludes tunnel start across replacement; installed admin-only --claim-update CLI runs before
+Stop. Claimed expiry stays blocked; corrupt storage leaves status/off available and rejects starts. Fresh same-version
+service/off evidence, matching native versions and release precede success. Consume results before one same-plan
+connect-if-idle resume. Separate auto-install opt-in/countdown cannot disconnect active VPN. See UPDATES.md.
+
 Alpha.24: Windows LibraryApplicationOrder owns presentation priority: browsers, Telegram, Discord, games/launchers,
 then other applications. Exact executable metadata, bounded known catalogue categories and known game directories
 classify cards only; they never create a routing match. Discovered/cached local cards precede catalogue recommendations.
@@ -169,7 +178,12 @@ Alpha.11: Windows `TrafficApplicationIds` resolves the complete native identity 
 
 `VersionedApplicationPaths` owns bounded local sibling lookup for recognized Discord/Roblox executable layouts. Desktop applies refreshed exact-path rules before building the next connect/reconnect plan. Existing paths remain selected; unresolved paths remain subject to service rejection. There is no executable-name wildcard or service-side arbitrary path remapping. The dispatcher preserves receipt fingerprint checks, keeps explicit idempotent off available when the bounded receipt cache is full, and releases its owner only after confirmed successful unprotected stop. The engine clears its owner after that completed stop; uncertain outcomes retain ownership. IPC remains v2 and UI/service are upgraded together.
 
-Core owns SemVer comparison, same-repository release/asset policy and checksum parsing. Windows `ReleaseUpdateClient` owns bounded public HTTPS fetches, restricted asset redirects, streamed download, SHA-256 verification and explicit installer launch. Desktop owns startup/six-hour checking, saved reminder/automatic-check preferences and the offer/download/install states. A shared UI mutation lease checks the service for Disconnected and protection inactive before installer handoff and prevents connection changes during verification/launch. The installer is reverified while held open, Internet-zone metadata is retained, and UAC remains an explicit user step. Trust is in HTTPS and the authorized public GitHub repository; a checksum from that repository is integrity evidence, not a publisher signature. The application/installer remain intentionally unsigned; no elevated update daemon or updater IPC command is added. See UPDATES.md.
+Core owns SemVer comparison, same-repository release/asset policy and checksum parsing. Windows ReleaseUpdateClient
+owns bounded HTTPS, redirects, streamed downloads and verified reuse; IntegratedUpdateClient/Session own alpha.25
+handoff and installation observation. Desktop owns consent, reminders, optional checking and separate off-only automatic
+installation. Service maintenance is fixed typed GUID state, not arbitrary updater execution. UAC elevates only native
+Inno. HTTPS and the authorized GitHub repository remain the trust source, without independent publisher signing.
+The app/installer remain intentionally unsigned. See UPDATES.md.
 
 Desktop graphics use native WPF geometry with theme tokens. The route scene restates saved mode/app count only,
 with a bounded 650 ms redraw after a choice changes and no settled rendering timer, animated connection claim or

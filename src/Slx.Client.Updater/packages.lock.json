@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0-windows7.0": {
+      "slx.client.core": {
+        "type": "Project"
+      },
+      "slx.client.windows": {
+        "type": "Project",
+        "dependencies": {
+          "Slx.Client.Core": "[0.1.0-alpha.25, )"
+        }
+      }
+    },
+    "net10.0-windows7.0/win-x64": {}
+  }
+}

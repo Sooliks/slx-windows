@@ -15,6 +15,9 @@ public sealed record TunnelStatus(TunnelPhase Phase, DateTimeOffset ObservedAt,
     string? ProfileName = null, string? Code = null, DateTimeOffset? ConnectedAt = null,
     RoutingMode? Mode = null, bool ProbePassed = false, bool ProtectionActive = false, RecoveryObservation? Recovery = null,
     HealthCheckObservation? HealthCheck = null, string? ApplicationRevision = null, DnsCheckObservation? DnsCheck = null,
-    TrafficRouteCheckObservation? TrafficRoutes = null);
-public sealed record PipeRequest(int Version, string Action, Guid RequestId, ConnectPlan? Plan = null);
+    TrafficRouteCheckObservation? TrafficRoutes = null, string? ServiceVersion = null,
+    UpdateMaintenanceObservation? UpdateMaintenance = null);
+public sealed record UpdateMaintenanceObservation(Guid SessionId, DateTimeOffset ExpiresAt, bool Claimed);
+public sealed record PipeRequest(int Version, string Action, Guid RequestId, ConnectPlan? Plan = null,
+    Guid? UpdateSessionId = null);
 public sealed record PipeReply(bool Success, string Code, TunnelStatus Status);

@@ -14,14 +14,20 @@
     </StackPanel>
    </Grid>
    <TextBlock x:Name="UpdateBannerStatus" Text="{Binding BannerDescription}" Style="{StaticResource MutedText}" FontSize="13" Margin="0,12,0,0" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+   <TextBlock Text="{Binding CheckWarning}" Style="{StaticResource MutedText}" FontSize="13" Margin="0,6,0,0" TextWrapping="Wrap" Visibility="{Binding HasCheckWarning, Converter={StaticResource VisibleWhen}}"/>
    <Grid Margin="0,9,0,0" Visibility="{Binding IsDownloading, Converter={StaticResource VisibleWhen}}"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
     <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay}" Height="5" VerticalAlignment="Center" Foreground="{DynamicResource Accent}" Background="{DynamicResource SurfaceInset}" BorderThickness="0" AutomationProperties.Name="{l:Tr UpdateDownloading}"/>
     <TextBlock Grid.Column="1" Text="{Binding ProgressText}" Foreground="{DynamicResource Text}" FontFamily="{DynamicResource FontUi}" FontSize="13" Margin="14,0,0,0"/>
    </Grid>
+   <ProgressBar IsIndeterminate="True" Height="5" Margin="0,12,0,0" Foreground="{DynamicResource Accent}" Background="{DynamicResource SurfaceInset}" BorderThickness="0" Visibility="{Binding IsApplying, Converter={StaticResource VisibleWhen}}" AutomationProperties.Name="{l:Tr UpdateNoInstallProgress}"/>
    <TextBlock Text="{Binding InstallHint}" Style="{StaticResource MutedText}" FontSize="13" Margin="0,4,0,0" TextWrapping="Wrap" Visibility="{Binding ShowInstallHint, Converter={StaticResource VisibleWhen}}"/>
-   <WrapPanel Margin="0,14,0,0" KeyboardNavigation.TabNavigation="Continue">
+   <WrapPanel Margin="0,14,0,0" KeyboardNavigation.TabNavigation="Continue" Visibility="{Binding ShowNormalActions, Converter={StaticResource VisibleWhen}}">
     <Button x:Name="UpdateApply" Content="{Binding ActionText}" Command="{Binding ApplyCommand}" Style="{StaticResource PrimaryButton}" MinWidth="116" Margin="0,0,8,0" AutomationProperties.Name="{Binding ActionName}" AutomationProperties.HelpText="{Binding InstallHint}"/>
     <Button x:Name="UpdateLater" Content="{Binding LaterText}" Command="{Binding LaterCommand}" MinWidth="76" ToolTip="{Binding LaterHint}" AutomationProperties.Name="{Binding LaterName}" AutomationProperties.HelpText="{Binding LaterHint}"/>
+   </WrapPanel>
+   <WrapPanel Margin="0,14,0,0" KeyboardNavigation.TabNavigation="Continue" Visibility="{Binding ConfirmationVisible, Converter={StaticResource VisibleWhen}}">
+    <Button x:Name="UpdateConfirmActive" Content="{l:Tr UpdateConfirmActive}" Command="{Binding ConfirmUpdateCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"/>
+    <Button x:Name="UpdateCancelActive" Content="{l:Tr UpdateCancelActive}" Command="{Binding CancelConfirmationCommand}" Margin="0,0,0,8"/>
    </WrapPanel>
   </StackPanel>
  </Border>

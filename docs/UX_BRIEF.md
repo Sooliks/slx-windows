@@ -1,5 +1,15 @@
 # Windows client UX brief
 
+## Alpha.25 updates inside SLX (2026-10-25)
+
+The floating card downloads in the background and preserves ready artifacts after failed checks. Separate off-only
+automatic installation is opt-in, with a visible cancellable 15-second notice. Active VPN keeps working by default;
+explicit confirmation offers Disconnect and update. Unknown/cleanup states cannot install. Handoff waits for a live
+staged helper before closing the UI. Its branded window shows actual phases without invented installation percentages,
+observes UAC cancellation, offers retry/return and treats reboot-required separately. Ordinary launch activates that
+window. Success requires installed-version and fresh service evidence; the receipt is consumed before a single
+same-config resume attempt. Existing check settings do not grant installation consent. The alpha.24 bootstrap remains.
+
 ## Alpha.24 familiar app priority and resilient daily use (2026-10-25)
 
 Audience: returning Windows users selecting common applications, switching individual rules and updating SLX without

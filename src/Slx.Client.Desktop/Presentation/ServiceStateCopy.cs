@@ -21,12 +21,17 @@ public static class ServiceStateCopy
             && parts[3].Length == 8 && parts[3].All(char.IsAsciiHexDigit);
     }
     public static bool IsControlFault(string code) => code.StartsWith("SERVICE_", StringComparison.Ordinal)
+        || code.StartsWith("UPDATE_MAINTENANCE_", StringComparison.Ordinal)
+        || code == "UPDATE_SERVICE_VERSION"
         || code.StartsWith("IPC_", StringComparison.Ordinal) || code is "OPERATION_INTERRUPTED" or "CANCELLED" or "CONTROLLER_OWNED";
     public static string DetailKey(string? code) => code switch
     {
         null => "ServiceCheckingHelp",
         "SERVICE_NOT_INSTALLED" => "ServiceHelp",
         "SERVICE_STARTUP_CLEANUP_PENDING" => "ServiceStartupHelp",
+        "UPDATE_MAINTENANCE_UNCONFIRMED" => "UpdateMaintenanceUnconfirmed",
+        "UPDATE_MAINTENANCE_ACTIVE" => "UpdateMaintenanceWait",
+        "UPDATE_SERVICE_VERSION" => "UpdateVersionMismatch",
         "SERVICE_ACCESS_DENIED" or "SERVICE_IDENTITY_FAILED" => "FaultServiceSecurity",
         "IPC_INVALID" or "IPC_VERSION_MISMATCH" or "IPC_REPLAY_MISMATCH" => "ServiceRequestHelp",
         "SERVICE_TIMEOUT" or "OPERATION_INTERRUPTED" or "CANCELLED" => "ServiceUnknownHelp",

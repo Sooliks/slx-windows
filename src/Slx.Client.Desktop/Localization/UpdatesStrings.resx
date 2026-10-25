@@ -16,4 +16,30 @@
 <data name="UpdateHideDownloadHint" xml:space="preserve"><value>Hide for 24 hours. The download continues; check its progress in Settings.</value></data>
 <data name="UpdateCheckTimeout" xml:space="preserve"><value>Checking for updates took too long. Try again.</value></data>
 <data name="UpdateCheckInvalid" xml:space="preserve"><value>The update information failed verification. Try again later.</value></data>
+<data name="UpdateActionUpdate" xml:space="preserve"><value>Update SLX</value></data>
+<data name="UpdateBackgroundDownloading" xml:space="preserve"><value>Downloading the update in the background. Settings and your connection stay unchanged.</value></data>
+<data name="UpdateReadyActive" xml:space="preserve"><value>The update is ready. VPN is still running. Update now or after disconnecting.</value></data>
+<data name="UpdateActiveWarning" xml:space="preserve"><value>Updating will briefly disconnect VPN. After restarting, SLX will try to connect again. Existing application connections may be interrupted.</value></data>
+<data name="UpdateConfirmActive" xml:space="preserve"><value>Disconnect and update</value></data>
+<data name="UpdateCancelActive" xml:space="preserve"><value>Keep working</value></data>
+<data name="UpdateIntegratedHint" xml:space="preserve"><value>SLX will install the update and restart. Your settings will be kept. Windows may ask for permission.</value></data>
+<data name="UpdatePhasePreparing" xml:space="preserve"><value>Preparing the update…</value></data>
+<data name="UpdatePhaseAuthorizing" xml:space="preserve"><value>Approve the update in the Windows prompt…</value></data>
+<data name="UpdatePhaseInstalling" xml:space="preserve"><value>Installing the update…</value></data>
+<data name="UpdatePhaseVerifying" xml:space="preserve"><value>Checking the installed version…</value></data>
+<data name="UpdatePhaseRestarting" xml:space="preserve"><value>Restarting SLX…</value></data>
+<data name="UpdateIntegratedFailed" xml:space="preserve"><value>The update could not be completed. You can try again. Check the Connection page for the current VPN state.</value></data>
+<data name="UpdateRebootRequired" xml:space="preserve"><value>Restart Windows to finish updating. Restart your computer when convenient.</value></data>
+<data name="UpdateCountdown" xml:space="preserve"><value>SLX will restart to update in {0} s. Choose Later to keep working.</value></data>
+<data name="UpdateInstallAutomatically" xml:space="preserve"><value>Install updates when VPN is off</value></data>
+<data name="UpdateInstallAutomaticallyHint" xml:space="preserve"><value>A notification appears for 15 seconds before installation. An active VPN is never disconnected automatically. Windows may ask for permission.</value></data>
+<data name="UpdateIntegratedPrivacy" xml:space="preserve"><value>Checks at startup and every 6 hours; new versions download in the background. Only public SLX releases are requested, without your subscription or application list.</value></data>
+<data name="UpdateNoInstallProgress" xml:space="preserve"><value>SLX update</value></data>
+<data name="UpdateMaintenanceWait" xml:space="preserve"><value>SLX is finishing the update. Connection controls will be available when it completes.</value></data>
+<data name="UpdateMaintenanceUnconfirmed" xml:space="preserve"><value>The service update could not be confirmed. Restart SLX or repair the installation.</value></data>
+<data name="UpdateCompleted" xml:space="preserve"><value>SLX has been updated. Your settings have been kept.</value></data>
+<data name="UpdateCancelled" xml:space="preserve"><value>The update was cancelled. You can install it later.</value></data>
+<data name="UpdateResultUnconfirmed" xml:space="preserve"><value>The update could not be confirmed. Check the service status or retry the installation.</value></data>
+<data name="UpdateVersionMismatch" xml:space="preserve"><value>The application and service versions differ. Finish or repair the SLX update before connecting.</value></data>
+<data name="UpdateChecksAndDownloads" xml:space="preserve"><value>Check for updates and download them automatically</value></data>
 </root>

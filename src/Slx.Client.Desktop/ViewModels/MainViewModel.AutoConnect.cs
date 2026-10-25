@@ -26,7 +26,7 @@ public sealed partial class MainViewModel
         if (status.Phase == TunnelPhase.Faulted && !status.ProtectionActive && status.Code == "SERVICE_STARTUP_CLEANUP_PENDING") return;
         // A running/recovering/protected service already has an intent. Never replace it.
         if (status.Phase != TunnelPhase.Disconnected || status.ProtectionActive) { CancelStartupConnection(); return; }
-        if (!startupRefreshFinished || IsBusy || polling || UpdateInProgress) return;
+        if (!startupRefreshFinished || IsBusy || polling || UpdateInProgress || HasUpdateMaintenance || HasServiceVersionMismatch) return;
         if (!StartupNetworkAvailable()) return;
         CancelStartupConnection();
         if (saved == null || SelectedProfile == null || IsSelectedMode && !HasSelectedApplications) return;

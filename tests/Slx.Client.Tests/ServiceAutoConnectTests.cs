@@ -1,3 +1,4 @@
+using System.Reflection;
 using Slx.Client.Core;
 using Slx.Client.Service;
 using Xunit;
@@ -29,7 +30,11 @@ public sealed class ServiceAutoConnectTests
         var observed=new TunnelStatus(phase,DateTimeOffset.UtcNow,"Existing",ProtectionActive:protection);
         var engine=new AutoTunnel{Status=observed,OwnerSid="owner"};
         var reply=await new ControlDispatcher(engine,new Sessions()).DispatchAsync("owner",Auto(),default);
-        Assert.True(reply.Success);Assert.Equal(observed,reply.Status);
+        string version=typeof(ControlDispatcher).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!
+            .InformationalVersion.Split('+')[0];
+        Assert.True(reply.Success);Assert.False(string.IsNullOrWhiteSpace(version));
+        Assert.Equal(version,reply.Status.ServiceVersion);
+        Assert.Equal(observed with{ServiceVersion=version},reply.Status);
         Assert.Equal(0,engine.Starts+engine.Stops);
     }
     [Fact]

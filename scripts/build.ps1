@@ -15,7 +15,7 @@ function Invoke-Dotnet([string[]]$Arguments) {
  if ($LASTEXITCODE -ne 0) { throw ('dotnet failed: ' + ($Arguments -join ' ')) }
 }
 function Remove-OwnedBuildDirectory([string]$Path) {
- $expected = @('bundle','publish-desktop','publish-service') | ForEach-Object { Join-Path $metadata.WorkDirectory $_ }
+ $expected = @('bundle','publish-desktop','publish-service','publish-updater') | ForEach-Object { Join-Path $metadata.WorkDirectory $_ }
  $resolved = [IO.Path]::GetFullPath($Path)
  if ($resolved -notin $expected) { throw 'Unsafe build cleanup path' }
  if (Test-Path -LiteralPath $resolved) {
@@ -36,7 +36,7 @@ Remove-OwnedBuildDirectory $bundle
 [IO.Directory]::CreateDirectory($metadata.ReleaseDirectory) | Out-Null
 $installer = Join-Path $metadata.ReleaseDirectory ($metadata.AssetPrefix + '-win-x64-setup.exe')
 if (Test-Path -LiteralPath $installer) { throw 'Versioned installer already exists; do not overwrite release assets' }
-foreach ($name in @('Desktop','Service')) {
+foreach ($name in @('Desktop','Service','Updater')) {
  $project = 'src/Slx.Client.' + $name + '/Slx.Client.' + $name + '.csproj'
  $publish = Join-Path $metadata.WorkDirectory ('publish-' + $name.ToLowerInvariant())
  Remove-OwnedBuildDirectory $publish
@@ -45,7 +45,7 @@ foreach ($name in @('Desktop','Service')) {
   '-p:DebugType=None','-p:DebugSymbols=false','-o',$publish)
  foreach ($file in Get-ChildItem -LiteralPath $publish -File -Recurse) {
   $relative = [IO.Path]::GetRelativePath($publish,$file.FullName)
-  $destinationRoot = if ($name -eq 'Service') { Join-Path $bundle 'service' } else { $bundle }
+ $destinationRoot = switch ($name) { 'Service' { Join-Path $bundle 'service' }; 'Updater' { Join-Path $bundle 'updater' }; default { $bundle } }
   $target = Join-Path $destinationRoot $relative
   [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($target)) | Out-Null
   if (Test-Path -LiteralPath $target) {
@@ -53,6 +53,7 @@ foreach ($name in @('Desktop','Service')) {
   } else { Copy-Item -LiteralPath $file.FullName -Destination $target }
  }
 }
+& (Join-Path $PSScriptRoot 'package-updater.ps1') -Directory (Join-Path $bundle 'updater')
 [IO.Directory]::CreateDirectory((Join-Path $bundle 'service/runtime')) | Out-Null
 foreach ($name in @('xray.exe','wintun.dll','runtime-manifest.json')) {
  Copy-Item -LiteralPath (Join-Path $root ('.runtime/' + $name)) -Destination (Join-Path $bundle ('service/runtime/' + $name))

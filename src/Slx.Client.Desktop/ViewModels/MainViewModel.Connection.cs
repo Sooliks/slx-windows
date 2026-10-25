@@ -32,6 +32,7 @@ public sealed partial class MainViewModel
     {
         if (action != "connect-if-idle") CancelStartupConnection();
         if (UpdateInProgress) return;
+        if (action != "disconnect" && HasServiceVersionMismatch) { Notice("UpdateVersionMismatch"); return; }
         var routingOwner = BeginRoutingMutation();
         if (action != "disconnect" && saved == null) { OpenImportCommand.Execute(null); return; }
         if (action != "disconnect" && IsSelectedMode && !HasSelectedApplications) { Notice("NoActiveApps"); Page = "applications"; return; }

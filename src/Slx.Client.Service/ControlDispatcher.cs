@@ -19,13 +19,17 @@ internal sealed partial class ControlDispatcher(IControlTunnelEngine engine, ISe
     internal static readonly TimeSpan ReceiptRetention = TimeSpan.FromMinutes(10);
     internal Func<long> Clock { get; init; } = Stopwatch.GetTimestamp;
 
-    public async Task<PipeReply> DispatchAsync(string sid, PipeRequest request, CancellationToken cancellationToken)
+    public async Task<PipeReply> DispatchAsync(string sid, PipeRequest request, CancellationToken cancellationToken,
+        bool isAdministrator = false)
     {
         if (request.Version != PipeContract.Version || request.RequestId == Guid.Empty
-            || request.Action is not ("status" or "connect" or "connect-if-idle" or "disconnect" or "reconnect" or "update-applications"))
+            || request.Action is not ("status" or "connect" or "connect-if-idle" or "disconnect" or "reconnect" or "update-applications"
+                or "prepare-update" or "claim-update" or "release-update"))
             return Rejected("IPC_INVALID");
+        if (IsMaintenance(request.Action) ? request.Plan is not null || !request.UpdateSessionId.HasValue || request.UpdateSessionId == Guid.Empty
+            : request.UpdateSessionId is not null) return Rejected("IPC_INVALID");
         if (request.Action == "status") return Observe(sid, request);
-        var mutation = AdmitMutation(sid, request);
+        var mutation = AdmitMutation(sid, request, isAdministrator);
         using var identity = mutation.Admission;
         if (mutation.Reply is { } denied) return denied;
         var off = request.Action == "disconnect" ? PrepareDisconnect(sid, request) : default;
@@ -39,10 +43,11 @@ internal sealed partial class ControlDispatcher(IControlTunnelEngine engine, ISe
             lock (observation)
             {
                 RefreshOwner();
-                if (owner is not null && owner != sid) return Rejected("CONTROLLER_OWNED");
+                if (owner is not null && owner != sid || !CanReadMaintenance(sid)
+                    && !(request.Action == "claim-update" && isAdministrator)) return Rejected("CONTROLLER_OWNED");
                 PruneReceipts();
                 if (receipts.TryGetValue(request.RequestId, out var prior))
-                    return prior.Fingerprint == fingerprint ? prior.Reply with { Status = engine.Status }
+                    return prior.Fingerprint == fingerprint ? prior.Reply with { Status = ObservedStatus }
                         : Rejected("IPC_REPLAY_MISMATCH");
             }
             if ((request.Action is "connect" or "connect-if-idle" or "update-applications") && request.Plan is null
@@ -52,7 +57,20 @@ internal sealed partial class ControlDispatcher(IControlTunnelEngine engine, ISe
             lock (observation) receiptAvailable = receipts.Count < ReceiptCapacity;
             // Explicit off is idempotent and must remain available when the replay cache is full.
             // Existing receipt fingerprints were checked first; no new connect/reconnect can bypass the cap.
-            if (!receiptAvailable && request.Action != "disconnect") return Rejected("IPC_RECEIPT_LIMIT");
+            if (!receiptAvailable && request.Action is not ("disconnect" or "release-update")) return Rejected("IPC_RECEIPT_LIMIT");
+            if (IsMaintenance(request.Action))
+            {
+                var maintained = DispatchMaintenance(sid, request, isAdministrator);
+                if (receiptAvailable) lock (observation) receipts.Add(request.RequestId, new(fingerprint, maintained, Clock()));
+                return maintained;
+            }
+            if (request.Action != "disconnect")
+            {
+                string? blocked;
+                try { blocked = Maintenance.BlockCode(); }
+                catch (ClientFault fault) { blocked = fault.Code; }
+                if (blocked is not null) return new(false, blocked, ObservedStatus);
+            }
             if (request.Plan is not null)
             {
                 try { PlanValidator.Validate(request.Plan); }
@@ -67,7 +85,7 @@ internal sealed partial class ControlDispatcher(IControlTunnelEngine engine, ISe
             if(request.Action=="connect-if-idle"&&(observed.Phase!=TunnelPhase.Disconnected||observed.ProtectionActive))
             {
                 // Remember the no-op too: replaying this request after explicit off must never connect later.
-                var unchanged=new PipeReply(true,"OK",observed);
+                var unchanged=new PipeReply(true,"OK",ObservedStatus);
                 lock (observation) receipts.Add(request.RequestId,new(fingerprint,unchanged,Clock()));
                 return unchanged;
             }
@@ -87,11 +105,11 @@ internal sealed partial class ControlDispatcher(IControlTunnelEngine engine, ISe
                     if (request.Plan is not null) await engine.StartAsync(request.Plan, sid, operation.Token);
                     else await engine.ReconnectAsync(operation.Token);
                 }
-                result = new(true, "OK", engine.Status);
+                result = new(true, "OK", ObservedStatus);
             }
-            catch (ClientFault fault) { result = new(false, fault.Code, engine.Status); }
-            catch (OperationCanceledException) { result = new(false, "OPERATION_INTERRUPTED", engine.Status); }
-            catch (Exception) { result = new(false, "SERVICE_FAILURE", engine.Status); }
+            catch (ClientFault fault) { result = new(false, fault.Code, ObservedStatus); }
+            catch (OperationCanceledException) { result = new(false, "OPERATION_INTERRUPTED", ObservedStatus); }
+            catch (Exception) { result = new(false, "SERVICE_FAILURE", ObservedStatus); }
             lock (observation)
             {
                 if ((request.Action != "disconnect" || result.Success)

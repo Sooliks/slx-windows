@@ -36,7 +36,7 @@ public sealed partial class MainViewModel
         OnPropertyChanged(nameof(ShowActivityHint)); OnPropertyChanged(nameof(ActivityIsRouting)); OnPropertyChanged(nameof(ActivityHint));
     }
     // Confirmations float as a toast and clear themselves; warnings and errors stay until dismissed or replaced.
-    private static readonly HashSet<string> TransientNotices = ["Imported", "Updated", "DiagnosticsCopied"];
+    private static readonly HashSet<string> TransientNotices = ["Imported", "Updated", "DiagnosticsCopied", "UpdateCompleted", "UpdateCancelled"];
     private DispatcherTimer? noticeTimer;
     private RelayCommand? dismissMessage;
     public RelayCommand DismissMessageCommand => dismissMessage ??= new RelayCommand(ClearMessage);

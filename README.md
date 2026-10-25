@@ -17,6 +17,7 @@ VPN для выбранных приложений или всего компь�
 - **В стиле сайта.** Тот же язык оформления, что на [slxvpn.com](https://slxvpn.com): оливково-чёрные панели, лаймовый акцент, схема маршрутов на фоне. Короткие анимации отвечают на ваши действия и отключаются вместе с анимацией Windows или в режиме высокой контрастности.
 - **Читаемый интерфейс.** Более плотные подписи, Segoe UI как запасной шрифт Olive и аккуратные кнопки окна с понятным наведением и фокусом.
 - **Два способа подключения.** Hysteria2 и VLESS/XHTTP из вашей подписки SLX.
+- **Обновления внутри SLX.** Новая версия загружается в фоне. Установка проходит в отдельном окне SLX без мастера установки; Windows может запросить разрешение администратора. Активный VPN продолжает работать до вашего решения обновиться.
 
 ## Начать пользоваться
 
@@ -51,9 +52,9 @@ VPN для выбранных приложений или всего компь�
 
 ## Совместимость и статус
 
-Текущий код: **0.1.0-alpha.24, предварительная версия**. Опубликованные установщики доступны в GitHub Releases; сборка кандидата сама по себе не означает публикацию.
+Текущий код: **0.1.0-alpha.25, предварительная версия**. Опубликованные установщики доступны в GitHub Releases; сборка кандидата сама по себе не означает публикацию.
 
-Alpha.24 упорядочивает список приложений и дорабатывает восстановление, чтение сохранённых данных и состояния фоновых операций. Проверки обычных маршрутов из alpha.23 сохраняются. Переключатели по-прежнему применяются к новым соединениям. Работа на проблемных ПК и влияние на CS2 требуют установленной проверки. [Применение и выпуск alpha.24](docs/UPDATE_ALPHA24_RU.md).
+Alpha.25 добавляет встроенное обновление интерфейса и сетевой службы. В настройках можно отдельно включить установку при выключенном VPN: перед ней есть 15 секунд, чтобы отложить обновление. При включённом VPN доступно явное «Отключить и обновить» с проверяемым однократным возвратом подключения. До alpha.25 потребуется один обычный установщик; встроенный процесс используется уже установленной alpha.25 для следующих версий. [Как работают обновления](docs/UPDATES.md).
 
 Целевые системы — **Windows 10, сборка 19041+, и Windows 11**. Приёмка на Windows 10 ещё не завершена. Приложение и установщик распространяются без подписи; драйвер Wintun сохраняет подпись производителя. Готовый установщик включает .NET, отдельно устанавливать его пользователю не требуется.
 
@@ -75,7 +76,7 @@ pwsh -File scripts/build.ps1 -Candidate
 
 # Выпуск: проверенный чистый коммит и предыдущий опубликованный тег.
 pwsh -File scripts/build.ps1
-pwsh -File scripts/package-source.ps1 -BaseRef v0.1.0-alpha.23
+pwsh -File scripts/package-source.ps1 -BaseRef v0.1.0-alpha.24
 ```
 
 Кандидаты: `artifacts/candidates/<version>/<timestamp>/output/`. Чистая сборка выпуска: `artifacts/release/<version>/`. Упаковка создаёт полный и изменённый архивы исходников, отдельный список удалений, provenance и контрольные суммы. Команды сборки и упаковки не публикуют выпуск. Запуск из `bin/Debug` не заменяет установку службы.
@@ -91,6 +92,6 @@ pwsh -File scripts/package-source.ps1 -BaseRef v0.1.0-alpha.23
 
 SLX VPN is a native Windows client for your SLX subscription, with selected-app and whole-computer modes, Hysteria2/VLESS, a local app library and automatic connection recovery. [Download](https://slxvpn.com/download/windows), install and add a personal Windows device link from your [SLX account](https://slxvpn.com/account/devices).
 
-From alpha.11, optional update checks run at startup and every six hours while the app is running. Download and installation require explicit actions; installation requires a confirmed disconnected VPN. Installer integrity is checked against SHA-256 from this repository's HTTPS releases. The app and installer are unsigned; Wintun retains its vendor signature. Older versions need one manual installer upgrade to enable update checks.
+From alpha.25, new versions download in the background and install in a dedicated SLX window without a setup wizard. Automatic installation while VPN is off is a separate opt-in, with a cancellable 15-second notice. An active VPN is preserved until explicit consent to disconnect and update. Windows may request administrator permission. Older clients need one installer upgrade to alpha.25 before using the integrated flow for future versions. Integrity uses SHA-256 from this repository's HTTPS releases; the app and installer remain unsigned, and Wintun retains its vendor signature.
 
 This is a prerelease targeting Windows 10 build 19041+ and Windows 11; Windows 10 acceptance is pending. App inventory stays local, and the personal subscription link uses Windows DPAPI protection. See [verification](docs/VERIFICATION.md) and [security](SECURITY.md) for current limits.

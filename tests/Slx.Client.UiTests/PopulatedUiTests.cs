@@ -32,6 +32,8 @@ public sealed class PopulatedUiTests
             CheckUnknownExit(window);
             FollowupChecks.Run(window);
             UpdateChecks.Run(window);
+            IntegratedUpdateChecks.Run(window);
+            UpdaterWindowChecks.Run();
             ApplicationUpdateVisualChecks.Run(window);
             StartupAutoConnectChecks.Run();
             SettingsStartupChecks.Run(window);
@@ -47,6 +49,7 @@ public sealed class PopulatedUiTests
             StatusObservationChecks.Run();
             SubscriptionActivityChecks.Run();
             UpdateAdmissionChecks.Run();
+            IntegratedHandoffChecks.Run();
             SingleInstanceChecks.Run();
             DnsDiagnosticsChecks.Run(window);
             TrafficRouteDiagnosticsChecks.Run(window);

@@ -9,7 +9,8 @@ internal sealed class ControlWorker(ControlDispatcher dispatcher, TunnelEngine e
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await engine.RestoreAsync(stoppingToken);
+        bool suppressResume = dispatcher.LoadMaintenance();
+        await engine.RestoreAsync(stoppingToken, suppressResume);
         try { await Task.WhenAll(RunPipesAsync(stoppingToken), MonitorAsync(stoppingToken)); }
         finally { await engine.ShutdownAsync(); }
     }
@@ -42,7 +43,7 @@ internal sealed class ControlWorker(ControlDispatcher dispatcher, TunnelEngine e
                 // DNS + tunnel readiness + owned cleanup can legitimately exceed the former 50s
                 // budget. Other pipe slots still serve status/off immediately during this wait.
                 budget.CancelAfter(TimeSpan.FromSeconds(caller.Request.Action == "status" ? 5 : 75));
-                var reply = await dispatcher.DispatchAsync(caller.Sid, caller.Request, budget.Token);
+                var reply = await dispatcher.DispatchAsync(caller.Sid, caller.Request, budget.Token, caller.IsAdministrator);
                 await PipeFraming.WriteReplyAndWaitAckAsync(pipe, reply, budget.Token);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }

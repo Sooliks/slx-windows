@@ -3,6 +3,10 @@ namespace Slx.Client.Desktop.ViewModels;
 public sealed partial class MainViewModel
 {
     private bool updateInstalling;
+    private bool HasUpdateMaintenance => statusFresh && (status?.UpdateMaintenance is not null
+        || status?.Code == "UPDATE_MAINTENANCE_UNCONFIRMED");
+    private bool HasServiceVersionMismatch => persistPreferences && statusFresh && status is not null
+        && status.ServiceVersion != VersionLabel["SLX VPN · ".Length..];
     private bool UpdateInProgress => updateInstalling || Updates?.InstallerOpened == true;
     public UpdateViewModel Updates { get; private set; } = null!;
     private void InitializeUpdates()
@@ -13,10 +17,18 @@ public sealed partial class MainViewModel
             {
                 preferences = preferences with { CheckUpdatesAutomatically = automatic, UpdateReminderUntil = reminder };
                 SavePreferences();
-            }, () => statusFresh && status?.Phase == TunnelPhase.Disconnected && !status.ProtectionActive && !IsBusy,
+            }, () => statusFresh && status?.Phase == TunnelPhase.Disconnected && !status.ProtectionActive && !IsBusy && !IsOverlayVisible
+                && !UpdateInProgress && !HasUpdateMaintenance && !HasServiceVersionMismatch,
             AcquireUpdateInstallAsync, () => !statusFresh ? "UpdateServiceUnconfirmed"
+                : HasUpdateMaintenance ? "UpdateMaintenanceWait"
                 : status?.Phase != TunnelPhase.Disconnected || status.ProtectionActive ? "UpdateDisconnectFirst"
-                : IsBusy ? "UpdateWaitForOperation" : null, persistPreferences);
+                : IsBusy ? "UpdateWaitForOperation" : null, persistPreferences,
+            persistPreferences ? ApplyIntegratedUpdateAsync : null, () => statusFresh && IsTunnelActive,
+            preferences.InstallUpdatesAutomatically, automatic =>
+            {
+                preferences = preferences with { InstallUpdatesAutomatically = automatic };
+                SavePreferences();
+            });
         Updates.PropertyChanged += (_, args) => { if (args.PropertyName is "" or nameof(UpdateViewModel.InstallerOpened)) NotifyState(); };
     }
     private async Task<IDisposable> AcquireUpdateInstallAsync(CancellationToken cancellationToken)

@@ -95,10 +95,10 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private bool ShouldRequestDisconnect => IsTunnelActive || operation is not null || !statusFresh && lastServiceCode is not null;
     public bool ShowConnectionAction => HasSubscription || ShouldRequestDisconnect;
     public bool ShowImportAction => !ShowConnectionAction;
-    public bool CanReconnect => !UpdateInProgress && statusFresh && HasSubscription && IsTunnelActive && !IsBusy;
-    public bool CanEditRouting => !UpdateInProgress && !IsBusy;
+    public bool CanReconnect => !UpdateInProgress && !HasUpdateMaintenance && !HasServiceVersionMismatch && statusFresh && HasSubscription && IsTunnelActive && !IsBusy;
+    public bool CanEditRouting => !UpdateInProgress && !HasUpdateMaintenance && !HasServiceVersionMismatch && !IsBusy;
     private bool IsStartupCleanupWait => statusFresh && status is { Phase: TunnelPhase.Faulted, ProtectionActive: false, Code: "SERVICE_STARTUP_CLEANUP_PENDING" };
-    public bool CanConnect => !UpdateInProgress && !IsStartupCleanupWait && (ShouldRequestDisconnect || !IsBusy && HasSubscription && statusFresh);
+    public bool CanConnect => !UpdateInProgress && !IsStartupCleanupWait && (ShouldRequestDisconnect || !HasUpdateMaintenance && !HasServiceVersionMismatch && !IsBusy && HasSubscription && statusFresh);
     public string ConnectionAction => Text.Catalog[ShouldRequestDisconnect ? "Disconnect" : "Connect"];
     public string StatusText => Text.Catalog[IsStartupCleanupWait ? "StatusPreparing" : !statusFresh ? ServiceStateCopy.IsTrafficFault(lastServiceCode) ? "StatusOperationUnconfirmed" : lastServiceCode == null ? "StatusUnknown" : status == null ? "StatusUnavailable" : "StatusStale" : status?.Phase switch
     {
@@ -106,7 +106,8 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         TunnelPhase.Reconnecting => "Reconnecting", TunnelPhase.Checking => "CheckingConnection", TunnelPhase.Stopping => "Stopping",
         TunnelPhase.Faulted => "ConnectionFailed", _ => "NotConnected"
     }];
-    public string? LastServiceCode => lastServiceCode ?? (statusFresh && status?.Code != null ? ServiceStateCopy.SafeCode(status.Code) : RetainedConnectionFailure);
+    public string? LastServiceCode => lastServiceCode ?? (statusFresh && status?.Code != null ? ServiceStateCopy.SafeCode(status.Code)
+        : HasServiceVersionMismatch ? "UPDATE_SERVICE_VERSION" : RetainedConnectionFailure);
     public bool HasServiceCode => LastServiceCode != null;
     public string ServiceCodeLabel => LastServiceCode == null ? "" : $"{Text.Catalog["ErrorCode"]}: {LastServiceCode}";
     public string StatusDetail => Text.Catalog[!statusFresh || IsStartupCleanupWait || ServiceStateCopy.IsTrafficFault(LastServiceCode)

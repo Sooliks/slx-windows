@@ -31,8 +31,7 @@ public partial class MainWindow : Window
     private void UpdateChanged(object? sender, PropertyChangedEventArgs args)
     {
         if (renderOnly || exiting || !model.Updates.InstallerOpened) return;
-        // The user explicitly handed off an already disconnected app to its interactive installer.
-        // Close this UI so it cannot reconnect while the installer waits on its welcome screen.
+        // The staged updater has acknowledged ownership; it can now wait for this process to exit.
         exiting = true; model.Dispose(); Close(); Application.Current.Shutdown();
     }
     private void ModelChanged(object? sender, PropertyChangedEventArgs args)
@@ -53,6 +52,7 @@ public partial class MainWindow : Window
     {
         if (exiting || renderOnly) return;
         args.Cancel = true;
+        if (model.Updates.IsApplying) { WindowState = WindowState.Minimized; return; }
         if (model.MinimizeToTray)
         {
             if (tray?.IsAvailable == true) Hide();
@@ -71,6 +71,7 @@ public partial class MainWindow : Window
     public async Task ExitAsync()
     {
         if (exiting) return;
+        if (model.Updates.IsApplying) { WindowState = WindowState.Minimized; return; }
         exiting = true;
         if (!await model.ExitAsync())
         {

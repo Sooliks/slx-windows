@@ -9,7 +9,7 @@ namespace Slx.Client.Service;
 internal static class ControlPipe
 {
     internal const int MaxInstances = 4;
-    internal sealed record CallerRequest(string Sid, PipeRequest Request);
+    internal sealed record CallerRequest(string Sid, PipeRequest Request, bool IsAdministrator = false);
 
     public static async Task<CallerRequest> ReadRequestAsync(NamedPipeServerStream pipe, CancellationToken cancellationToken)
     {
@@ -17,10 +17,16 @@ internal static class ControlPipe
         // Deserialization is not authorization: dispatch still requires the authenticated caller SID.
         var request = await PipeFraming.ReadAsync<PipeRequest>(pipe, cancellationToken);
         string? sid = null;
-        try { pipe.RunAsClient(() => sid = WindowsIdentity.GetCurrent().User?.Value); }
+        bool administrator = false;
+        try { pipe.RunAsClient(() =>
+        {
+            using var identity = WindowsIdentity.GetCurrent();
+            sid = identity.User?.Value;
+            administrator = new WindowsPrincipal(identity).IsInRole(WindowsBuiltInRole.Administrator);
+        }); }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidOperationException)
         { throw new ClientFault("IPC_CALLER_INVALID"); }
-        return new(sid ?? throw new ClientFault("IPC_CALLER_INVALID"), request);
+        return new(sid ?? throw new ClientFault("IPC_CALLER_INVALID"), request, administrator);
     }
 
     public static NamedPipeServerStream Create(string name, bool firstInstance = true)

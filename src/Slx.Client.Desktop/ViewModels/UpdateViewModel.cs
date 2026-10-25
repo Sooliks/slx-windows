@@ -15,45 +15,68 @@ public sealed partial class UpdateViewModel : ObservableObject, IDisposable
     private readonly Func<bool> canInstall;
     private readonly Func<CancellationToken, Task<IDisposable>> beginInstall;
     private readonly Func<string?>? installBlockReason;
+    private readonly Func<PreparedUpdate, bool, IProgress<UpdateApplyProgress>, CancellationToken, Task<UpdateApplyResult>>? integratedApply;
+    private readonly Func<bool>? connectionActive;
+    private readonly Action<bool>? saveInstallAutomatically;
     private readonly string version;
     private readonly bool reuseStaged;
-    private bool automatic, busy, disposed, started, installerOpened;
+    private bool automatic, busy, disposed, started, installerOpened, installAutomatically, confirmationVisible;
     private DateTimeOffset? remindAfter;
     private UpdateOffer? offer;
     private PreparedUpdate? prepared;
     private string stateKey = "UpdateNotChecked";
-    private int progress, downloadGeneration;
+    private string? checkWarningKey;
+    private int progress, downloadGeneration, applyGeneration;
     internal Func<string, CancellationToken, Task<UpdateCheckResult>>? CheckOverride { get; set; }
     internal Func<UpdateOffer, IProgress<int>?, CancellationToken, Task<PreparedUpdate>>? DownloadOverride { get; set; }
     internal Func<PreparedUpdate, CancellationToken, Task<UpdateLaunchResult>>? LaunchOverride { get; set; }
     internal Func<UpdateOffer, CancellationToken, Task<PreparedUpdate?>>? FindPreparedOverride { get; set; }
     public UpdateViewModel(string version, bool automatic, DateTimeOffset? reminder,
         Action<bool, DateTimeOffset?> save, Func<bool> canInstall, Func<CancellationToken, Task<IDisposable>> beginInstall,
-        Func<string?>? installBlockReason = null, bool reuseStaged = false)
+        Func<string?>? installBlockReason = null, bool reuseStaged = false,
+        Func<PreparedUpdate, bool, IProgress<UpdateApplyProgress>, CancellationToken, Task<UpdateApplyResult>>? integratedApply = null,
+        Func<bool>? connectionActive = null, bool installAutomatically = false, Action<bool>? saveInstallAutomatically = null)
     {
-        this.version = version; this.automatic = automatic; remindAfter = reminder; this.save = save; this.canInstall = canInstall; this.beginInstall = beginInstall;
-        this.installBlockReason = installBlockReason; this.reuseStaged = reuseStaged;
-        CheckCommand = new AsyncRelayCommand(() => CheckAsync(true), () => !busy);
-        ApplyCommand = new AsyncRelayCommand(ApplyAsync, () => !busy && !installerOpened && offer != null && (prepared == null || canInstall()));
+        this.version = version; this.automatic = automatic; remindAfter = reminder; this.save = save; this.canInstall = canInstall;
+        this.beginInstall = beginInstall; this.installBlockReason = installBlockReason; this.reuseStaged = reuseStaged;
+        this.integratedApply = integratedApply; this.connectionActive = connectionActive;
+        this.installAutomatically = installAutomatically; this.saveInstallAutomatically = saveInstallAutomatically;
+        CheckCommand = new AsyncRelayCommand(() => CheckAsync(true), () => !busy && !installerOpened);
+        ApplyCommand = new AsyncRelayCommand(ApplyAsync, CanApply);
         LaterCommand = new RelayCommand(RemindTomorrow, () => !busy || IsDownloading);
-        timer.Tick += AutomaticTick;
+        ConfirmUpdateCommand = new AsyncRelayCommand(() => ApplyPreparedAsync(true), () => confirmationVisible && !busy && connectionActive?.Invoke() == true);
+        CancelConfirmationCommand = new RelayCommand(CancelConfirmation);
+        timer.Tick += AutomaticTick; countdownTimer.Tick += CountdownTick;
         Text.Catalog.PropertyChanged += LanguageChanged;
     }
     public AsyncRelayCommand CheckCommand { get; }
     public AsyncRelayCommand ApplyCommand { get; }
+    public AsyncRelayCommand ConfirmUpdateCommand { get; }
+    public RelayCommand CancelConfirmationCommand { get; }
     public RelayCommand LaterCommand { get; }
     public bool Automatic
     {
         get => automatic;
         set { if (SetProperty(ref automatic, value)) { save(value, remindAfter); if (started && value) _ = CheckAsync(false); } }
     }
+    public bool InstallAutomatically
+    {
+        get => installAutomatically;
+        set { if (SetProperty(ref installAutomatically, value)) { autoInstallPaused = false; saveInstallAutomatically?.Invoke(value); Changed(); } }
+    }
+    public bool HasIntegratedUpdate => integratedApply != null;
     public bool ShowBanner => offer != null && (!remindAfter.HasValue || remindAfter <= DateTimeOffset.UtcNow);
     public bool IsBusy => busy;
     public bool InstallerOpened => installerOpened;
     public bool IsDownloading => busy && stateKey == "UpdateDownloading";
+    public bool IsApplying => busy && !IsDownloading && stateKey != "UpdateChecking";
+    public bool ConfirmationVisible => confirmationVisible;
+    public bool ShowNormalActions => !confirmationVisible;
     public int Progress => progress;
     public string Status => Text.Catalog[stateKey];
     public string CurrentVersion => version;
+    public string CheckWarning => checkWarningKey == null ? "" : Text.Catalog[checkWarningKey];
+    public bool HasCheckWarning => checkWarningKey != null;
     public void Start()
     {
         if (started || disposed) return;
@@ -62,74 +85,43 @@ public sealed partial class UpdateViewModel : ObservableObject, IDisposable
     private async void AutomaticTick(object? sender, EventArgs args) => await CheckAsync(false);
     internal async Task CheckAsync(bool manual)
     {
-        if (disposed || busy || !manual && (!automatic || remindAfter > DateTimeOffset.UtcNow)) return;
-        if (manual) { remindAfter = null; save(automatic, null); }
+        if (disposed || busy || installerOpened || !manual && (!automatic || remindAfter > DateTimeOffset.UtcNow)) return;
+        if (manual) { remindAfter = null; autoInstallPaused = false; save(automatic, null); }
+        confirmationVisible = false;
         SetBusy(true, "UpdateChecking");
+        bool download = false;
         try
         {
             var result = await (CheckOverride?.Invoke(version, lifetime.Token) ?? client.CheckAsync(version, lifetime.Token));
             if (disposed) return;
+            checkWarningKey = null;
             if (result.State == UpdateCheckState.Available && result.Offer != null)
             {
-                if (offer != result.Offer) { prepared = null; installerOpened = false; }
+                if (offer != result.Offer) { prepared = null; installerOpened = false; autoInstallPaused = false; }
                 offer = result.Offer;
-                // An installer for this exact release that is already staged and verified is offered for install directly.
-                // Render checks and UI fixtures never read the real staging folder.
                 if (prepared == null && (reuseStaged || FindPreparedOverride != null))
                     prepared = await (FindPreparedOverride?.Invoke(offer, lifetime.Token) ?? client.FindPreparedAsync(offer, lifetime.Token));
                 if (disposed) return;
                 stateKey = prepared == null ? "UpdateFound" : "UpdateReady";
+                download = HasIntegratedUpdate && automatic && prepared == null;
             }
             else if (result.State == UpdateCheckState.Current) { offer = null; prepared = null; stateKey = "UpdateCurrent"; }
-            else stateKey = CheckFailureKey(result.ErrorCode);
+            else SetCheckFailure(result.ErrorCode);
         }
         catch (OperationCanceledException) when (lifetime.IsCancellationRequested) { }
-        catch (ClientFault fault) { stateKey = CheckFailureKey(fault.Code); }
+        catch (ClientFault fault) { SetCheckFailure(fault.Code); }
         finally { SetBusy(false); }
+        if (download && !disposed) await DownloadAsync();
     }
-    private async Task ApplyAsync()
+    private void SetCheckFailure(string? code)
     {
-        if (disposed || busy || installerOpened || offer == null) return;
-        if (prepared != null && !canInstall()) { Changed(); return; }
-        if (prepared == null) progress = 0;
-        SetBusy(true, prepared == null ? "UpdateDownloading" : "UpdateStarting");
-        try
-        {
-            if (prepared == null)
-            {
-                var generation = ++downloadGeneration;
-                var reporter = new Progress<int>(value =>
-                {
-                    if (disposed || generation != downloadGeneration || !IsDownloading) return;
-                    progress = Math.Clamp(value, 0, 100);
-                    OnPropertyChanged(nameof(Progress)); OnPropertyChanged(nameof(ProgressText));
-                });
-                prepared = await (DownloadOverride?.Invoke(offer, reporter, lifetime.Token) ?? client.DownloadAsync(offer, reporter, lifetime.Token));
-                stateKey = "UpdateReady";
-            }
-            else
-            {
-                // Check the current service observation immediately before the explicit installation handoff.
-                if (!canInstall()) { stateKey = "UpdateReady"; return; }
-                using var lease = await beginInstall(lifetime.Token);
-                if (disposed) return;
-                lifetime.Token.ThrowIfCancellationRequested();
-                var result = await (LaunchOverride?.Invoke(prepared, lifetime.Token) ?? client.LaunchInstallerAsync(prepared, lifetime.Token));
-                installerOpened = result == UpdateLaunchResult.Started;
-                stateKey = result == UpdateLaunchResult.Started ? "UpdateInstallerOpened" : "UpdateInstallCancelled";
-            }
-        }
-        catch (OperationCanceledException) when (lifetime.IsCancellationRequested) { }
-        catch (ClientFault fault)
-        {
-            stateKey = fault.Code switch { "UPDATE_INTEGRITY_FAILED" => "UpdateIntegrityFailed",
-                "UPDATE_CONNECTION_ACTIVE" => "UpdateDisconnectFirst", _ => "UpdateActionFailed" };
-            if (fault.Code is "UPDATE_INTEGRITY_FAILED" or "UPDATE_INSTALL_FAILED" or "UPDATE_DOWNLOAD_FAILED") prepared = null;
-        }
-        finally { SetBusy(false); }
+        var key = CheckFailureKey(code);
+        if (HasIntegratedUpdate && prepared != null) { checkWarningKey = key; stateKey = "UpdateReady"; }
+        else stateKey = key;
     }
     private void RemindTomorrow()
     {
+        CancelConfirmation(); StopCountdown();
         remindAfter = DateTimeOffset.UtcNow.AddDays(1); save(automatic, remindAfter); Changed();
     }
     private void SetBusy(bool value, string? key = null)
@@ -138,18 +130,24 @@ public sealed partial class UpdateViewModel : ObservableObject, IDisposable
     }
     public void RefreshInstallAvailability()
     {
-        OnPropertyChanged(nameof(InstallHint)); OnPropertyChanged(nameof(BannerDescription));
-        OnPropertyChanged(nameof(IsInstallBlocked)); OnPropertyChanged(nameof(ShowInstallHint)); ApplyCommand.NotifyCanExecuteChanged();
+        if (confirmationVisible && connectionActive?.Invoke() != true) confirmationVisible = false;
+        RefreshCountdown();
+        foreach (var property in new[] { nameof(InstallHint), nameof(BannerDescription), nameof(IsInstallBlocked), nameof(ShowInstallHint),
+            nameof(ConfirmationVisible), nameof(ShowNormalActions), nameof(IsInstallCountdown), nameof(CountdownText) }) OnPropertyChanged(property);
+        ApplyCommand.NotifyCanExecuteChanged(); ConfirmUpdateCommand.NotifyCanExecuteChanged();
     }
     private void Changed()
     {
-        OnPropertyChanged(""); CheckCommand.NotifyCanExecuteChanged(); ApplyCommand.NotifyCanExecuteChanged(); LaterCommand.NotifyCanExecuteChanged();
+        RefreshCountdown(); OnPropertyChanged("");
+        CheckCommand.NotifyCanExecuteChanged(); ApplyCommand.NotifyCanExecuteChanged(); LaterCommand.NotifyCanExecuteChanged();
+        ConfirmUpdateCommand.NotifyCanExecuteChanged();
     }
     private void LanguageChanged(object? sender, PropertyChangedEventArgs args) => Changed();
     public void Dispose()
     {
         if (disposed) return;
         disposed = true; lifetime.Cancel(); timer.Stop(); timer.Tick -= AutomaticTick;
+        countdownTimer.Stop(); countdownTimer.Tick -= CountdownTick;
         Text.Catalog.PropertyChanged -= LanguageChanged; lifetime.Dispose();
     }
 }

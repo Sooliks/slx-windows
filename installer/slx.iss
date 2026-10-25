@@ -54,6 +54,31 @@ Filename: "{app}\SLX VPN.exe"; Description: "{cm:LaunchProgram,SLX VPN}"; Flags:
 [UninstallRun]
 Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -NonInteractive -ExecutionPolicy Bypass -File ""{app}\scripts\manage-service.ps1"" -Action Remove"; Flags: runhidden waituntilterminated; RunOnceId: "RemoveSLXService"
 [Code]
+var UpdateSession: String;
+#include "runtime-environment.iss"
+function InitializeSetup(): Boolean;
+var I, J: Integer; Argument, Value: String;
+begin
+ Result := True;
+ SecureManagedEnvironment();
+ for I := 1 to ParamCount do begin
+  Argument := ParamStr(I);
+  if CompareText(Copy(Argument, 1, 11), '/SLXUPDATE=') = 0 then begin
+   Value := Copy(Argument, 12, Length(Argument));
+   if (UpdateSession <> '') or (Length(Value) <> 32) then begin Result := False; Exit; end;
+   for J := 1 to Length(Value) do
+    if Pos(Lowercase(Copy(Value, J, 1)), '0123456789abcdef') = 0 then begin Result := False; Exit; end;
+   UpdateSession := Value;
+  end;
+ end;
+end;
+function ClaimUpdate(): Boolean;
+var ExitCode: Integer; ServiceBinary: String;
+begin
+ ServiceBinary := ExpandConstant('{app}\service\SLX.Service.exe');
+ Result := FileExists(ServiceBinary) and Exec(ServiceBinary, '--claim-update ' + UpdateSession,
+  ExpandConstant('{app}'), SW_HIDE, ewWaitUntilTerminated, ExitCode) and (ExitCode = 0);
+end;
 function RunServiceAction(Action: String): Boolean;
 var ExitCode: Integer;
 begin
@@ -64,6 +89,10 @@ end;
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 begin
  Result := '';
+ if (UpdateSession <> '') and not ClaimUpdate() then begin
+  Result := 'SLX could not confirm that VPN is off. Return to the application and retry the update.';
+  Exit;
+ end;
  if FileExists(ExpandConstant('{app}\scripts\manage-service.ps1')) then
   if not RunServiceAction('Stop') then Result := 'Could not stop the existing SLX service. Close SLX and retry.';
 end;
@@ -78,6 +107,7 @@ begin
 end;
 function InitializeUninstall(): Boolean;
 begin
+ SecureManagedEnvironment();
  Result := RunServiceAction('Remove');
  if not Result then MsgBox('Could not stop SLX network service. Uninstall cancelled.', mbError, MB_OK);
 end;

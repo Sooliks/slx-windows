@@ -17,7 +17,8 @@ internal sealed partial class ControlDispatcher
         lock (observation)
         {
             RefreshOwner();
-            return owner is not null && owner != sid ? Rejected("CONTROLLER_OWNED") : new(true, "OK", engine.Status);
+            return owner is not null && owner != sid || !CanReadMaintenance(sid)
+                ? Rejected("CONTROLLER_OWNED") : new(true, "OK", ObservedStatus);
         }
     }
 
@@ -32,7 +33,7 @@ internal sealed partial class ControlDispatcher
             if (owner is not null && owner != sid) return (Rejected("CONTROLLER_OWNED"), null);
             PruneReceipts();
             if (receipts.TryGetValue(request.RequestId, out var prior))
-                return (prior.Fingerprint == fingerprint ? prior.Reply with { Status = engine.Status }
+                return (prior.Fingerprint == fingerprint ? prior.Reply with { Status = ObservedStatus }
                     : Rejected("IPC_REPLAY_MISMATCH"), null);
             if (active is { } running && running.Id == request.RequestId && running.Fingerprint != fingerprint)
                 return (Rejected("IPC_REPLAY_MISMATCH"), null);

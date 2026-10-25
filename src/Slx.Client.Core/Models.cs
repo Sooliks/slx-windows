@@ -25,7 +25,7 @@ public sealed record ClientPreferences(string Language = "ru", string Theme = "o
     RoutingMode Mode = RoutingMode.SelectedApplications, List<AppRule>? Applications = null,
     bool MinimizeToTray = true, bool AutoStart = false, string? SelectedProfileId = null,
     bool CheckUpdatesAutomatically = true, DateTimeOffset? UpdateReminderUntil = null,
-    bool AutoConnectOnStartup = true)
+    bool AutoConnectOnStartup = true, bool InstallUpdatesAutomatically = false)
 {
     public override string ToString() => "ClientPreferences { Private settings = [redacted] }";
 }

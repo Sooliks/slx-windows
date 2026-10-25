@@ -39,7 +39,7 @@ internal static class UpdatePresentationChecks
             Assert.Equal(Text.Catalog["UpdateLater"], new ButtonAutomationPeer(later).GetName());
             Assert.False(string.IsNullOrWhiteSpace(AutomationProperties.GetHelpText(later)));
             Assert.True(apply.Focusable); Assert.True(later.Focusable); Assert.NotNull(apply.FocusVisualStyle);
-            Assert.All(Sta.Descendants<Button>(banner), button => Assert.True(button.ActualHeight >= 40));
+            Assert.All(Sta.Descendants<Button>(banner).Where(button => button.IsVisible), button => Assert.True(button.ActualHeight >= 40));
             AssertFits(window, banner); UiScreenshots.Save(window, "slx-update15-available-ru-narrow");
             model.ImportVisible = true; Sta.Pump();
             Assert.False(banner.IsVisible);

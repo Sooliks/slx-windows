@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.24. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.25. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,22 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.25 — integrated updates with tunnel ownership
+
+Owner authorizes commit/push and release through the existing production update channel. Preserve alpha.24 network,
+discovery, application identity, runtime and storage contracts. Add a small unprivileged WPF updater staged outside
+the installation. Background download cannot disconnect VPN; default active behavior is deferral. Separate automatic
+installation consent defaults false, with a cancellable 15-second off-only countdown. Explicit active update requires
+confirmation and confirmed owned off. Service-owned typed GUID maintenance excludes reconnect during replacement and
+survives service restart. No arbitrary update command/path or privileged downloader is exposed over IPC.
+
+Only the verified native installer gets fixed silent/no-reboot arguments after hash/MOTW locking. After UAC, a fixed
+installed service CLI claims the same maintenance session before Stop. Observe real exit, matching app/service versions,
+fresh service/off state and maintenance release before success. Reboot, cancellation, mixed versions and unknown result
+are distinct. No atomic rollback/power-loss guarantee. Consume bounded DPAPI result before a single same-config resume
+through connect-if-idle. Settings/subscription keep their stores; checking does not imply installation consent. Update
+UI/service together. Alpha.24 needs one ordinary bootstrap; alpha.25 integrates later upgrades. See UPDATES.md.
 
 ## Alpha.24 — practical library order and resilient local state
 

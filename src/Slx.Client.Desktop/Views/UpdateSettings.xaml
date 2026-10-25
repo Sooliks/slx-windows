@@ -4,19 +4,29 @@
   <Border Style="{StaticResource Card}" Padding="16" Margin="0,0,0,18"><StackPanel>
    <TextBlock Text="{Binding CurrentVersionCaption}" FontFamily="{DynamicResource FontUi}" FontWeight="Bold"/>
    <TextBlock Text="{Binding BannerDescription}" Style="{StaticResource MutedText}" FontSize="13" Margin="0,5,0,12" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+   <TextBlock Text="{Binding CheckWarning}" Style="{StaticResource MutedText}" FontSize="13" Margin="0,0,0,12" TextWrapping="Wrap" Visibility="{Binding HasCheckWarning, Converter={StaticResource VisibleWhen}}"/>
    <StackPanel Visibility="{Binding HasOffer, Converter={StaticResource VisibleWhen}}">
     <TextBlock Text="{Binding OfferTitle}" FontWeight="Bold" Margin="0,0,0,4"/>
     <TextBlock Text="{l:Tr UpdateSavedOffer}" Style="{StaticResource MutedText}" FontSize="13" Margin="0,0,0,10" Visibility="{Binding IsOfferDeferred, Converter={StaticResource VisibleWhen}}"/>
-    <Button x:Name="UpdateSettingsApply" Content="{Binding ActionText}" Command="{Binding ApplyCommand}" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,0,0,12" AutomationProperties.Name="{Binding ActionName}" AutomationProperties.HelpText="{Binding InstallHint}"/>
+    <Button x:Name="UpdateSettingsApply" Content="{Binding ActionText}" Command="{Binding ApplyCommand}" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,0,0,12" AutomationProperties.Name="{Binding ActionName}" AutomationProperties.HelpText="{Binding InstallHint}" Visibility="{Binding ShowNormalActions, Converter={StaticResource VisibleWhen}}"/>
+    <WrapPanel Margin="0,0,0,8" Visibility="{Binding ConfirmationVisible, Converter={StaticResource VisibleWhen}}">
+     <Button Content="{l:Tr UpdateConfirmActive}" Command="{Binding ConfirmUpdateCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"/>
+     <Button Content="{l:Tr UpdateCancelActive}" Command="{Binding CancelConfirmationCommand}" Margin="0,0,0,8"/>
+    </WrapPanel>
     <TextBlock Text="{Binding InstallHint}" Style="{StaticResource MutedText}" FontSize="13" Margin="0,8,0,12" TextWrapping="Wrap" Visibility="{Binding ShowInstallHint, Converter={StaticResource VisibleWhen}}"/>
     <Grid Margin="0,9,0,12" Visibility="{Binding IsDownloading, Converter={StaticResource VisibleWhen}}"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
      <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progress, Mode=OneWay}" Height="5" VerticalAlignment="Center" Foreground="{DynamicResource Accent}" Background="{DynamicResource SurfaceInset}" BorderThickness="0" AutomationProperties.Name="{l:Tr UpdateDownloading}"/>
      <TextBlock Grid.Column="1" Text="{Binding ProgressText}" Foreground="{DynamicResource Text}" FontFamily="{DynamicResource FontUi}" FontSize="13" Margin="14,0,0,0"/>
     </Grid>
+    <ProgressBar IsIndeterminate="True" Height="5" Margin="0,0,0,12" Foreground="{DynamicResource Accent}" Background="{DynamicResource SurfaceInset}" BorderThickness="0" Visibility="{Binding IsApplying, Converter={StaticResource VisibleWhen}}" AutomationProperties.Name="{l:Tr UpdateNoInstallProgress}"/>
    </StackPanel>
    <Button Content="{l:Tr UpdateCheck}" Command="{Binding CheckCommand}" HorizontalAlignment="Left"/>
   </StackPanel></Border>
-  <CheckBox IsChecked="{Binding Automatic}"><TextBlock Text="{l:Tr UpdatesAutomatic}" TextWrapping="Wrap"/></CheckBox>
-  <TextBlock Text="{l:Tr UpdatesPrivacy}" Style="{StaticResource MutedText}" FontSize="13" Margin="48,7,0,0"/>
+  <CheckBox IsChecked="{Binding Automatic}"><TextBlock Text="{Binding AutomationCaption}" TextWrapping="Wrap"/></CheckBox>
+  <TextBlock Text="{Binding AutomationPrivacy}" Style="{StaticResource MutedText}" FontSize="13" Margin="48,7,0,0"/>
+  <StackPanel Margin="0,18,0,0" Visibility="{Binding HasIntegratedUpdate, Converter={StaticResource VisibleWhen}}">
+   <CheckBox x:Name="InstallUpdatesAutomatically" IsChecked="{Binding InstallAutomatically}"><TextBlock Text="{l:Tr UpdateInstallAutomatically}" TextWrapping="Wrap"/></CheckBox>
+   <TextBlock Text="{l:Tr UpdateInstallAutomaticallyHint}" Style="{StaticResource MutedText}" FontSize="13" Margin="48,7,0,0"/>
+  </StackPanel>
  </StackPanel>
 </UserControl>
