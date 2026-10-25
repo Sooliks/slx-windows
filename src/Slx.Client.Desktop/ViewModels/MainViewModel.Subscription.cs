@@ -4,6 +4,8 @@ using Slx.Client.Desktop.Localization;
 namespace Slx.Client.Desktop.ViewModels;
 public sealed partial class MainViewModel
 {
+    private CancellationTokenSource? subscriptionOperation;
+    internal Func<string, CancellationToken, Task<SubscriptionSnapshot>>? SubscriptionFetchOverride { get; set; }
     private VpnProfile? selectedProfile;
     public VpnProfile? SelectedProfile
     {
@@ -26,7 +28,9 @@ public sealed partial class MainViewModel
         try
         {
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(35));
-            var snapshot = await subscriptions.FetchAsync(url, store.GetOrCreateInstallationId(), Text.Catalog.Language, timeout.Token);
+            subscriptionOperation = timeout;
+            var snapshot = SubscriptionFetchOverride is not null ? await SubscriptionFetchOverride(url, timeout.Token)
+                : await subscriptions.FetchAsync(url, store.GetOrCreateInstallationId(), Text.Catalog.Language, timeout.Token);
             if (owner != generation || disposed) return;
             ApplySubscription(url, snapshot);
             ImportVisible = false;
@@ -39,7 +43,7 @@ public sealed partial class MainViewModel
         {
             if (owner == generation) ShowFault(error is ClientFault fault ? fault.Code : "NETWORK_UNAVAILABLE");
         }
-        finally { if (owner == generation) IsBusy = false; }
+        finally { if (owner == generation) { subscriptionOperation = null; IsBusy = false; } }
     }
     private async Task RemoveSubscriptionAsync()
     {

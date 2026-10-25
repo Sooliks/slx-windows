@@ -24,8 +24,13 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     {
         persistPreferences = loadStoredData;
         if (!loadStoredData) { saved = initialSubscription; preferences = initialPreferences ?? new(); }
-        try { if (loadStoredData) { preferences = store.LoadPreferences(); saved = store.LoadSubscription(); } }
-        catch (ClientFault) { messageKey = "FaultStorage"; }
+        if (loadStoredData)
+        {
+            var loaded = ReadStoredData(store);
+            preferences = loaded.Preferences; saved = loaded.Subscription;
+            HasPreferencesFault = loaded.PreferencesFailed;
+            if (loaded.PreferencesFailed || loaded.SubscriptionFailed) messageKey = "FaultStorage";
+        }
         Text.Catalog.SetLanguage(preferences.Language);
         ThemeManager.Apply(preferences.Theme);
         foreach (var group in (preferences.Applications ?? []).Select(ApplicationGroups.Normalize).GroupBy(x=>x.Name.Trim(),StringComparer.CurrentCultureIgnoreCase)) Attach(group);
@@ -87,13 +92,13 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public bool IsTunnelActive => status?.ProtectionActive == true || status?.Phase is TunnelPhase.Connected or TunnelPhase.Connecting or TunnelPhase.Reconnecting or TunnelPhase.Stopping or TunnelPhase.Checking;
     // A lost connect reply may leave protection installed even when the last snapshot was Disconnected.
     // Offer idempotent explicit off without turning an unknown observation into a claimed active tunnel.
-    private bool ShouldRequestDisconnect => IsTunnelActive || IsBusy || !statusFresh && lastServiceCode is not null;
+    private bool ShouldRequestDisconnect => IsTunnelActive || operation is not null || !statusFresh && lastServiceCode is not null;
     public bool ShowConnectionAction => HasSubscription || ShouldRequestDisconnect;
     public bool ShowImportAction => !ShowConnectionAction;
     public bool CanReconnect => !UpdateInProgress && statusFresh && HasSubscription && IsTunnelActive && !IsBusy;
     public bool CanEditRouting => !UpdateInProgress && !IsBusy;
     private bool IsStartupCleanupWait => statusFresh && status is { Phase: TunnelPhase.Faulted, ProtectionActive: false, Code: "SERVICE_STARTUP_CLEANUP_PENDING" };
-    public bool CanConnect => !UpdateInProgress && !IsStartupCleanupWait && ((HasSubscription && statusFresh) || ShouldRequestDisconnect);
+    public bool CanConnect => !UpdateInProgress && !IsStartupCleanupWait && (ShouldRequestDisconnect || !IsBusy && HasSubscription && statusFresh);
     public string ConnectionAction => Text.Catalog[ShouldRequestDisconnect ? "Disconnect" : "Connect"];
     public string StatusText => Text.Catalog[IsStartupCleanupWait ? "StatusPreparing" : !statusFresh ? ServiceStateCopy.IsTrafficFault(lastServiceCode) ? "StatusOperationUnconfirmed" : lastServiceCode == null ? "StatusUnknown" : status == null ? "StatusUnavailable" : "StatusStale" : status?.Phase switch
     {

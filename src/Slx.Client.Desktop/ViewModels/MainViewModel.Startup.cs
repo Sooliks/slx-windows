@@ -6,6 +6,7 @@ public sealed partial class MainViewModel
     private CancellationTokenSource? startupRefresh;
     private bool startupRefreshStarted, subscriptionRefreshing, startupRefreshFailed, startupRefreshFinished;
     internal Func<string, CancellationToken, Task<SubscriptionSnapshot>>? StartupFetchOverride { get; set; }
+    internal TimeSpan StartupRefreshBudget { get; set; } = TimeSpan.FromSeconds(20);
     public bool IsSubscriptionRefreshing { get => subscriptionRefreshing; private set { if (SetProperty(ref subscriptionRefreshing, value)) OnPropertyChanged(nameof(SubscriptionRefreshHint)); } }
     public string SubscriptionRefreshHint => Text.Catalog[IsSubscriptionRefreshing ? "RefreshingProfiles" : startupRefreshFailed ? "CachedProfiles" : "ProfilesAutoRefresh"];
     internal async Task RefreshOnStartupAsync()
@@ -14,18 +15,23 @@ public sealed partial class MainViewModel
         startupRefreshStarted = true;
         if (saved is null) { startupRefreshFinished = true; return; }
         var source = saved;
-        using var budget = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+        using var budget = new CancellationTokenSource(StartupRefreshBudget);
         startupRefresh = budget;
         IsSubscriptionRefreshing = true;
         try
         {
             var snapshot = StartupFetchOverride != null ? await StartupFetchOverride(source.Url, budget.Token)
                 : await subscriptions.FetchAsync(source.Url, store.GetOrCreateInstallationId(), Text.Catalog.Language, budget.Token);
-            if (disposed || budget.IsCancellationRequested || !ReferenceEquals(saved, source) || IsBusy || IsTunnelActive) return;
+            if (disposed || !ReferenceEquals(saved, source)) return;
+            if (budget.IsCancellationRequested || IsBusy || IsTunnelActive)
+            {
+                if (ReferenceEquals(startupRefresh, budget)) startupRefreshFailed = true;
+                return;
+            }
             ApplySubscription(source.Url, snapshot);
         }
         catch (Exception error) when (error is ClientFault or OperationCanceledException or System.IO.IOException)
-        { if (!disposed && !budget.IsCancellationRequested) startupRefreshFailed = true; }
+        { if (!disposed && ReferenceEquals(startupRefresh, budget) && ReferenceEquals(saved, source)) startupRefreshFailed = true; }
         finally
         {
             if (ReferenceEquals(startupRefresh, budget)) startupRefresh = null;

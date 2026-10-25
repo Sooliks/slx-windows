@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.23. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.24. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,37 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.24 — practical library order and resilient local state
+
+Use one presentation-only ordering policy for cached, progressive, final, searched and source-limited application
+lists: browsers, Telegram, Discord, recognized games/platforms, then the rest. Rank before the 300-item source/final
+limit; keep the 600-row transient bound and stable card objects. Installed exact rules precede explicit Find EXE
+recommendations. Classification is a display heuristic, never native identity, routing permission or proof of installation.
+Discovery cannot alter saved selections, toggle states or send a VPN control mutation. Unknown custom games remain
+searchable/manual additions without generic executable-name rules or inventory upload.
+
+Subscription HTTP work is separate from a tunnel mutation. A confirmed off state during refresh keeps Connect labelled
+correctly and disabled until work finishes; an active tunnel retains explicit Disconnect, which cancels the subscription
+request and fences its late result. Unknown tunnel outcomes continue to offer safe explicit off. Update-install admission
+cannot overwrite a newer accepted service read; a newer confirmed off can admit installation, while active/unknown and
+failed reads reject it. A confirmed active reply remains current, rather than being relabelled as a transport failure.
+
+Validate bounded preferences and saved-subscription structure before UI use. Load their independent stores separately.
+Unreadable preferences remain untouched and block subsequent writes in that store instance, including automatic startup
+reconciliation; show a persistent Settings warning about session-only changes. No automatic reset or migration is added.
+Preserve a valid installation ID when explicitly replacing a malformed subscription snapshot. Startup refresh's own
+timeout and a skipped live-state response identify cached profiles; explicit cancellation does not invent a network error.
+
+Retain the existing typed protection, cancellation, recovery, service ownership and exact executable identity rules.
+During automatic recovery and restored intent, refresh only recognized Discord/Roblox sibling layouts through held
+local no-reparse directory/executable handles; fully prepare the proposed plan before adopting current/pinned intent.
+Disabled exact paths remain unchanged and cannot be enabled by sibling expansion. On a failed native application
+protection commit, clear the claimed revision and schedule full protected recovery of the authoritative before/after
+plan. Never replay an AddRule or publish healthy success from the same health tick after protection reconciliation failed.
+Current results and any additional recovery correction belong in VERIFICATION.md and versioned release notes.
+The owner has authorized Codex commit/push and publication through the existing Windows workflow. Source base is exact
+v0.1.0-alpha.23 at 85b514ffc317c92c14e34153bfbdc611cdebfe34; website/server/DB and live-machine settings are out of scope.
 
 ## Alpha.23 — ordinary traffic routes, live observations and local application identity
 

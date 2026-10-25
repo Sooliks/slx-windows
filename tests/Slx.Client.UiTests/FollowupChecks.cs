@@ -30,6 +30,8 @@ internal static class FollowupChecks
         AutoRoutingChecks.Run();
         DashboardChecks.Run(window);
         CheckStartupRefresh();
+        StartupRefreshOutcomeChecks.Run();
+        StoredDataIsolationChecks.Run();
     }
     private static void CheckQuickAdd()
     {

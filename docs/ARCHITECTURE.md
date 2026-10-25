@@ -1,5 +1,47 @@
 # Boundaries
 
+Alpha.24: Windows LibraryApplicationOrder owns presentation priority: browsers, Telegram, Discord, games/launchers,
+then other applications. Exact executable metadata, bounded known catalogue categories and known game directories
+classify cards only; they never create a routing match. Discovered/cached local cards precede catalogue recommendations.
+Ordinal name/path tie-breaks keep equivalent results stable across source completion order and RU/EN switches. Running,
+installed and shortcut results are ranked before their 300-path cap; DiscoveryScanner applies the same bounded order
+before source publication, and Desktop applies it before its merged cap and twelve-card pagination. Progressive/cache
+refresh reuses card instances and preserves explicit selection. Search, icons and discovery do not change live rules.
+
+RecoveredApplicationPlan prepares a complete proposed selected-app plan before TunnelEngine adopts it. Windows
+VersionedApplicationPaths.RefreshProtected reads recognized Discord/Roblox version siblings through held local
+directory/executable handles without following reparse points, bounds candidates and preserves explicit disabled
+siblings. ExactApplicationPlan then canonicalizes/validates the complete proposal. Cancellation or preparation failure
+cannot partially replace the current/pinned application lists. Restore and recovery use one prepared list for WFP,
+Xray, revision and durable intent; whole-PC mode does not gain selected-file dependencies. No generic name rule,
+remote lookup, forced process termination or discovery-driven live update is introduced.
+
+ApplicationUpdateTransaction marks ProtectionRecoveryRequired after any failed native application-filter stage:
+initial union, rollback to Before after desired-intent save failure, final After, or final Before after the core's old
+revision is confirmed. That flag invalidates the incremental baseline and stops further delta reconciliation/replay.
+TunnelEngine clears the pending update, withdraws confirmed connection success and schedules full protected recovery.
+Before remains authoritative when replacement was never attempted or the old core revision was confirmed; After is
+the recovery intent after an attempted unknown/applied replacement. A lost core acknowledgement alone retains the
+existing union and revision-read reconciliation; it does not force this native-baseline recovery path. Ordinary
+application edits with a valid baseline continue to preserve the running core/TUN and unaffected sessions.
+
+UserSettingsStore validates bounded preference structure and decrypted subscription snapshots with existing typed
+contracts before Desktop consumes them, without checking installed files, resolving addresses or making requests.
+A failed preference read latches writes off for that store instance; original bytes are preserved until the owner
+restores the file/access and restarts. Desktop reads preferences and subscription independently, keeps a persistent
+session-only Settings warning, and skips startup-registration reconciliation while preferences are unreadable.
+An invalid cached subscription does not reset a valid InstallationId; explicit replacement can preserve that identity.
+No reset, automatic repair or stored-data migration is introduced. Startup refresh labels retained cached profiles
+after its own timeout or an active/busy replacement skip; explicit cancellation is distinct from a failed refresh.
+
+Desktop separates subscription HTTP activity from a pending tunnel command: a refresh cannot relabel confirmed Off
+as Disconnect or issue an off request merely because IsBusy is true. Explicit off during an active/uncertain tunnel
+can supersede and cancel subscription HTTP, and generation fencing rejects its late result. Update-install admission
+captures mutation generation and observation revision; its delayed read/error cannot replace a newer observation.
+Only a current confirmed unprotected Off status grants the mutation lease; deadlines and cancellation remain bounded.
+These contracts introduce no dependency, IPC, server or database change and do not prove installed packet continuity,
+the friend's connection outcome, every destination, physical DNS behaviour or CS2 acceptance.
+
 Alpha.23: Core XraySystemRoutes owns the four split-default prefixes and the existing two DNS host routes. Windows
 TunnelRouteLookup shares unrestricted GetBestRoute2/GUID observation between TunnelDnsRoute and TunnelDataRoute;
 it neither binds a probe socket nor edits routes. PublicIpv6Source limits the extra IPv6 read to a usable preferred

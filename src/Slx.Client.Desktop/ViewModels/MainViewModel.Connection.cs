@@ -37,6 +37,8 @@ public sealed partial class MainViewModel
         if (action != "disconnect" && IsSelectedMode && !HasSelectedApplications) { Notice("NoActiveApps"); Page = "applications"; return; }
         ConnectPlan? plan = null;
         var owner = ++generation;
+        subscriptionOperation?.Cancel();
+        subscriptionOperation = null;
         operation?.Cancel();
         using var current = new CancellationTokenSource(PipeContract.ClientMutationTimeout);
         operation = current;
@@ -153,7 +155,7 @@ public sealed partial class MainViewModel
     public void Dispose()
     {
         if (disposed) return;
-        disposed = true; discoveryCancellation?.Cancel(); CancelRoutingApply(); CancelStartupRefresh(); timer.Stop(); timer.Tick -= PollTick; operation?.Cancel();
+        disposed = true; discoveryCancellation?.Cancel(); CancelRoutingApply(); CancelStartupRefresh(); timer.Stop(); timer.Tick -= PollTick; operation?.Cancel(); subscriptionOperation?.Cancel();
         libraryAddCancellation?.Cancel();foreach(var entry in libraryEntries.Values)entry.Dispose();
         Updates.Dispose(); noticeTimer?.Stop();
         Text.Catalog.PropertyChanged -= LanguageChanged;

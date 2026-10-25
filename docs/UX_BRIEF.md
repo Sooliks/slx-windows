@@ -1,5 +1,45 @@
 # Windows client UX brief
 
+## Alpha.24 familiar app priority and resilient daily use (2026-10-25)
+
+Audience: returning Windows users selecting common applications, switching individual rules and updating SLX without
+having to understand paths, service timing or network internals. Preserve the current SLX/site-aligned Olive/lime and
+Terminal design, readable native text, icon sidebar, fixed status geometry and floating notices. Quality means prompt
+access to saved choices and truthful feedback; no new decoration, simulated traffic or unsupported success state.
+
+The application chooser puts browsers first, then Telegram, Discord, games/launchers and other apps. Local discovered
+or cached cards stay ahead of catalogue recommendations; recommendations still require finding an installed EXE.
+Known executable/category/game-directory metadata orders presentation only. Search applies to the whole available
+library, Show more continues in groups of twelve, and changing RU/EN does not reshuffle equivalent results. Ranking
+also precedes source/merged result caps so low-priority entries cannot consume all retained slots first. Existing
+selections, names, enabled switches, exact paths, icon work and stable cards survive progressive refresh. A cached
+card is a previous observation; explicit addition still validates its installed files before saving a choice.
+
+Refreshing a subscription shows request activity while a confirmed disconnected VPN keeps its Connect label; that
+button waits for the refresh rather than sending an unrelated Disconnect. During an active or uncertain connection,
+explicit Disconnect stays reachable, cancels the competing subscription request and rejects late HTTP results.
+An install check cannot overwrite a newer connection observation with its delayed off reply or error. Installation
+remains explicit and requires a current confirmed off/unprotected state; downloading is separate from installing.
+
+Unreadable settings do not crash startup, hide a separately valid subscription or silently overwrite the original
+file. A persistent Settings notice explains that preferences are temporary for this session and access/file recovery
+plus restart is required. Automatic startup registration is not reconciled from fallback preferences. No reset button
+or automatic file repair is added. A malformed cached subscription reports a storage fault while valid preferences
+remain usable; an explicit replacement preserves a valid existing installation identity. Startup subscription timeout
+or a skipped replacement during an active operation says cached profiles remain; explicit cancellation is neutral.
+
+Recognized versioned apps can refresh their exact local paths during protected recovery. Preparation is complete
+before adoption, respects disabled siblings and rejects unsupported path aliases; it does not terminate apps or
+expand routing by executable name. Normal app edits continue to apply to new sessions without restarting unrelated
+sessions. If a native protection transaction breaks its baseline, SLX reports protected recovery instead of claiming
+that the edit succeeded or repeatedly applying an unsafe delta. Old versus new desired intent follows confirmed
+transaction progress; an acknowledgement lost on its own still uses the existing revision reconciliation.
+
+Controlled evidence covers ranking before caps, paging/search/card reuse, malformed local data and preserved identity,
+cached-profile feedback, subscription/tunnel activity separation, stale install reads and failed protection stages.
+Executed commands/results are in VERIFICATION.md. This does not close friend-PC, real WFP/TUN traffic continuity,
+reboot/sleep, Windows 10, physical DPI/accessibility, DNS/provider coexistence or CS2 acceptance.
+
 ## Alpha.23 observable connection progress and one active UI (2026-10-25)
 
 Audience: a returning user whose apps have no VPN traffic despite an apparent connection attempt. Friction: a busy

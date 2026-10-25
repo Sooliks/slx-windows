@@ -39,7 +39,7 @@ public static class ShortcutApplications
             }
             catch(Exception error) when(error is IOException or UnauthorizedAccessException) { }
         }
-        return found.Values.Take(300).ToArray();
+        return LibraryApplicationOrder.Bundled.Order(found.Values).Take(300).ToArray();
     }
     private static unsafe string? ReadTarget(string shortcut)
     {

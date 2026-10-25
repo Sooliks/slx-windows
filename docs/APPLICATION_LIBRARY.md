@@ -1,7 +1,22 @@
-# Application library — alpha.12
+# Application library — alpha.24
 
 Desktop owns library presentation, saved/read activity and explicit selection. Windows owns local discovery and the
 optional cache through UserSettingsStore. No inventory is sent to the catalogue endpoint, update server or diagnostics.
+
+## Priority and stable selection
+
+The chooser ranks browsers, Telegram, Discord, games/launchers, then other applications. Discovered/cached local cards
+precede catalogue recommendations, which retain their explicit Find executable action. LibraryApplicationOrder uses
+known executable names, catalogue categories and recognized Steam/Epic game directories for presentation only.
+It does not discover additional files, create process-name rules, select an application or change routing scope.
+Ordinal name and exact-path tie-breaks make equivalent results deterministic across source completion and RU/EN.
+
+Priority is applied before the running/installed/shortcut source caps, before DiscoveryScanner's 300-path batch cap,
+and before the Desktop merged result cap. Existing traversal limits remain; ranking does not make scans unbounded
+or guarantee finding every installed title. Cached and progressively found rows use the same visible ordering.
+Stable card instances, query, page size and explicit enabled choices survive reordered/progressive results. Search
+matches the available library rather than only the first twelve cards; Show more exposes twelve additional matches.
+Changing presentation priority never reorders or rewrites saved selected-app intent.
 
 ## Return and refresh
 
@@ -38,6 +53,20 @@ Saved rows are previous observations, not proof that a program is still installe
 files on a worker and adds only existing exact paths. A moved/removed file offers refresh/manual selection. Manual
 file selection adds the chosen executable without importing unverified cached siblings. Discovery by itself never
 selects a new path, changes selected rules or reconnects VPN. Service plan validation remains authoritative.
+
+## Recovery of selected executable paths
+
+The privileged recovery owner prepares recognized Discord/Roblox version siblings separately from UI discovery.
+RefreshProtected reads only held local directories and executable files, refuses reparse traversal, bounds candidates
+and leaves explicit disabled siblings disabled. RecoveredApplicationPlan validates and canonicalizes the whole proposed
+list before the engine changes its current/pinned plans. Cancellation or failure cannot install a partial list.
+One prepared exact-path list feeds WFP and Xray during restore/recovery; unresolved or unsupported files fail closed.
+This does not auto-select newly discovered apps, create wildcard rules, terminate processes or prove packet routing.
+
+Preferences and optional discovery cache retain separate failure handling. Invalid preferences raise a safe storage
+fault and latch preference writes off for the session, preserving the original file; cached discovery cannot repair
+or overwrite them. The separately saved subscription can still load, and Settings explains temporary choices until
+file/access restoration and restart. A valid installation identity is not reset by a malformed subscription snapshot.
 
 ## Presentation and icons
 

@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 namespace Slx.Client.Windows;
 /// <summary>Repairs only removed Discord/Roblox version paths, retaining exact executable rules.</summary>
-public static class VersionedApplicationPaths
+public static partial class VersionedApplicationPaths
 {
     public static bool NeedsRefresh(AppRule rule) => TryVersionRoot(rule.ExecutablePath, out _, out _);
     public static IReadOnlyList<AppRule> Refresh(IReadOnlyList<AppRule> rules)

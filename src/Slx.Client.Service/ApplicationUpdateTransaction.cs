@@ -9,17 +9,19 @@ internal sealed class ApplicationUpdateTransaction(ConnectPlan before, ConnectPl
     public bool Finished { get; private set; }
     public bool Applied { get; private set; }
     public bool Attempted { get; private set; }
+    public bool ProtectionRecoveryRequired { get; private set; }
+    public bool RecoveryUsesAfter => Attempted && coreApplied is not false;
     public string? FailureCode { get; private set; }
     private bool? coreApplied;
     public async Task StartAsync(CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        protect(ApplicationProtectionStage.Union);
+        ApplyProtection(ApplicationProtectionStage.Union);
         try { save(true); }
         catch
         {
             // No core mutation has been sent: old routing is still authoritative.
-            protect(ApplicationProtectionStage.Before);
+            ApplyProtection(ApplicationProtectionStage.Before);
             throw;
         }
         Attempted = true;
@@ -31,7 +33,7 @@ internal sealed class ApplicationUpdateTransaction(ConnectPlan before, ConnectPl
     }
     public async Task ReconcileAsync()
     {
-        if (Finished) return;
+        if (Finished || ProtectionRecoveryRequired) return;
         try
         {
             if (coreApplied is null)
@@ -44,7 +46,7 @@ internal sealed class ApplicationUpdateTransaction(ConnectPlan before, ConnectPl
             }
             // Intent is durable before releasing any blocking rule. A crash resumes the adopted desired plan.
             save(coreApplied.Value);
-            protect(coreApplied.Value ? ApplicationProtectionStage.After : ApplicationProtectionStage.Before);
+            ApplyProtection(coreApplied.Value ? ApplicationProtectionStage.After : ApplicationProtectionStage.Before);
             Applied = coreApplied.Value;
             Finished = true;
             FailureCode = Applied ? null : "ROUTING_UPDATE_FAILED";
@@ -52,5 +54,15 @@ internal sealed class ApplicationUpdateTransaction(ConnectPlan before, ConnectPl
         catch (Exception error) when (error is ClientFault or OperationCanceledException or IOException
             or HttpRequestException or UnauthorizedAccessException or System.Security.Cryptography.CryptographicException)
         { FailureCode = error is ClientFault fault ? fault.Code : "ROUTING_UPDATE_UNCONFIRMED"; }
+    }
+    private void ApplyProtection(ApplicationProtectionStage stage)
+    {
+        try { protect(stage); }
+        catch (Exception error)
+        {
+            ProtectionRecoveryRequired = true;
+            FailureCode = error is ClientFault fault ? fault.Code : "TRAFFIC_PROTECTION_FAILED";
+            throw;
+        }
     }
 }

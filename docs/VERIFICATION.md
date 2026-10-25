@@ -1,4 +1,50 @@
-# Verification — 0.1.0-alpha.23 (2026-10-25)
+# Verification — 0.1.0-alpha.24 (2026-10-25)
+
+STATUS: PARTIAL for installed acceptance. Release base is the exact published alpha.23 source commit
+`85b514ffc317c92c14e34153bfbdc611cdebfe34`; the working branch also contains its later documentation-only evidence commit.
+Codex is authorized to commit/push and publish through the existing Windows CI. Local results below precede publication.
+
+## Current alpha.24 local execution
+
+- `pwsh -NoProfile -File scripts/verify.ps1`: **exit 0**, completed `2026-10-25T15:55:35Z`. Locked restore succeeded.
+  Release solution build **0 warnings, 0 errors**; **664 main tests passed, 0 failed/skipped**, reported 6 seconds;
+  **1 composite WPF test passed, 0 failed/skipped**, 34 seconds. Source-size guard passed.
+- The first build found an ambiguous target-typed test constructor and xUnit2031 in two new assertions. Explicit
+  AppRule construction and the predicate Assert.Single overload corrected them; analyzers/guards were not disabled.
+  The successful full run was after both corrections. Runtime has not changed since that full run.
+- `node --test --test-isolation=none scripts/tests/release-auth.test.mjs scripts/tests/release-base.test.mjs`:
+  **exit 0, 24 passed**, 0 failed/skipped. `pwsh -NoProfile -File scripts/tests/runtime-inputs.test.ps1`:
+  **exit 0, 18 checks passed**. No release, source-cleanliness or vendor-trust guard was weakened.
+- New main coverage includes priority before source limits, exact-name/store-path classifier boundaries and culture
+  independence; malformed preferences/protected snapshots, unchanged failed-store bytes and installation ID; protected
+  version-root/candidate leases, junction rejection, recognized sibling refresh, disabled paths and cancellation;
+  all four native protection failure stages with correct before/after recovery, invalidated revision and no core replay.
+- The WPF composite adds cached/progressive/completed/search priority, stable entry references and unchanged chosen
+  rules with zero discovery IPC; independent stored-data reads, cached startup timeout/skipped result versus explicit
+  cancellation; subscription refresh without a fictitious Disconnect and active off cancelling the fetch; stale update
+  admission success/failure versus newer Connected/Checking/Reconnecting/Disconnected reads, preserving fresh state.
+- Evidence: ignored `artifacts/handoff/verify-alpha24.txt` and each test project's timestamped `TestResults/*.trx`.
+  Local temporary EXE/junction/DPAPI fixtures neither change the installed service nor measure real VPN traffic.
+
+## Owner alpha.23 live observation supplied during this work
+
+Captured `2026-10-25T15:59:00Z`: current read at 15:59:00.314Z, Connected, Protection=true, Probe=true, no code,
+ConnectedAt15:24:59Z; Health incidents3/retained3, last at15:53:50Z. The reported primary Gstatic TLS failure2302ms
+was followed by Gstatic204/278ms and SLX200/556ms successes. Both representative IPv4 data routes are OwnedTunnel
+/1 metric0 at15:58:51Z; startup DNS is older OwnedTunnel /32 success313ms. No usable public IPv6 source was available.
+This is owner-supplied successful alpha.23 evidence, not a diagnosis of the initial TLS failure or acceptance on the
+friend's PC. The owner intends to request the friend's diagnostic after alpha.24 if the problem remains.
+
+## Alpha.24 acceptance limits
+
+Actual friend traffic, CS2, physical Windows10/DPI, installed upgrade/rollback and network transitions remain open.
+Recognized sibling layouts do not discover arbitrary moved EXEs; unknown custom games can remain in the general list.
+Corrupt preferences require restoring a valid file/access and restarting; no automatic reset/repair UI was introduced.
+The existing routing/probe observations do not prove all apps, packets, DNS configurations or networks. Native delta
+failure uses full protected recovery; ordinary selection edits and unknown core replies keep their existing no-restart,
+no-replay policy. Website/server/DB and this PC's real subscription/settings/network were not changed by verification.
+
+## Historical alpha.23 evidence
 
 STATUS: PARTIAL. Current source preparation starts at published alpha.22 commit
 `f694b51c8a815ce041fe67b26c8e21627aaa5cda`. The owner reports alpha.22's successful Windows release with

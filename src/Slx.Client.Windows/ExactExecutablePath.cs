@@ -13,11 +13,17 @@ internal sealed unsafe class ExactExecutablePath : IDisposable
     private readonly List<SafeFileHandle> handles = [];
     internal ExactExecutablePath(string path) => Path = path; // Empty handles are only used by injected contract fixtures.
     public string Path { get; private set; }
-    public static ExactExecutablePath Open(string input, CancellationToken token)
+    public static ExactExecutablePath Open(string input, CancellationToken token) => Open(input, false, token);
+    internal static ExactExecutablePath OpenDirectory(string input, CancellationToken token) => Open(input, true, token);
+    private static bool ValidPath(string input, bool directory) => directory
+        ? System.IO.Path.IsPathFullyQualified(input)
+            && PlanValidator.IsExecutablePath(System.IO.Path.Combine(input, "slx-directory-lease.exe"))
+        : PlanValidator.IsExecutablePath(input);
+    private static ExactExecutablePath Open(string input, bool directory, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        if (!PlanValidator.IsExecutablePath(input)) throw new ClientFault(Unsupported);
-        string full = System.IO.Path.GetFullPath(input);
+        if (!ValidPath(input, directory)) throw new ClientFault(Unsupported);
+        string full = System.IO.Path.TrimEndingDirectorySeparator(System.IO.Path.GetFullPath(input));
         string root = System.IO.Path.GetPathRoot(full)!;
         var drive = new DriveInfo(root);
         if (drive.DriveType is DriveType.Network or DriveType.Unknown or DriveType.NoRootDirectory)
@@ -32,7 +38,7 @@ internal sealed unsafe class ExactExecutablePath : IDisposable
             for (int index = 0; index < components.Length; index++)
             {
                 token.ThrowIfCancellationRequested();
-                result.handles.Add(OpenComponent(components[index], result.handles[^1], index < components.Length - 1));
+                result.handles.Add(OpenComponent(components[index], result.handles[^1], directory || index < components.Length - 1));
             }
             var buffer = new StringBuilder(32768);
             uint count = GetFinalPathNameByHandleW(result.handles[^1], buffer, (uint)buffer.Capacity, 0);
@@ -41,7 +47,7 @@ internal sealed unsafe class ExactExecutablePath : IDisposable
             string normalized = buffer.ToString();
             if (normalized.StartsWith(@"\\?\", StringComparison.Ordinal)) normalized = normalized[4..];
             // This change repairs casing only. Short names, devices and remapped aliases remain unsupported.
-            if (!PlanValidator.IsExecutablePath(normalized) || !full.Equals(normalized, StringComparison.OrdinalIgnoreCase))
+            if (!ValidPath(normalized, directory) || !full.Equals(normalized, StringComparison.OrdinalIgnoreCase))
                 throw new ClientFault(Unsupported);
             token.ThrowIfCancellationRequested();
             result.Path = normalized;

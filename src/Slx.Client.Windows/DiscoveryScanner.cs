@@ -54,8 +54,7 @@ public static class DiscoveryScanner
                         var rule = ApplicationGroups.Normalize(app, cancellationToken);
                         normalized.TryAdd(rule.ExecutablePath, rule);
                     }
-                    batch = new(source.Source, normalized.Values.OrderBy(x => x.Name,
-                        StringComparer.CurrentCultureIgnoreCase).Take(300).ToArray(), true);
+                    batch = new(source.Source, LibraryApplicationOrder.Bundled.Order(normalized.Values).Take(300).ToArray(), true);
                 }
                 catch (Exception error) when (ExpectedSourceFailure(error))
                 {

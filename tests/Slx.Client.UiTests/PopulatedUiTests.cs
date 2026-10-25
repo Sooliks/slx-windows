@@ -45,6 +45,8 @@ public sealed class PopulatedUiTests
             LayoutStabilityChecks.Run(window);
             ConnectionRecoveryChecks.Run();
             StatusObservationChecks.Run();
+            SubscriptionActivityChecks.Run();
+            UpdateAdmissionChecks.Run();
             SingleInstanceChecks.Run();
             DnsDiagnosticsChecks.Run(window);
             TrafficRouteDiagnosticsChecks.Run(window);

@@ -11,6 +11,7 @@ internal static partial class LibraryCacheChecks
 {
     public static void Run()
     {
+        LibraryPriorityChecks.Run();
         CachedAndFastRowsAppearDuringOneRefresh();
         PartialResultCannotEvictAnyFullBaselineRow();
         CompleteScanPrunesAndPersistsOnlyFreshRows();

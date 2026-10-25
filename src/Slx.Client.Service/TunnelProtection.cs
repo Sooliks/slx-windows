@@ -21,7 +21,7 @@ internal sealed partial class TunnelEngine
             if(saved==null){startupOffCleanup.Begin();TryStartupOffCleanup();return;}
             startupOffCleanup.Cancel();
             pinnedPlan=saved.Plan;currentPlan=saved.EndpointHost is null?saved.Plan:saved.Plan with{Profile=saved.Plan.Profile with{Host=saved.EndpointHost}};ownerSid=saved.OwnerSid;desiredConnected=true;
-            var restored=ExactApplicationPlan.Prepare(RestoredTunnelPlan.Refresh(saved),cancellationToken);
+            var restored=ExactApplicationPlan.Prepare(RestoredTunnelPlan.Refresh(saved,cancellationToken),cancellationToken);
             pinnedPlan=restored.Plan;
             currentPlan=restored.EndpointHost is null?restored.Plan:restored.Plan with{Profile=restored.Plan.Profile with{Host=restored.EndpointHost}};
             // Preserve old rules until the complete refreshed native-ID set passes and replacement commits.

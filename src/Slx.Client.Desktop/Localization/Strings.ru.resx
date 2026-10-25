@@ -207,4 +207,5 @@
 <data name="FaultVpnTrafficRoute" xml:space="preserve"><value>Windows направляет обычный трафик мимо туннеля SLX. Проверьте другие VPN и программы маршрутизации, затем повторите подключение. При восстановлении SLX сохраняет защиту; кнопка «Отключить» снимает её.</value></data>
 <data name="FaultTrafficPath" xml:space="preserve"><value>Не удалось проверить путь к приложению. Выберите его установленный .exe заново в «Приложениях». Псевдонимы и перенаправленные папки пока не поддерживаются.</value></data>
 <data name="FaultTrafficIdentity" xml:space="preserve"><value>Windows не подтвердила один и тот же файл для маршрутизации VPN и защиты. Выберите текущий установленный .exe заново в «Приложениях».</value></data>
+<data name="PreferencesSessionOnly" xml:space="preserve"><value>SLX не удалось прочитать сохранённые настройки. Изменения действуют только в этом сеансе; исходный файл сохранён. Восстановите доступ к файлу настроек и перезапустите SLX.</value></data>
 </root>

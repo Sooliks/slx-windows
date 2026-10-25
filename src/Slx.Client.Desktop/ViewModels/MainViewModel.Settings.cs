@@ -22,6 +22,7 @@ public sealed partial class MainViewModel
         set
         {
             if (value == AutoStart) return;
+            if (HasPreferencesFault) { ShowFault("STORAGE_UNAVAILABLE"); OnPropertyChanged(); return; }
             if (!value) CancelStartupConnection();
             try
             {
@@ -44,7 +45,7 @@ public sealed partial class MainViewModel
     }
     private void ReconcileStartup()
     {
-        if (!persistPreferences) return;
+        if (!persistPreferences || HasPreferencesFault) return;
         try { StartupRegistration.SetEnabled(preferences.AutoStart); }
         catch (ClientFault fault) { ShowFault(fault.Code); }
     }

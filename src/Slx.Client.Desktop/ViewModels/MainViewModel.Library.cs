@@ -12,9 +12,9 @@ public sealed partial class MainViewModel
     private readonly Dictionary<string,LibraryEntry> libraryEntries=new(StringComparer.CurrentCultureIgnoreCase);
     internal IReadOnlyList<CatalogApplication> CatalogEntries {get=>catalogEntries;set{catalogEntries=value;RefreshDiscoveryProperties();}}
     public string DiscoverySearch {get=>discoverySearch;set{if(SetProperty(ref discoverySearch,value)){libraryLimit=12;RefreshDiscoveryProperties();}}}
-    public IEnumerable<AppRule> FilteredDiscovered=>Discovered.Where(app=>
+    public IEnumerable<AppRule> FilteredDiscovered=>new LibraryApplicationOrder(CatalogEntries).Order(Discovered.Where(app=>
         !Applications.Any(added=>string.Equals(added.Name.Trim(),app.Name.Trim(),StringComparison.CurrentCultureIgnoreCase))
-        &&app.Name.Contains(DiscoverySearch,StringComparison.CurrentCultureIgnoreCase)).GroupBy(x=>x.Name.Trim(),StringComparer.CurrentCultureIgnoreCase).Select(x=>x.First());
+        &&app.Name.Contains(DiscoverySearch,StringComparison.CurrentCultureIgnoreCase))).GroupBy(x=>x.Name.Trim(),StringComparer.CurrentCultureIgnoreCase).Select(x=>x.First());
     public ObservableCollection<LibraryEntry> FilteredLibrary {get;}=[];
     public bool HasDiscoveryResults=>FilteredLibrary.Count>0;
     private void RefreshDiscoveryProperties()
@@ -39,7 +39,12 @@ public sealed partial class MainViewModel
         }
         foreach(var key in libraryEntries.Keys.Where(key=>!retained.Contains(key)).ToArray())
         {libraryEntries[key].Dispose();libraryEntries.Remove(key);}
-        var matching=desired.Where(x=>x.Name.Contains(DiscoverySearch,StringComparison.CurrentCultureIgnoreCase)).ToArray();
+        var order=new LibraryApplicationOrder(CatalogEntries);
+        var matching=desired.Where(x=>x.Name.Contains(DiscoverySearch,StringComparison.CurrentCultureIgnoreCase))
+            .OrderBy(x=>x.Rule is null?1:0)
+            .ThenBy(x=>x.Paths?.Min(order.Priority)??(x.Rule is {} rule?order.Priority(rule):x.Catalog is {} app?order.Priority(app):4))
+            .ThenBy(x=>x.Name.Trim(),StringComparer.OrdinalIgnoreCase).ThenBy(x=>x.Name.Trim(),StringComparer.Ordinal)
+            .ThenBy(x=>x.Rule?.ExecutablePath??x.Catalog?.Id??"",StringComparer.OrdinalIgnoreCase).ToArray();
         HasMoreLibraryResults=matching.Length>libraryLimit;OnPropertyChanged(nameof(HasMoreLibraryResults));
         var visible=matching.Take(libraryLimit).ToArray();
         foreach(var entry in visible)entry.RefreshIconIfMissing();

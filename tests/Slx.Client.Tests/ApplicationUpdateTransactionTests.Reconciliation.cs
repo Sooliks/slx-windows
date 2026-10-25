@@ -65,7 +65,8 @@ public sealed partial class ApplicationUpdateTransactionTests
         Assert.False(transaction.Finished);Assert.Equal(2,state.Filters.Count);
         Assert.Throws<ClientFault>(()=>state.Current);
         await transaction.ReconcileAsync();
-        Assert.False(transaction.Finished);Assert.Equal("TRAFFIC_PROTECTION_APPLICATION_BASELINE",transaction.FailureCode);
+        Assert.False(transaction.Finished);Assert.Equal("TRAFFIC_PROTECTION_COMMIT_80320010",transaction.FailureCode);
+        Assert.True(transaction.ProtectionRecoveryRequired);Assert.True(transaction.RecoveryUsesAfter);
         Assert.Equal(2,nativeCommits);Assert.Equal(1,fixture.ReplaceCalls);Assert.Equal(0,fixture.ReadCalls);
     }
 }

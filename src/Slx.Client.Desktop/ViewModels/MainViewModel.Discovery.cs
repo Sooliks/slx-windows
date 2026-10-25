@@ -70,9 +70,8 @@ public sealed partial class MainViewModel
             Discovering=false;
         }
     }
-    private static IEnumerable<AppRule> MergedBatches(IEnumerable<DiscoveryBatch> batches)=>batches.Where(x=>x.Success)
-        .OrderBy(x=>x.Source).SelectMany(x=>x.Apps).DistinctBy(x=>x.ExecutablePath,StringComparer.OrdinalIgnoreCase)
-        .OrderBy(x=>x.Name,StringComparer.CurrentCultureIgnoreCase).Take(300);
+    private IEnumerable<AppRule> MergedBatches(IEnumerable<DiscoveryBatch> batches)=>new LibraryApplicationOrder(CatalogEntries).Order(batches.Where(x=>x.Success)
+        .OrderBy(x=>x.Source).SelectMany(x=>x.Apps).DistinctBy(x=>x.ExecutablePath,StringComparer.OrdinalIgnoreCase)).Take(300);
     private static IEnumerable<AppRule> MergeWithPrior(IEnumerable<AppRule> baseline,IEnumerable<AppRule> fresh)
     {
         var latest=fresh.ToDictionary(x=>x.ExecutablePath,StringComparer.OrdinalIgnoreCase);
@@ -84,7 +83,7 @@ public sealed partial class MainViewModel
         var unique=rows.DistinctBy(x=>x.ExecutablePath,StringComparer.OrdinalIgnoreCase);
         int maximum=preservePrior?600:300;
         if(preservePrior)unique=unique.Take(maximum);
-        var found=unique.OrderBy(x=>x.Name,StringComparer.CurrentCultureIgnoreCase).Take(maximum).ToArray();
+        var found=new LibraryApplicationOrder(CatalogEntries).Order(unique).Take(maximum).ToArray();
         changingDiscovery=true;
         try{Discovered.Clear();foreach(var row in found)Discovered.Add(row);}
         finally{changingDiscovery=false;}

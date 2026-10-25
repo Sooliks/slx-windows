@@ -42,7 +42,7 @@ public static class AppDiscovery
             }
         }
         finally { foreach (var process in processes) process.Dispose(); }
-        return found.Values.OrderBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase).Take(300).ToArray();
+        return LibraryApplicationOrder.Bundled.Order(found.Values).Take(300).ToArray();
     }
     public static IReadOnlyList<AppRule> InstalledApplications(CancellationToken cancellationToken = default)
     {
@@ -66,6 +66,6 @@ public static class AppDiscovery
                     catch (Exception ex) when (ex is ClientFault or IOException or UnauthorizedAccessException or ArgumentException) { }
                 }
             }
-        return found.Values.OrderBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase).Take(300).ToArray();
+        return LibraryApplicationOrder.Bundled.Order(found.Values).Take(300).ToArray();
     }
 }

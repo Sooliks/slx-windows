@@ -24,26 +24,43 @@ public sealed partial class MainViewModel
         CancelStartupConnection();
         await mutationGate.WaitAsync(cancellationToken);
         updateInstalling = true; NotifyState();
+        bool granted = false;
+        var owner = generation;
+        var revision = observationRevision;
         try
         {
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeout.CancelAfter(TimeSpan.FromSeconds(3));
-            var reply = await SendControlAsync(new(PipeContract.Version, "status", Guid.NewGuid()), timeout.Token);
-            if (!reply.Success) { MarkStatusUnknown(reply.Code); throw new ClientFault("UPDATE_CONNECTION_ACTIVE"); }
-            AcceptStatus(reply.Status);
-            if (status.Phase != TunnelPhase.Disconnected || status.ProtectionActive) throw new ClientFault("UPDATE_CONNECTION_ACTIVE");
+            PipeReply reply;
+            try
+            {
+                reply = await SendControlAsync(new(PipeContract.Version, "status", Guid.NewGuid()), timeout.Token).WaitAsync(timeout.Token);
+            }
+            catch (Exception error) when (error is OperationCanceledException or System.IO.IOException or ClientFault)
+            {
+                if (!disposed && owner == generation && revision == observationRevision)
+                    MarkStatusUnknown(error is ClientFault fault ? fault.Code : "SERVICE_TIMEOUT");
+                cancellationToken.ThrowIfCancellationRequested();
+                throw new ClientFault("UPDATE_CONNECTION_ACTIVE");
+            }
+            cancellationToken.ThrowIfCancellationRequested();
+            // Never overwrite a newer read with this snapshot; a newer confirmed off can still admit installation.
+            if (disposed || owner != generation)
+                throw new ClientFault("UPDATE_CONNECTION_ACTIVE");
+            if (!reply.Success)
+            {
+                if (revision == observationRevision) MarkStatusUnknown(reply.Code);
+                throw new ClientFault("UPDATE_CONNECTION_ACTIVE");
+            }
+            if (revision == observationRevision) AcceptStatus(reply.Status);
+            if (!statusFresh || status?.Phase != TunnelPhase.Disconnected || status.ProtectionActive)
+                throw new ClientFault("UPDATE_CONNECTION_ACTIVE");
+            granted = true;
             return new InstallLease(() => { updateInstalling = false; mutationGate.Release(); NotifyState(); });
         }
-        catch (Exception error) when (error is OperationCanceledException or System.IO.IOException or Slx.Client.Core.ClientFault)
+        finally
         {
-            updateInstalling = false; mutationGate.Release(); NotifyState();
-            if (cancellationToken.IsCancellationRequested) throw;
-            MarkStatusUnknown(error is ClientFault fault ? fault.Code : "SERVICE_TIMEOUT");
-            throw new ClientFault("UPDATE_CONNECTION_ACTIVE");
-        }
-        catch
-        {
-            updateInstalling = false; mutationGate.Release(); NotifyState(); throw;
+            if (!granted) { updateInstalling = false; mutationGate.Release(); NotifyState(); }
         }
     }
     private sealed class InstallLease(Action release) : IDisposable

@@ -54,12 +54,14 @@ internal sealed partial class TunnelEngine
             try { await transaction.StartAsync(token); }
             catch
             {
-                if (!transaction.Attempted) pendingApplicationUpdate = null;
+                if (!RecoverApplicationProtection(transaction, before, plan, pinnedBefore, pinnedAfter)
+                    && !transaction.Attempted) pendingApplicationUpdate = null;
                 throw;
             }
             // The durable desired plan is adopted even if the command acknowledgement was lost.
             currentPlan = plan; pinnedPlan = pinnedAfter;
             PublishApplicationOutcome(pending);
+            if (transaction.ProtectionRecoveryRequired) throw new ClientFault(transaction.FailureCode ?? "TRAFFIC_PROTECTION_FAILED");
             if (!transaction.Finished) throw new ClientFault("ROUTING_UPDATE_UNCONFIRMED");
             if (!transaction.Applied) throw new ClientFault("ROUTING_UPDATE_FAILED");
         }
@@ -76,6 +78,7 @@ internal sealed partial class TunnelEngine
     private void PublishApplicationOutcome(PendingApplicationUpdate pending)
     {
         var transaction = pending.Transaction;
+        if (RecoverApplicationProtection(transaction, pending.Before, pending.After, pending.PinnedBefore, pending.PinnedAfter)) return;
         if (!transaction.Finished)
         {
             state = state with { Code = "ROUTING_UPDATE_UNCONFIRMED", ApplicationRevision = null };
@@ -87,5 +90,17 @@ internal sealed partial class TunnelEngine
         state = state with { Code = transaction.Applied ? null : "ROUTING_UPDATE_FAILED",
             ApplicationRevision = XrayRouteRevision.For(currentPlan) };
         pendingApplicationUpdate = null;
+    }
+    internal bool RecoverApplicationProtection(ApplicationUpdateTransaction transaction,
+        ConnectPlan before, ConnectPlan after, ConnectPlan pinnedBefore, ConnectPlan pinnedAfter)
+    {
+        if (!transaction.ProtectionRecoveryRequired) return false;
+        // A failed native commit invalidates the delta baseline. Full protected recovery rebuilds it;
+        // no AddRule replay and no claim that the old revision still has confirmed protection.
+        currentPlan = transaction.RecoveryUsesAfter ? after : before;
+        pinnedPlan = transaction.RecoveryUsesAfter ? pinnedAfter : pinnedBefore;
+        pendingApplicationUpdate = null;
+        ScheduleRecovery(transaction.FailureCode ?? "TRAFFIC_PROTECTION_FAILED");
+        return true;
     }
 }

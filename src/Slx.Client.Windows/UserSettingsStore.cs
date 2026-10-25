@@ -12,6 +12,7 @@ public sealed partial class UserSettingsStore
     private readonly string root;
     private readonly string mutexName;
     private readonly object sync = new();
+    private bool preferencesReadable = true;
     private static readonly byte[] Entropy = SHA256.HashData(Encoding.UTF8.GetBytes("SLX.Windows.UserVault.v1"));
     private sealed record Vault(string InstallationId, StoredSubscription? Subscription);
     public UserSettingsStore() : this(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SLX", "VPN")) { }
@@ -28,18 +29,31 @@ public sealed partial class UserSettingsStore
             try
             {
                 var bytes = ReadBounded("preferences.json", MaxPreferencesBytes);
-                return bytes is null ? new() : JsonSerializer.Deserialize<ClientPreferences>(bytes) ?? new();
+                return bytes is null ? new() : PreferencesData.Validate(JsonSerializer.Deserialize<ClientPreferences>(bytes));
             }
+            catch (ClientFault) { preferencesReadable = false; throw; }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
-            { throw new ClientFault("STORAGE_UNAVAILABLE"); }
+            { preferencesReadable = false; throw new ClientFault("STORAGE_UNAVAILABLE"); }
         }
     }
-    public void SavePreferences(ClientPreferences preferences) =>
-        Save("preferences.json", JsonSerializer.SerializeToUtf8Bytes(preferences), MaxPreferencesBytes);
-    public StoredSubscription? LoadSubscription() => WithVaultLock(() => ReadVault()?.Subscription);
+    public void SavePreferences(ClientPreferences preferences)
+    {
+        lock (sync)
+        {
+            if (!preferencesReadable) throw new ClientFault("STORAGE_UNAVAILABLE");
+            Save("preferences.json", JsonSerializer.SerializeToUtf8Bytes(PreferencesData.Validate(preferences)), MaxPreferencesBytes);
+        }
+    }
+    public StoredSubscription? LoadSubscription() => WithVaultLock(() =>
+    {
+        var subscription = ReadVault()?.Subscription;
+        StoredSubscriptionData.Validate(subscription);
+        return subscription;
+    });
     public string GetOrCreateInstallationId() => WithVaultLock(GetOrCreateIdCore);
     public void SaveSubscription(StoredSubscription subscription) => WithVaultLock(() =>
     {
+        StoredSubscriptionData.Validate(subscription);
         SaveVault(new(GetOrCreateIdCore(), subscription)); return true;
     });
     public void ClearSubscription() => WithVaultLock(() =>
