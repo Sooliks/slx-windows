@@ -25,7 +25,23 @@ policy tests24/24 passed. Git diff --check passed. Unique RU/EN keys match:208 m
 A temporary ignored .NET10 console invoked the actual compiled IntegratedUpdateBoot.ReadAsync method: exit0,
 LOCAL_CIM_BOOT_OBSERVATION=VALID_UTC (artifacts/handoff/cim-probe.txt). This verifies local bounded read/parse only,
 not an actual reboot or3010 installation. WMI LastBootUpTime behavior under system-clock correction remains unverified.
-Publication/CI evidence follows only after completion.
+## Published alpha.25 evidence
+
+- Source commit `ec2d5524b4227f84779521717e2593b0a17088f1` pushed to main; exact base validator returned
+  v0.1.0-alpha.24. [Windows CI40228346633](https://github.com/Sooliks/slx-windows/actions/runs/40228346633), job121274525419,
+  completed success. All release/source/runtime guards, clean installer packaging and publication passed.
+- CI: **717 main tests**,0 failed/skipped,9s; **1 composite WPF**,0 failed/skipped,40s; build0 warnings/errors.
+  Source<=200 and18 runtime-input cases passed. Includes the final beta/rc version policy and current updater UI copy.
+- [Alpha.25 release](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.25) published2026-10-25T20:00:08Z,
+  draft=false, prerelease=true in the authorized existing production update channel. All6 assets downloaded under ignored
+  artifacts/published/0.1.0-alpha.25. Five listed hashes match SHA256SUMS; that file's SHA-256 matches GitHub asset digest
+  b5773291810b00cf6e880b94f5ffcc1ab79764b98ad2444073e617cc41410cfb.
+- Installer127169545 bytes, SHA-256 `7c49a618f4a56b1f210fec0982a5924b01e6b577a984358fd6dd31fc42afb39e`.
+  Provenance identifies the exact source/base commits, sourceClean=true, candidate=false, publicationAllowed=true.
+- Full source474 files and changed source86 files match every corresponding Git blob, with declared PS1 CRLF export.
+  Local validator: node artifacts/handoff/verify-published-alpha25.mjs artifacts/published/0.1.0-alpha.25, exit0.
+- Read-only website request returned HTTP302 to this exact alpha.25 installer. No website/server/DB deployment was done.
+  Follow-up documentation records these facts without changing already published release assets or source provenance.
 
 No local installation or live service/network/settings mutation was used for verification. Actual installed upgrade,
 UAC with standard-user alternate administrator, reboot/power interruption, recovery from mixed binaries, DPI/high
