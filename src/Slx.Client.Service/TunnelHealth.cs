@@ -26,17 +26,12 @@ internal sealed partial class TunnelEngine
                         await ReconcileApplicationsAsync();
                     if(Stopwatch.GetTimestamp()<healthAt)return;
                     healthAt=Stopwatch.GetTimestamp()+15*Stopwatch.Frequency;
-                    var result = await HealthConfirmation.CheckAsync(
+                    var result = await ConnectionHealthCheck.CheckAsync(state,
                         (target, token) => LocalProbe.ObserveAsync(probe.Port, probe.User, probe.Password, target, token),
-                        () => state = state with { Phase=TunnelPhase.Reconnecting,
-                            ObservedAt=DateTimeOffset.UtcNow, ProbePassed=false }, cancellationToken);
-                    bool retained = result.Passed && !child.HasExited && LocalProbe.TunnelReady();
-                    RecordHealthIncident(result, retained);
-                    if(retained)
-                    {
-                        state=state with { Phase=TunnelPhase.Connected, ObservedAt=DateTimeOffset.UtcNow, ProbePassed=true };
-                        return;
-                    }
+                        () => child is not null && !child.HasExited && LocalProbe.TunnelReady(),
+                        observed => state = observed, cancellationToken);
+                    RecordHealthIncident(result.Confirmation, result.Retained);
+                    if(result.Retained)return;
                 }
                 if(wasConnected)
                     RecordRecovery(child is null||child.HasExited?RecoveryCause.CoreExited

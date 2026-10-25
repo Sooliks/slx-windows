@@ -17,6 +17,9 @@
 <data name="Connected" xml:space="preserve"><value>VPN подключён</value></data>
 <data name="Connecting" xml:space="preserve"><value>Подключаемся…</value></data>
 <data name="Reconnecting" xml:space="preserve"><value>Переподключаемся…</value></data>
+<data name="CheckingConnection" xml:space="preserve"><value>Проверяем соединение…</value></data>
+<data name="CheckingConnectionProtected" xml:space="preserve"><value>Проверяем доступ через VPN. Связь пока не подтверждена. Защита включена.</value></data>
+<data name="CheckingConnectionUnconfirmed" xml:space="preserve"><value>Проверяем доступ через VPN. Связь пока не подтверждена.</value></data>
 <data name="Stopping" xml:space="preserve"><value>Отключаемся…</value></data>
 <data name="ConnectionFailed" xml:space="preserve"><value>Нужно проверить подключение</value></data>
 <data name="StatusUnknown" xml:space="preserve"><value>Проверяем службу…</value></data>

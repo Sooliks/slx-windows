@@ -10,7 +10,7 @@ public static class PipeContract
     public static readonly TimeSpan ClientStatusTimeout = TimeSpan.FromSeconds(10);
     public static readonly TimeSpan ClientMutationTimeout = TimeSpan.FromSeconds(80);
 }
-public enum TunnelPhase { Disconnected, Connecting, Connected, Reconnecting, Stopping, Faulted }
+public enum TunnelPhase { Disconnected, Connecting, Connected, Reconnecting, Stopping, Faulted, Checking = 6 }
 public sealed record TunnelStatus(TunnelPhase Phase, DateTimeOffset ObservedAt,
     string? ProfileName = null, string? Code = null, DateTimeOffset? ConnectedAt = null,
     RoutingMode? Mode = null, bool ProbePassed = false, bool ProtectionActive = false, RecoveryObservation? Recovery = null,

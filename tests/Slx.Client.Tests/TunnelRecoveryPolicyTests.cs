@@ -12,6 +12,8 @@ public sealed class TunnelRecoveryPolicyTests
     [InlineData(TunnelPhase.Disconnected, true, false, false, false, false)]
     [InlineData(TunnelPhase.Connected, true, true, true, true, false)]
     [InlineData(TunnelPhase.Reconnecting, true, true, true, false, false)]
+    [InlineData(TunnelPhase.Checking, true, true, true, true, false)]
+    [InlineData(TunnelPhase.Checking, false, false, false, false, false)]
     [InlineData(TunnelPhase.Disconnected, false, true, false, false, false)]
     [InlineData(TunnelPhase.Disconnected, false, false, true, false, false)]
     [InlineData(TunnelPhase.Disconnected, false, false, false, true, false)]

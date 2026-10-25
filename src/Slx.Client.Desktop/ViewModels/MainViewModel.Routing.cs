@@ -8,6 +8,8 @@ public sealed partial class MainViewModel
     private bool connectionChangePending, routingUnconfirmed, routingDeferred;
     private long routingChangeVersion, pendingAppVersion;
     private string? pendingAppRevision;
+    private bool WaitForApplicationReadiness => !IsConnected && !connectionChangePending
+        && !(IsSelectedMode && !HasSelectedApplications);
     public string RoutingUpdateText => Text.Catalog[statusFresh && !routingUnconfirmed ? "RulesPending" : "RulesUnconfirmed"];
     internal Func<PipeRequest, CancellationToken, Task<PipeReply>>? SendOverride { get; set; }
     private Task<PipeReply> SendControlAsync(PipeRequest request, CancellationToken token) =>
@@ -40,7 +42,7 @@ public sealed partial class MainViewModel
             await Task.Delay(400, delay.Token);
             if (disposed || !IsTunnelActive) return;
             // Nothing was sent yet: keep the edit and submit it after the next authoritative status, not never.
-            if (!statusFresh || IsBusy) { routingDeferred = true; return; }
+            if (!statusFresh || IsBusy || WaitForApplicationReadiness) { routingDeferred = true; return; }
             await ChangeTunnelAsync(IsSelectedMode && !HasSelectedApplications ? "disconnect"
                 : connectionChangePending ? "reconnect" : "update-applications");
         }
@@ -53,7 +55,7 @@ public sealed partial class MainViewModel
     }
     internal void ResumeDeferredRouting()
     {
-        if (!routingDeferred || routingDelay != null || disposed || IsBusy || !statusFresh) return;
+        if (!routingDeferred || routingDelay != null || disposed || IsBusy || !statusFresh || WaitForApplicationReadiness) return;
         routingDeferred = false;
         if (RulesPending && IsTunnelActive) QueueRoutingApply(false);
     }

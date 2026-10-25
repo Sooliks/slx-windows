@@ -19,6 +19,8 @@ public sealed class ServiceAutoConnectTests
     [InlineData(TunnelPhase.Connected,false)]
     [InlineData(TunnelPhase.Connecting,false)]
     [InlineData(TunnelPhase.Reconnecting,false)]
+    [InlineData(TunnelPhase.Checking,false)]
+    [InlineData(TunnelPhase.Checking,true)]
     [InlineData(TunnelPhase.Stopping,false)]
     [InlineData(TunnelPhase.Faulted,false)]
     [InlineData(TunnelPhase.Disconnected,true)]

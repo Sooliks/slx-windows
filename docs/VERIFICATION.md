@@ -1,4 +1,100 @@
-# Verification — 0.1.0-alpha.21 (2026-10-25)
+# Verification — 0.1.0-alpha.22 (2026-10-25)
+
+STATUS: PARTIAL. The source handoff starts at published alpha.21 commit
+`0b2979d5358b5467516dd18738379f3707d744ee`, exact tag `v0.1.0-alpha.21`.
+Alpha.21's Windows workflow [40158154244](https://github.com/Sooliks/slx-windows/actions/runs/40158154244)
+passed 521 main tests and one composite WPF test, built a clean installer, and published its six release assets.
+Those results establish the base release, not acceptance of this alpha.22 patch.
+
+## Observed alpha.21 evidence
+
+The owner supplied safe diagnostics captured on 25 October 2026 at 04:09:13 UTC (07:09 Moscow):
+Connected, current observation, Protection=true, ProbePassed=true, no current code; Health incidents=10,
+retained=10, last incident 03:51:25 UTC. No Recovery observation is present. The ten recorded initial probe
+failures all retained their existing tunnel after confirmation; no automatic recovery was recorded in this service
+lifetime. This does not establish the cause of those first failures, rule out manual reconnects, or attribute them
+to Steam. Counters are cumulative; the last recorded incident precedes capture by about eighteen minutes.
+
+The DNS observation is older startup evidence, at 03:42:49 UTC. Its first Gstatic query timed out in 3006 ms;
+the second Slx query succeeded in 62 ms with RCODE 0. Both selected OwnedTunnel with prefix length 32 and route
+metric 0. Thus this startup completed protected DNS readiness through the expected route. It does not prove the
+friend's adapter problem is solved, nor identify why the first query timed out. DNS query targets are not resolver
+provider identities, and this startup observation is not a live trace of the later HTTPS health incidents.
+
+## Alpha.22 correction and boundaries
+
+Add a distinct Checking phase after the existing enum values. A failed first periodic HTTPS check now publishes
+Checking with ProbePassed=false while retaining the running core, TUN and protection. A successful confirmation
+with a still-ready core/TUN restores Connected without resetting ConnectedAt. Actual recovery remains Reconnecting.
+Disconnect, controller ownership, active-update installation guards and unconfirmed-state handling stay conservative.
+The UI/service must be installed together. IPC actions/version and stored-data shapes are unchanged.
+
+The UI gives Checking its own RU/EN title and protected, unconfirmed-health detail. It keeps applicable connection
+facts and explicit off available without presenting a healthy-success state. Edits during Checking wait for an
+eligible service observation. Help now includes the existing primary/repeat/alternate health outcomes and bounded
+timing/HTTP status metadata, allowing the next report to distinguish timeout, TLS, HTTP and other failures.
+No raw exception, address, URL, profile, key, application inventory or native trace is added.
+
+Probe targets, intervals, deadlines, recovery policy, DNS routes/resolvers, WFP rules and selected-application routing
+are unchanged. In particular, toggling Telegram still affects new connections, without forcibly terminating its
+existing sessions. No claim of a Steam-specific repair or measured Telegram traffic path is made.
+
+## Alpha.22 execution evidence
+
+Local host: Linux, SDK 10.0.401, pinned packages in `/tmp/slx-nuget`. No native Windows network mutation or real
+profile was used. WPF assemblies and tests cross-compile here, but their Windows runtime scenario cannot run here.
+
+- `dotnet restore Slx.Windows.slnx --locked-mode --packages /tmp/slx-nuget -m:1 -nr:false`: the first restricted
+  invocation exited 1 with NU1900 because the sandbox could not reach NuGet's vulnerability-data endpoint. The same
+  command with permitted network access exited 0 for all six projects. Vulnerability checks and locked mode remained
+  enabled; no warning suppression or dependency changes were used to obtain a passing restore.
+- `dotnet build Slx.Windows.slnx -c Release --no-restore -m:1 -nr:false -p:UseSharedCompilation=false`: exit 0,
+  zero warnings/errors, 28.00 seconds. The final build after improving the compact WPF text measurement assertion
+  also exited 0 with zero warnings/errors, 4.42 seconds.
+- `dotnet test tests/Slx.Client.Tests/Slx.Client.Tests.csproj -c Release --no-build --no-restore -m:1 -nr:false
+  --filter <classes below> --logger 'trx;LogFileName=alpha22-focused.trx'`: exit 0, **111 passed, 0 failed,
+  0 skipped**, reported duration 2 seconds. The runner used permitted localhost communication. Actual native
+  Windows routes, WFP and application traffic were not exercised by these controlled tests.
+- Classes: ConnectionHealthCheckTests, TunnelPhaseContractTests, HealthConfirmationTests, ProbeRequestTests,
+  PipeFramingTests, RecoveryObservationTests, ServiceControlTests, ServiceAutoConnectTests, ServiceResponsivenessTests,
+  InitialConnectionAttemptTests, TunnelRecoveryPolicyTests, StartupReadinessTests, ApplicationUpdateTransactionTests,
+  ApplicationPlanChangeTests.
+- New main-test cases: 9 connection-health cases, 2 enum/strict-IPC cases, 6 admission/ownership/rollback theory cases.
+  They are included in the 111, not additional to that total. A controlled cancellation inside the resource-readiness
+  lookup confirms that a late successful lookup cannot publish Connected after explicit off requests cancellation.
+  Actual core exit during Checking retains the recovery counter path, with the existing child identity/lifecycle guard.
+- `node --test --test-isolation=none scripts/tests/release-auth.test.mjs scripts/tests/release-base.test.mjs`:
+  exit 0, **24 passed**, 0 failed/skipped.
+- `git diff --check`: exit 0. All source C#/XAML files remain within 200 nonblank lines; RU/EN resources contain
+  204 identical unique keys. Release notes match their versioned copy; relative changed-document links resolve.
+  The four lock-file changes are exactly eight internal project version ranges; external dependency objects/hashes
+  are unchanged. The four PowerShell blocks in UPDATE_ALPHA22_RU.md parse successfully with PowerShell 7.6.8;
+  release commands from that guide were not executed.
+- The Linux WPF cross-build left one untracked generated `*_wpftmp.csproj`. Its generated intermediate-project
+  identity was checked and only that temporary file was removed after the build. It is not source and is excluded
+  from the handoff. The Windows workflow's source-cleanliness gate is unchanged; this is not Windows clean-build proof.
+- HEAD, `v0.1.0-alpha.21` and the fetched `origin/main` all identify the published base commit above. This is an
+  uncommitted source handoff; the owner must create a new descendant commit before pushing. The release policy and
+  workflow were not weakened, tags/assets were not changed, and no alpha.22 installer/publication is claimed.
+
+Evidence logs: `/tmp/slx-alpha22-restore.log`, `/tmp/slx-alpha22-restore-permitted.log`,
+`/tmp/slx-alpha22-build.log`, `/tmp/slx-alpha22-build-final.log`, `/tmp/slx-alpha22-tests.log`,
+`/tmp/slx-alpha22-results/alpha22-focused.trx`, `/tmp/slx-alpha22-release-tests.log`.
+
+## Alpha.22 outstanding installed acceptance
+
+- Run the existing Windows release workflow on the newly committed source: all tests, WPF scenarios, installer and
+  clean-input/source packaging gates must pass before publication can be considered successful.
+- With a real installed matching UI/service pair, observe a transient failed first HTTPS check and a retained tunnel:
+  Checking must not claim a successful probe, the connection start time must persist, and explicit off must work.
+- Verify an actual core exit, adapter loss and fully failed confirmation still enter Reconnecting with protection.
+- Verify application edits queued during Checking are applied once after recovery of a confirmed service state,
+  and that explicit off does not trigger a later automatic reconnect or install while protected.
+- Confirm compact RU/EN Olive/Terminal layouts at Windows runtime. Cross-compilation is not rendered WPF acceptance.
+- Repeat owner/friend Wi-Fi, Hysteria2/VLESS, excluded Steam/CS2 and normal disconnect checks as appropriate.
+  Clean-machine, Windows 10, driver/WFP/TUN and packet-level isolation acceptance remain separate open items.
+
+## Historical alpha.21 source-handoff evidence (before its later successful publication)
 
 STATUS: PARTIAL. Source patch based on published alpha.20, commit
 `9cd73831292c8e8ba34327ead0039969c70cea7d`, exact tag `v0.1.0-alpha.20`.

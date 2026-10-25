@@ -27,10 +27,16 @@ public sealed partial class MainViewModel
             text.AppendLine("Probe passed: " + (status?.ProbePassed.ToString() ?? "unknown"));
             text.AppendLine("Code: " + (LastServiceCode ?? "none"));
             text.AppendLine("Observed UTC: " + (status?.ObservedAt.ToString("O") ?? "unknown"));
+            if (status?.ConnectedAt is {} connected) text.AppendLine($"Connected UTC: {connected:O}");
             if (status?.Recovery is {} recovery)
                 text.AppendLine($"Recovery: {recovery.Count}, {recovery.Cause}, {recovery.At:O}");
             if (status?.HealthCheck is {} health)
+            {
                 text.AppendLine($"Health incidents: {health.Incidents}, retained: {health.RetainedConnections}, at: {health.At:O}");
+                AppendHealthAttempt(text, "primary", health.Primary);
+                if (health.Repeat is {} repeat) AppendHealthAttempt(text, "repeat", repeat);
+                if (health.Alternate is {} alternate) AppendHealthAttempt(text, "alternate", alternate);
+            }
             if (status?.DnsCheck is {} dns)
             {
                 text.AppendLine($"DNS check UTC: {dns.At:O}");
@@ -40,6 +46,12 @@ public sealed partial class MainViewModel
             }
             return text.ToString();
         }
+    }
+    private static void AppendHealthAttempt(StringBuilder text, string phase, ProbeObservation observation)
+    {
+        text.Append($"Health {phase}: {observation.Target}, {observation.Outcome}, {observation.ElapsedMs} ms");
+        if (observation.HttpStatus is {} code) text.Append($", http_status={code}");
+        text.AppendLine();
     }
     private static void AppendDnsAttempt(StringBuilder text, int number, DnsProbeObservation observation)
     {

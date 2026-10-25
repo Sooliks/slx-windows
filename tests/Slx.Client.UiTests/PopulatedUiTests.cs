@@ -45,6 +45,8 @@ public sealed class PopulatedUiTests
             LayoutStabilityChecks.Run(window);
             ConnectionRecoveryChecks.Run();
             DnsDiagnosticsChecks.Run(window);
+            CheckingConnectionChecks.Run(window);
+            HealthDiagnosticsChecks.Run();
         }
         finally { window.Close(); Sta.Pump(); }
     });

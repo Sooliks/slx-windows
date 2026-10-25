@@ -1,4 +1,29 @@
-# Network model and limits — alpha.21
+# Network model and limits — alpha.22
+
+## Alpha.22 health-check state and evidence
+
+After a failed primary periodic probe, the service now reports Checking with ProbePassed=false. It retains the
+owned core/TUN and existing protection while the same bounded confirmation requests run. This state is not a fresh
+healthy observation and does not authorize installation, release ownership or remove protection. Explicit Disconnect
+remains available. A successful confirmation plus a live owned core and ready TUN restores Connected without changing
+ConnectedAt. Actual recovery reports Reconnecting and uses the existing protected stop/relaunch path.
+
+The owner's alpha.21 report contains 10 incidents with 10 retained connections and no Recovery observation. It
+establishes confirmation without automatic restart for those recorded incidents; it cannot establish the cause of
+the primary failures or a causal link to Steam. Its DNS check is a separate startup observation: the first query
+timed out after 3006 ms, and the second succeeded in 62 ms on the owned /32 route with route metric 0. A successful
+fallback is not an observed route mismatch, and owner evidence does not establish acceptance on the friend's PC.
+
+Help now includes the primary, repeat and alternate HealthCheck results already held by the service: fixed target
+and outcome enums, elapsed time and an optional HTTP status. No raw exception, URL, credential, process path or
+packet is exposed. Incident/retained counters and the last incident survive tunnel launches until service restart;
+compare timestamps or before/after counter values when investigating an application launch. Old startup DNS results
+must not be described as the reason for a later periodic HTTPS failure.
+
+Probe targets, request budgets, the one-second confirmation pause, retry pacing, DNS and WFP rules remain unchanged.
+Steam discovery does not start a reconnect. Selected-app changes continue to affect new sessions, so a previously
+connected Telegram session can retain its old route; exit that application fully to test a new connection. Shared
+Windows DNS still affects unselected applications. See [the alpha.22 guide](UPDATE_ALPHA22_RU.md) for installed checks.
 
 ## Alpha.21 DNS route readiness
 
@@ -154,5 +179,5 @@ Full IPv6/ECH/HTTP3, existing flows, sleep/network changes, clean VM, Windows 10
 - https://learn.microsoft.com/en-us/windows/win32/fwp/object-management
 
 ## Alpha.10 health confirmation
-A failed periodic request is not proof that the core or every VPN route is broken. The service immediately clears ProbePassed and shows Reconnecting while retaining the owned core/TUN and existing WFP policy. After a one-second pause it makes independent fresh HTTPS requests via the same authenticated proxy to gstatic generate_204 (exact 204) and SLX robots.txt (exact 200), concurrently with the existing five-second timeout each. Redirects and TLS errors are not accepted. Either valid response, plus a still-live owned core and ready TUN, restores success without changing ConnectedAt. If neither passes, the core is replaced with the existing protected recovery procedure. Core/adapter loss does not wait for confirmation. Startup readiness remains the original strict 204/TUN/DNS path.
+A failed periodic request is not proof that the core or every VPN route is broken. The service immediately clears ProbePassed while retaining the owned core/TUN and existing WFP policy. Through alpha.21 this stage displayed Reconnecting; alpha.22 distinguishes it as Checking. After a one-second pause it makes independent fresh HTTPS requests via the same authenticated proxy to gstatic generate_204 (exact 204) and SLX robots.txt (exact 200), concurrently with the existing five-second timeout each. Redirects and TLS errors are not accepted. Either valid response, plus a still-live owned core and ready TUN, restores success without changing ConnectedAt. If neither passes, the core is replaced with the existing protected recovery procedure. Core/adapter loss does not wait for confirmation. Startup readiness accepts the authenticated HTTPS origins described in the alpha.18 section and still requires owned TUN/DNS readiness.
 Optional HealthCheck IPC diagnostics retain only the last failed-primary incident and cumulative incident/retained counters until service restart. They contain enum categories, status codes, elapsed milliseconds and UTC time; no messages, credentials, URLs or app data. A caller cancellation propagates and is never accepted as health success.

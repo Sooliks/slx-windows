@@ -1,5 +1,13 @@
 # Boundaries
 
+Alpha.22: Core appends Checking to TunnelPhase while retaining all prior enum values. Service distinguishes the
+periodic confirmation stage from actual Reconnecting: unconfirmed health clears ProbePassed but retains the owned
+core/TUN, WFP policy and connection start; successful confirmation restores Connected without relaunch. Recovery
+continues through the existing Reconnecting/StopChild/Launch path. Desktop treats Checking as active but unconfirmed,
+keeps explicit off available, and provides distinct RU/EN copy. Help renders existing HealthCheck observations as
+bounded target/result/time/HTTP metadata only. No additional network requests, raw logs, routes, timeouts, privileges
+or stored-data fields are introduced. The new phase requires upgrading service and UI together through the installer.
+
 Alpha.21: Core's typed TUN configuration adds host routes only for its two existing DNS addresses alongside the
 defaults. The pinned Xray owns their lifecycle on its TUN; no independent route mutator or foreign-interface cleanup
 is introduced. Windows TunnelDnsRoute still reads the unrestricted native route and now returns bounded numeric

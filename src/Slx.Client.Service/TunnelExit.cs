@@ -8,7 +8,8 @@ internal sealed partial class TunnelEngine
         try
         {
             if(!ReferenceEquals(child,exited))return;
-            if(state.Phase==Slx.Client.Core.TunnelPhase.Connected)RecordRecovery(Slx.Client.Core.RecoveryCause.CoreExited);
+            if(state.Phase is Slx.Client.Core.TunnelPhase.Connected or Slx.Client.Core.TunnelPhase.Checking)
+                RecordRecovery(Slx.Client.Core.RecoveryCause.CoreExited);
             await BackgroundCleanup.TryAsync(StopChildAsync);
             if(desiredConnected)ScheduleRecovery("CORE_EXITED");
         }

@@ -35,6 +35,8 @@ public sealed partial class ServiceControlTests
     [Theory]
     [InlineData(TunnelPhase.Disconnected,true)]
     [InlineData(TunnelPhase.Reconnecting,false)]
+    [InlineData(TunnelPhase.Checking,false)]
+    [InlineData(TunnelPhase.Checking,true)]
     [InlineData(TunnelPhase.Faulted,false)]
     public async Task StopWithoutConfirmedUnprotectedDisconnectedObservationCannotTransferOwner(TunnelPhase phase,bool protectedTraffic)
     {

@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.21. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.22. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,32 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.22 — distinguish health confirmation from tunnel recovery
+
+The owner's alpha.21 diagnostics captured 25 October 2026 show Connected/Protection=true/ProbePassed=true,
+10 health incidents and 10 retained connections, with no Recovery observation. All recorded failed-primary health
+checks retained the running tunnel after confirmation; this does not identify why those primary requests failed or
+attribute them to opening Steam. The last incident predates the capture. The separate startup DNS check timed out
+once on an owned /32 route (metric 0), then succeeded in 62 ms; the owner's result does not establish the friend's fix.
+
+Append TunnelPhase.Checking without changing prior enum values. A failed primary periodic check publishes this
+phase with ProbePassed=false while the existing core/TUN and traffic protection remain owned. Successful confirmation
+returns Connected with the original ConnectedAt; an actual recovery enters Reconnecting before replacing the core.
+Keep disconnect and controller ownership correct in Checking. The interface must distinguish unconfirmed health
+from a healthy connection and from recovery, using RU/EN copy without changing status-card geometry or themes.
+Existing probe targets, timeouts, confirmation pause, retry pacing, WFP, DNS and selected-app routing are unchanged.
+
+Help diagnostics print the existing HealthCheck primary/repeat/alternate observations: bounded enum target/outcome,
+elapsed milliseconds and optional HTTP status. Do not print raw exceptions, URLs, credentials, app paths or traffic.
+The counters describe service-lifetime observations, not just the latest connection; compare timestamps and deltas.
+App switches still apply to new sessions; existing Telegram sessions can retain their old route until that app exits.
+No Steam-start reconnect hook or forced process/session termination is introduced.
+
+UI and service must be installed together because Checking is a new status value in the existing IPC v2 contract.
+There is no new action, stored-data, dependency, driver, server or database migration. Source/release base is the exact
+published alpha.21 tag. Distribution remains an authorized prerelease with PARTIAL installed-system acceptance;
+alpha.21 CI results are historical evidence, not proof of alpha.22 tests or publication.
 
 ## Alpha.21 — explicit DNS routes and bounded route readiness
 

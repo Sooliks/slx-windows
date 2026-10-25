@@ -2,7 +2,8 @@ using Slx.Client.Core;
 namespace Slx.Client.Desktop.ViewModels;
 public sealed partial class MainViewModel
 {
-    public bool HasConnectionFacts => IsConnected && status?.ConnectedAt != null;
+    public bool HasConnectionFacts => status?.ConnectedAt != null && (IsConnected
+        || statusFresh && status.Phase == TunnelPhase.Checking && status.ProtectionActive);
     public bool HasActiveProtocol => HasConnectionFacts && ActiveProtocol.Length > 0;
     public string ConnectionDuration
     {

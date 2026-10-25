@@ -82,7 +82,7 @@ internal static class StartupAutoConnectChecks
     }
     private static void CheckExistingIntent()
     {
-        foreach (var state in new[] { (TunnelPhase.Connected, false), (TunnelPhase.Connecting, false), (TunnelPhase.Reconnecting, false),
+        foreach (var state in new[] { (TunnelPhase.Connected, false), (TunnelPhase.Connecting, false), (TunnelPhase.Reconnecting, false), (TunnelPhase.Checking, true),
             (TunnelPhase.Disconnected, true), (TunnelPhase.Faulted, true), (TunnelPhase.Faulted, false), (TunnelPhase.Stopping, false) })
         {
             using var model = Model();
