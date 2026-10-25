@@ -4,8 +4,28 @@ STATUS: PARTIAL. Current source preparation starts at published alpha.22 commit
 `f694b51c8a815ce041fe67b26c8e21627aaa5cda`. The owner reports alpha.22's successful Windows release with
 538 main tests and one composite WPF test. That historical report is separate from the alpha.23 execution below.
 At completion of local verification, alpha.23 had not yet been committed or published. The owner then explicitly
-authorized Codex to commit/push and release through the existing Windows workflow. CI publication must be confirmed
-separately. No installed-service mutation or real-profile VPN connection was performed for local testing.
+authorized Codex to commit/push and release through the existing Windows workflow. Subsequent CI publication is
+confirmed below. No installed-service mutation or real-profile VPN connection was performed for local testing.
+
+## Published alpha.23 evidence
+
+- Release source commit: `85b514ffc317c92c14e34153bfbdc611cdebfe34`; pushed to main after local verification.
+  [Windows workflow 40205535509](https://github.com/Sooliks/slx-windows/actions/runs/40205535509) completed successfully.
+  Its logs confirm **617 main tests and 1 composite WPF test**, 0 failed/skipped, build 0 warnings/errors,
+  runtime-input guards, installer build, clean-source packaging and immutable asset publication.
+- [Alpha.23](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.23) was published at
+  `2026-10-25T15:11:49Z`, draft=false, prerelease=true, in the existing public update channel. All six assets exist.
+  Release provenance identifies the exact source commit above and base `f694b51c8a815ce041fe67b26c8e21627aaa5cda`,
+  sourceClean=true and publicationAllowed=true.
+- All six published files were downloaded to ignored `artifacts/published/0.1.0-alpha.23/`. Their SHA-256 values
+  match the published checksum list; that list itself matches the GitHub asset digest. Installer: **82,724,808 bytes**,
+  SHA-256 `1017e9219d2b08d0ed930790cd39403fc475e643bd26f34dc1551e86b5d0f342`.
+- Both downloaded ZIP inventories and contents match the release commit: **414 full-source files, 64 changed files**.
+  Comparison respects the reviewed `.gitattributes` CRLF export for PowerShell scripts. No tracked files were deleted.
+- A public GET of `https://slxvpn.com/download/windows` initially returned cached alpha.22. A later read returned
+  **302 to the alpha.23 installer**. No website change, deployment, cache purge or account mutation was performed.
+- This documentation follow-up records completed CI/release evidence. Published source archives and installer
+  remain immutable outputs of the release source commit, not a rebuild from the documentation follow-up.
 
 ## Current alpha.23 execution
 
