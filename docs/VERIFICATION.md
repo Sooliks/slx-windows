@@ -21,6 +21,24 @@ IPC contract/serializer files have no diff; no new reply field can break the alp
 Publication evidence is recorded after completion. Installed server-outage packet
 continuity, direct encrypted DNS reachability on every provider, Windows10/IPv6 and alpha25→26 UAC upgrade remain open.
 
+## Published alpha.26 evidence
+
+- Exact source `c90bc890396d4cff55fed79f0951d68a778b118a` pushed to main; release base validator returned
+  v0.1.0-alpha.25. [CI40426248413](https://github.com/Sooliks/slx-windows/actions/runs/40426248413), job121932624727,
+  completed success: **732 main tests**0fail/skip11s, **1 WPF**0fail/skip44s; build0warnings/errors, source-size gate,
+  runtime-input18 cases, release guards, clean installer/source packaging and immutable publication all passed.
+- [Alpha.26](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.26) published2026-10-27T00:29:36Z,
+  draft=false/prerelease=true in the existing authorized production update channel. All6 assets downloaded to ignored
+  artifacts/published/0.1.0-alpha.26. Five listed SHA-256 hashes match; checksum-list digest matches GitHub metadata:
+  5ada772b0f074b847c5d2c1d98ba147522b2b3c77c116152c34fb44333eafb73.
+- Installer127196209 bytes, SHA-256 `0162c1f3c31db8cee88a453b43f8740fe6acb149b2ae30c28551831ac4cc4d2e`.
+  Provenance matches exact source/base commits, sourceClean=true/candidate=false/publicationAllowed=true. FullZIP480
+  and changedZIP33 match every Git blob with declared PS1CRLF export; local validator exit0.
+- First read-only website GET returned cached alpha.25; a subsequent GET returned HTTP302 to the exact alpha.26
+  installer after cache refresh. The app uses an independent GitHub update feed.
+  No website/server/DB or live installed network/service changes were made. Documentation follow-up does not alter
+  published source archives/assets. Actual installed outage and upgrade acceptance remain open.
+
 ## Alpha.25 current execution
 
 STATUS: PARTIAL for installed acceptance. Source base: exact published alpha.24 at
