@@ -1,5 +1,14 @@
 # Windows client UX brief
 
+## Alpha.26 selected-only outage isolation (2026-10-27)
+
+Selected-mode copy explicitly says shared Windows DNS is outside VPN so unselected applications do not depend on
+VPN recovery. Whole-PC DNS remains protected. DNS errors no longer universally claim a VPN-outbound check. Help
+diagnostics print the observed mode and distinguish local TUN ownership from the shared resolver outbound, using
+unknown when mode is unavailable. No new layout, toggles, fonts or IPC fields are introduced. Remote-only failures
+can retain the existing core/direct sessions for90 seconds in Checking with ProbePassed=false; never claim Connected
+from time elapsed, a DNS reply alone or retained resources. Explicit off stays available and resource loss recovers.
+
 ## Alpha.25 updates inside SLX (2026-10-25)
 
 The floating card downloads in the background and preserves ready artifacts after failed checks. Separate off-only

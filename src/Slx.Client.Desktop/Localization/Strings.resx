@@ -49,7 +49,7 @@
 <data name="RoutingTitle" xml:space="preserve"><value>VPN mode</value></data>
 <data name="ModeSelected" xml:space="preserve"><value>Apps</value></data>
 <data name="ModeWhole" xml:space="preserve"><value>Whole PC</value></data>
-<data name="ModeSelectedDescription" xml:space="preserve"><value>Enabled apps use VPN. Shared Windows DNS can also affect other apps while VPN is recovering.</value></data>
+<data name="ModeSelectedDescription" xml:space="preserve"><value>Enabled apps use VPN. Shared DNS stays outside VPN so other apps can resolve names during recovery.</value></data>
 <data name="ModeWholeDescription" xml:space="preserve"><value>Internet on your whole PC uses VPN. Local networks stay available.</value></data>
 <data name="SelectedApps" xml:space="preserve"><value>App selection</value></data>
 <data name="NoAppsTitle" xml:space="preserve"><value>Choose your first app</value></data>
@@ -98,7 +98,7 @@
 <data name="HelpBindingBody" xml:space="preserve"><value>An existing Happ link belongs to that installation. Create a separate Windows device or transfer the connection in your SLX account. SLX never copies Happ’s device identity.</value></data>
 <data name="Support" xml:space="preserve"><value>Contact support ↗</value></data>
 <data name="Website" xml:space="preserve"><value>Open SLX website ↗</value></data>
-<data name="SecurityNote" xml:space="preserve"><value>No browsing telemetry. Connection data is encrypted by Windows. If VPN fails, protected public traffic stays blocked until recovery. Disconnect releases protection. Local networks remain available; per-app DNS isolation is not promised.</value></data>
+<data name="SecurityNote" xml:space="preserve"><value>No browsing telemetry. Protected traffic stays blocked during an outage until recovery or Disconnect. In Apps mode, shared DNS works outside VPN; Whole PC also protects DNS. Local networks remain available.</value></data>
 <data name="VersionLabel" xml:space="preserve"><value>SLX VPN</value></data>
 <data name="AlphaNotice" xml:space="preserve"><value>Preview release. Real tunnel, DNS, sleep recovery and clean-machine acceptance are still being verified.</value></data>
 <data name="ServiceHelp" xml:space="preserve"><value>Install SLX using its installer, then try again. Do not run the app as administrator.</value></data>
@@ -199,7 +199,7 @@
 <data name="TrayStatus" xml:space="preserve"><value>SLX VPN · {0}</value></data>
 <data name="FaultOutboundInterface" xml:space="preserve"><value>No usable Windows route to the VPN server. Check your internet connection and network adapters, then retry.</value></data>
 <data name="FaultVpnProbe" xml:space="preserve"><value>The VPN connection check failed. Check your internet connection or try the other connection method.</value></data>
-<data name="FaultVpnDns" xml:space="preserve"><value>DNS through VPN could not be verified. Try another connection method or copy diagnostics from Help.</value></data>
+<data name="FaultVpnDns" xml:space="preserve"><value>DNS could not be verified. Try another connection method or copy diagnostics from Help.</value></data>
 <data name="FaultVpnDnsRoute" xml:space="preserve"><value>DNS could not be routed through SLX. If another VPN is running, disconnect it and retry. Copy diagnostics from Help.</value></data>
 <data name="FaultEndpointNetwork" xml:space="preserve"><value>Could not resolve the VPN server address. Check your internet connection, then retry or choose the other connection method.</value></data>
 <data name="FaultEndpointRejected" xml:space="preserve"><value>The VPN server address failed validation. Refresh your subscription or contact support.</value></data>

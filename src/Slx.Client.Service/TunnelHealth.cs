@@ -3,6 +3,7 @@ using Slx.Client.Core;
 namespace Slx.Client.Service;
 internal sealed partial class TunnelEngine
 {
+    private readonly RemoteHealthGrace remoteHealthGrace = new();
     public async Task CheckHealthAsync(CancellationToken cancellationToken)
     {
         await lifecycle.WaitAsync(cancellationToken);
@@ -19,22 +20,35 @@ internal sealed partial class TunnelEngine
             try
             {
                 InteractiveSessions.RequireSingleOwner(ownerSid??"");
-                bool wasConnected = state.Phase == TunnelPhase.Connected;
-                if(wasConnected && child is not null && !child.HasExited && LocalProbe.TunnelReady())
+                bool wasConnected = state.Phase == TunnelPhase.Connected || state.Phase == TunnelPhase.Checking && remoteHealthGrace.Pending;
+                if(wasConnected && child is not null && !child.HasExited && LocalProbe.TunnelReady()
+                    && (!remoteHealthGrace.Pending || remoteHealthGrace.Remaining > TimeSpan.Zero && HealthResourcesReady(cancellationToken)))
                 {
-                    if(pendingApplicationUpdate is not null && Stopwatch.GetTimestamp()>=applicationReconcileAt)
+                    if(state.Phase==TunnelPhase.Connected && pendingApplicationUpdate is not null && Stopwatch.GetTimestamp()>=applicationReconcileAt)
                     {
                         await ReconcileApplicationsAsync();
                         if(state.Phase!=TunnelPhase.Connected || !state.ProbePassed)return;
                     }
                     if(Stopwatch.GetTimestamp()<healthAt)return;
                     healthAt=Stopwatch.GetTimestamp()+15*Stopwatch.Frequency;
-                    var result = await ConnectionHealthCheck.CheckAsync(state,
-                        (target, token) => LocalProbe.ObserveAsync(probe.Port, probe.User, probe.Password, target, token),
-                        () => HealthResourcesReady(cancellationToken),
-                        observed => state = observed, cancellationToken);
-                    RecordHealthIncident(result.Confirmation, result.Retained);
-                    if(result.Retained)return;
+                    using var checkBudget = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    if(remoteHealthGrace.Pending)checkBudget.CancelAfter(remoteHealthGrace.Remaining);
+                    ConnectionHealthResult? result=null;
+                    try
+                    {
+                        result = await ConnectionHealthCheck.CheckAsync(state,
+                            (target, token) => LocalProbe.ObserveAsync(probe.Port, probe.User, probe.Password, target, token),
+                            () => HealthResourcesReady(checkBudget.Token), observed => state = observed, checkBudget.Token,
+                            deferFailure: currentPlan.Mode==RoutingMode.SelectedApplications?()=>remoteHealthGrace.Defer(currentPlan.Mode):null);
+                    }
+                    catch(OperationCanceledException) when(!cancellationToken.IsCancellationRequested && remoteHealthGrace.Pending
+                        && remoteHealthGrace.Remaining<=TimeSpan.Zero) { }
+                    if(result is not null)
+                    {
+                        RecordHealthIncident(result.Confirmation, result.Retained);
+                        if(result.Retained){remoteHealthGrace.Reset();return;}
+                        if(result.Deferred){healthAt=Stopwatch.GetTimestamp()+5*Stopwatch.Frequency;return;}
+                    }
                 }
                 if(wasConnected)
                     RecordRecovery(child is null||child.HasExited?RecoveryCause.CoreExited

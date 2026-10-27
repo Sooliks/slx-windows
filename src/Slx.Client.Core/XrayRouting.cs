@@ -17,8 +17,10 @@ internal static class XrayRouting
         {
             new(XrayRouteProtocol.ApiTag) { Inbounds = ["probe"], Domains = ["full:" + XrayRouteProtocol.Host], Network = "tcp", Port = "80" },
             new("direct") { Ips = LocalNetworks },
-            // A real readiness probe must use VPN even though it originates in our service.
-            new("vpn") { Inbounds = ["probe", "resolver"] },
+            // Readiness remains VPN-only. Shared Windows DNS cannot identify the original app:
+            // selected mode keeps it independent from VPN availability; whole-PC protects it.
+            new("vpn") { Inbounds = ["probe"] },
+            new(plan.Mode == RoutingMode.WholeComputer ? "vpn" : "direct") { Inbounds = ["resolver"] },
             new("dns") { Inbounds = ["tun"], Port = "53" },
             new("direct") { Processes = ["self/"] }
         };

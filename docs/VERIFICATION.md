@@ -1,4 +1,25 @@
-# Verification — 0.1.0-alpha.25 (2026-10-25)
+# Verification — 0.1.0-alpha.26 (2026-10-27)
+
+## Alpha.26 current execution
+
+STATUS: PARTIAL for installed acceptance. Exact release base: v0.1.0-alpha.25 at
+ec2d5524b4227f84779521717e2593b0a17088f1, with documentation-only follow-up0edd93b. Remote main matched before edits.
+Owner diagnostic after recovery shows current healthy Connected, two ProbeFailed recoveries and shared owned DNS
+success; no packet capture establishes server reboot or full connectivity loss mechanism. Code-level global DNS
+dependency and immediate core replacement are confirmed independently. No live service/network/server changes.
+
+`dotnet restore Slx.Windows.slnx --force-evaluate` exit0 updated internal project versions only. Core focused29 tests
+and WFP rule preparation23 focused tests passed. `scripts/tests/dns-routing.test.ps1` passed against SHA-pinned real
+Xray26.9.9: generated routing, local stub and unavailable VPN, Selected DNS answered and Whole could not use direct.
+Fixture replaces transports only: no TUN, WFP, actual DoH/TLS exchange, public egress, installed service or real profile.
+Full `scripts/verify.ps1` exit0 at2026-10-27T00:23:09Z: **732 main tests +1 composite WPF**, zero failed/skipped,
+build0 warnings/errors and source-size gate passed. Log artifacts/handoff/verify-alpha26.txt. Covers mode-specific
+native rule construction, selected-only90s monotonic grace/expiry/cancellation/resource loss and unchanged whole-PC
+behavior, diagnostic policy labels and current RU/EN WPF copy. Root viewed the fresh RU940 DNS-failure frame.
+Root also reran actual pinned-core local DNS contract: exit0, both modes passed (artifacts/handoff/dns-routing-alpha26.txt).
+IPC contract/serializer files have no diff; no new reply field can break the alpha.25 updater decoder.
+Publication evidence is recorded after completion. Installed server-outage packet
+continuity, direct encrypted DNS reachability on every provider, Windows10/IPv6 and alpha25→26 UAC upgrade remain open.
 
 ## Alpha.25 current execution
 

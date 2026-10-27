@@ -43,15 +43,16 @@ public sealed unsafe partial class TrafficGuard : IDisposable
             foreach(var layer in new[]{PInvoke.FWPM_LAYER_ALE_AUTH_CONNECT_V4,PInvoke.FWPM_LAYER_ALE_AUTH_CONNECT_V6})
             {
                 AddExemptions(layer,luid);
-                var dns=new FWPM_FILTER_CONDITION0{fieldKey=PInvoke.FWPM_CONDITION_IP_REMOTE_PORT,matchType=FWP_MATCH_TYPE.FWP_MATCH_EQUAL,conditionValue=new(){type=FWP_DATA_TYPE.FWP_UINT16,uint16=53}};
-                Add(layer,false,[dns]);
-                if(plan.Mode==RoutingMode.WholeComputer)
+                foreach(var rule in TrafficProtectionPolicy.Build(plan.Mode,applications,prepared,layer==PInvoke.FWPM_LAYER_ALE_AUTH_CONNECT_V4))
                 {
-                    foreach(var app in applications)ApplicationFilter(layer,app);
-                    Add(layer,false,[]);
+                    if(rule.Kind==TrafficProtectionRuleKind.SharedDnsBlock)
+                    {
+                        var dns=new FWPM_FILTER_CONDITION0{fieldKey=PInvoke.FWPM_CONDITION_IP_REMOTE_PORT,matchType=FWP_MATCH_TYPE.FWP_MATCH_EQUAL,conditionValue=new(){type=FWP_DATA_TYPE.FWP_UINT16,uint16=53}};
+                        Add(layer,false,[dns]);
+                    }
+                    else if(rule.Kind==TrafficProtectionRuleKind.GlobalBlock)Add(layer,false,[]);
+                    else ApplicationFilter(layer,rule.Application!,rule.Key);
                 }
-                else foreach(var app in prepared!.Filters.Values)
-                    ApplicationFilter(layer,new(app.Identity,false),layer==PInvoke.FWPM_LAYER_ALE_AUTH_CONNECT_V4?app.V4:app.V6);
             }
         });
         applicationState=adapterId is not null?prepared:null;

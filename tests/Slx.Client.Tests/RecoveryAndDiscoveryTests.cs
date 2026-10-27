@@ -30,7 +30,7 @@ public sealed class RecoveryAndDiscoveryTests
     [Theory]
     [InlineData(RoutingMode.SelectedApplications)]
     [InlineData(RoutingMode.WholeComputer)]
-    public void PublicDnsRacesOnlyConfiguredHttpsResolversThroughVpn(RoutingMode mode)
+    public void SharedDnsRacesOnlyConfiguredHttpsResolversUsingTheModePolicy(RoutingMode mode)
     {
         using var json=System.Text.Json.JsonDocument.Parse(XrayConfigBuilder.Build(CoreFixtures.Plan(mode),18899,"probeUser00000000","probePassword0000"));
         var root=json.RootElement;var dns=root.GetProperty("dns");
@@ -45,7 +45,10 @@ public sealed class RecoveryAndDiscoveryTests
         var rules=root.GetProperty("routing").GetProperty("rules").EnumerateArray().ToArray();
         int resolver=Array.FindIndex(rules,x=>x.TryGetProperty("inboundTag",out var tags)&&tags.EnumerateArray().Any(t=>t.GetString()=="resolver"));
         int self=Array.FindIndex(rules,x=>x.TryGetProperty("process",out _));Assert.InRange(resolver,0,self-1);
-        Assert.Equal("vpn",rules[resolver].GetProperty("outboundTag").GetString());
+        Assert.Equal(mode==RoutingMode.WholeComputer?"vpn":"direct",rules[resolver].GetProperty("outboundTag").GetString());
+        var probe=Assert.Single(rules,x=>x.TryGetProperty("inboundTag",out var tags)&&tags.EnumerateArray().Any(t=>t.GetString()=="probe")
+            &&x.GetProperty("outboundTag").GetString()=="vpn");
+        Assert.Equal(new[]{"probe"},probe.GetProperty("inboundTag").EnumerateArray().Select(tag=>tag.GetString()).ToArray());
         int captured=Array.FindIndex(rules,x=>x.TryGetProperty("port",out var port)&&port.GetString()=="53");
         Assert.InRange(captured,0,self-1);
         Assert.Equal("dns",rules[captured].GetProperty("outboundTag").GetString());

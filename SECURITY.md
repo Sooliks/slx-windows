@@ -7,7 +7,12 @@ User subscription storage uses DPAPI CurrentUser. Resume intent uses DPAPI Local
 
 Alpha.5 adds persistent provider-owned WFP protection for exact enabled executable paths, or public whole-computer traffic. Core/service failure preserves blocking outside the owned TUN. LAN/loopback and the service/core recovery path remain available. Explicit Disconnect, uninstall or administrator emergency recovery releases protection. Alpha.18 also rolls back a definitively failed first connection that started from confirmed off, after its owned cleanup succeeds. This exception never applies to an established/protected session, unreadable startup state, cancellation or an unknown request result. An off-intent survives restart; corrupted/unreadable intent leaves control available without clearing existing rules.
 The TUN exception is nonpersistent and tied to its next-hop LUID, rather than the interface holding the source IP. Broad per-user boot-time, existing-flow, raw-packet and IPv6 guarantees are not established by the current acceptance. See docs/NETWORK.md and docs/VERIFICATION.md.
-Shared public DNS captured by TUN uses HTTPS through VPN without direct DNS fallback. Local DNS and endpoint bootstrap may remain direct; no per-app DNS anonymity is claimed.
+Alpha.26 separates DNS by mode. Whole-PC shared DNS uses HTTPS through VPN without direct fallback. Selected-app
+mode uses the same shared HTTPS resolvers directly and does not globally block other processes' port53; while the
+TUN/core is absent, ordinary Windows DNS remains available to unselected applications. Windows shared DNS cannot
+attribute its original app caller, so selected mode does not promise VPN-confined DNS or per-app DNS anonymity.
+Selected exact-app public data blocks remain; app-owned encrypted DNS follows its process route. Local DNS and endpoint
+bootstrap may remain direct. No physical DNS setting or foreign firewall policy is changed.
 
 Alpha.18 keeps status authorization independent of slow network work, while mutations stay serialized. Four bounded
 pipe instances retain the original ACL and first-instance ownership. Only SID-authorized, payload-validated and

@@ -102,14 +102,14 @@
         "type": "Project",
         "dependencies": {
           "CommunityToolkit.Mvvm": "[8.4.0, )",
-          "Slx.Client.Core": "[0.1.0-alpha.25, )",
-          "Slx.Client.Windows": "[0.1.0-alpha.25, )"
+          "Slx.Client.Core": "[0.1.0-alpha.26, )",
+          "Slx.Client.Windows": "[0.1.0-alpha.26, )"
         }
       },
       "SLX VPN Updater": {
         "type": "Project",
         "dependencies": {
-          "Slx.Client.Windows": "[0.1.0-alpha.25, )"
+          "Slx.Client.Windows": "[0.1.0-alpha.26, )"
         }
       },
       "slx.client.core": {
@@ -118,7 +118,7 @@
       "slx.client.windows": {
         "type": "Project",
         "dependencies": {
-          "Slx.Client.Core": "[0.1.0-alpha.25, )"
+          "Slx.Client.Core": "[0.1.0-alpha.26, )"
         }
       }
     },

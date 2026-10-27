@@ -6,6 +6,7 @@ internal sealed partial class TunnelEngine
 {
     private async Task StopChildAsync()
     {
+        remoteHealthGrace.Reset();
         var process = child;
         // Launch checked that this name was absent before starting our verified child.
         // A successful launch records its GUID; partial launches capture it before stopping.

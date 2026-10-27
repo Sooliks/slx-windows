@@ -9,6 +9,7 @@ internal sealed partial class TunnelEngine
 
     private void RequestOff(string? completionCode = null)
     {
+        remoteHealthGrace.Reset();
         startupOffCleanup.Cancel();
         desiredConnected = false;
         offCleanup.Begin(completionCode);

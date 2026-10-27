@@ -205,8 +205,25 @@ without starting a tunnel. The service reports SERVICE_STARTUP_CLEANUP_PENDING u
 confirms Disconnected. Unreadable intent never enables this cleanup. New connection protection supersedes it;
 an explicit Stop cancels it, including a failed stop. This does not add a boot-time packet guarantee.
 
-## DNS
-Windows shares its DNS service across applications. Public port 53 captured by TUN routes to Xray DNS, whose HTTPS resolvers (literal 1.1.1.1 / 8.8.8.8, normal certificate validation) route via VPN before self-process bypass. There is no plain UDP/system DNS fallback in this path. This also affects unselected applications using the shared public resolver while connected. Private/LAN DNS and initial bootstrap resolution remain direct; public port 53 is blocked outside TUN during recovery, including the shared Windows resolver. This can pause DNS for unselected apps while VPN is recovering; app-owned HTTPS DNS follows its process rule. Selected mode is not per-app DNS anonymity.
+## DNS — alpha.26
+Windows shares its DNS service across applications and does not expose the original app caller to these routing rules.
+SelectedApplications therefore routes the same HTTPS resolver peers directly, independently of VPN-server health, and
+does not install a global public port53 deny. While core/TUN is absent, ordinary Windows DNS is available to unselected
+programs; selected exact EXE public-data blocks remain. This explicitly trades VPN-confined shared DNS for isolation
+of unselected applications from VPN outages. It does not promise selected-app DNS anonymity. App-owned encrypted DNS
+continues to follow its exact process route. No system DNS address or foreign provider filter is changed.
+
+WholeComputer retains HTTPS DNS through VPN and the persistent global port53 deny outside LAN/TUN. Same two peers,
+TLS validation, parallel fallback and readiness budgets remain. In selected mode the DNS readiness response now proves
+the direct shared resolver path reached through the owned local TUN, not a VPN-outbound DNS exchange. HTTP readiness
+through the authenticated probe still uses VPN and ordinary data routes remain checked independently. Diagnostics say
+which shared DNS policy applies when current mode is known; absent historical mode cannot be inferred from preferences.
+
+Selected-only remote HTTPS failures retain a healthy owned core, adapter and routes for at most90 monotonic seconds,
+checking again with five-second gaps. Checking with ProbePassed=false remains unconfirmed; no healthy state is invented.
+This avoids destroying unselected direct sessions merely because the remote VPN briefly disappeared. Successful checks
+retain ConnectedAt; resource/route/native-policy failure and grace exhaustion still use protected core recovery.
+Core restart necessarily can interrupt direct sessions traversing TUN; universal packet continuity is not claimed.
 The service flushes the Windows resolver cache and performs a real DNS exchange before Connected. Owner-reported YouTube NXDOMAIN was reproduced on plain DNS; the new DoH path returned valid answers on both live protocols. No physical DNS settings are persisted.
 
 ## Acceptance

@@ -40,6 +40,14 @@ internal static class DnsDiagnosticsChecks
             Assert.DoesNotContain(UiFixtures.Primary.Name, model.SafeDiagnostics);
             Assert.DoesNotContain("synthetic-ui-fixture", model.SafeDiagnostics);
             Assert.DoesNotContain("1.1.1.1", model.SafeDiagnostics);
+            observed = observed with { Mode = RoutingMode.SelectedApplications };
+            model.PollAsync().GetAwaiter().GetResult();
+            Assert.Contains("Mode: SelectedApplications", model.SafeDiagnostics);
+            Assert.Contains("shared resolver outside VPN", model.SafeDiagnostics);
+            observed = observed with { Mode = RoutingMode.WholeComputer };
+            model.PollAsync().GetAwaiter().GetResult();
+            Assert.Contains("Mode: WholeComputer", model.SafeDiagnostics);
+            Assert.Contains("shared resolver through VPN", model.SafeDiagnostics);
             foreach (var language in new[] { "ru", "en" })
             {
                 model.Language = language;

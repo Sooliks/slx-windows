@@ -14,7 +14,7 @@
       "slx.client.windows": {
         "type": "Project",
         "dependencies": {
-          "Slx.Client.Core": "[0.1.0-alpha.25, )"
+          "Slx.Client.Core": "[0.1.0-alpha.26, )"
         }
       }
     },

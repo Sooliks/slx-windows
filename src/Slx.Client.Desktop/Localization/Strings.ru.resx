@@ -49,7 +49,7 @@
 <data name="RoutingTitle" xml:space="preserve"><value>Режим VPN</value></data>
 <data name="ModeSelected" xml:space="preserve"><value>Приложения</value></data>
 <data name="ModeWhole" xml:space="preserve"><value>Весь ПК</value></data>
-<data name="ModeSelectedDescription" xml:space="preserve"><value>Включённые приложения используют VPN. Общий DNS Windows может затронуть другие программы при восстановлении VPN.</value></data>
+<data name="ModeSelectedDescription" xml:space="preserve"><value>VPN только для включённых приложений. Общий DNS — вне VPN, чтобы остальные программы сохраняли связь при обрыве.</value></data>
 <data name="ModeWholeDescription" xml:space="preserve"><value>Интернет на всём ПК через VPN. Локальная сеть доступна.</value></data>
 <data name="SelectedApps" xml:space="preserve"><value>Выбор приложений</value></data>
 <data name="NoAppsTitle" xml:space="preserve"><value>Выберите первое приложение</value></data>
@@ -98,7 +98,7 @@
 <data name="HelpBindingBody" xml:space="preserve"><value>Ссылка из Happ привязана к его установке. Создайте отдельное Windows-устройство или перенесите подключение в кабинете SLX. Мы не копируем идентификатор Happ.</value></data>
 <data name="Support" xml:space="preserve"><value>Написать в поддержку ↗</value></data>
 <data name="Website" xml:space="preserve"><value>Открыть сайт SLX ↗</value></data>
-<data name="SecurityNote" xml:space="preserve"><value>Без телеметрии посещений. Данные подключения зашифрованы средствами Windows. При сбое VPN защищённый публичный трафик блокируется до восстановления. Кнопка «Отключиться» снимает защиту. Локальная сеть остаётся доступной; изоляция DNS по приложениям не обещается.</value></data>
+<data name="SecurityNote" xml:space="preserve"><value>Без телеметрии посещений. При обрыве защищённый трафик блокируется до восстановления или нажатия «Отключиться». В режиме «Приложения» общий DNS работает вне VPN; режим «Весь ПК» защищает и DNS. Локальная сеть остаётся доступной.</value></data>
 <data name="VersionLabel" xml:space="preserve"><value>SLX VPN</value></data>
 <data name="AlphaNotice" xml:space="preserve"><value>Предварительная версия. Реальные маршруты, DNS, восстановление после сна и чистая установка ещё проходят проверку.</value></data>
 <data name="ServiceHelp" xml:space="preserve"><value>Установите SLX через установщик и повторите попытку. Запускать приложение от администратора не нужно.</value></data>
@@ -199,7 +199,7 @@
 <data name="TrayStatus" xml:space="preserve"><value>SLX VPN · {0}</value></data>
 <data name="FaultOutboundInterface" xml:space="preserve"><value>Нет маршрута Windows к серверу VPN. Проверьте интернет и сетевые адаптеры, затем повторите подключение.</value></data>
 <data name="FaultVpnProbe" xml:space="preserve"><value>Проверка соединения VPN не прошла. Проверьте интернет или выберите другой способ подключения.</value></data>
-<data name="FaultVpnDns" xml:space="preserve"><value>Не удалось проверить DNS через VPN. Попробуйте другой способ подключения или скопируйте диагностику из «Помощи».</value></data>
+<data name="FaultVpnDns" xml:space="preserve"><value>Не удалось проверить DNS. Попробуйте другой способ подключения или скопируйте диагностику из «Помощи».</value></data>
 <data name="FaultVpnDnsRoute" xml:space="preserve"><value>Не удалось направить DNS через SLX. Отключите другой VPN, если он запущен, и повторите попытку. Диагностика — в «Помощи».</value></data>
 <data name="FaultEndpointNetwork" xml:space="preserve"><value>Не удалось определить адрес сервера VPN. Проверьте интернет, затем повторите подключение или выберите другой способ.</value></data>
 <data name="FaultEndpointRejected" xml:space="preserve"><value>Адрес сервера VPN не прошёл проверку. Обновите подписку или обратитесь в поддержку.</value></data>

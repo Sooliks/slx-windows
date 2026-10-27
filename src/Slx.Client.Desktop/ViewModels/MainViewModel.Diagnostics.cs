@@ -26,6 +26,7 @@ public sealed partial class MainViewModel
             text.AppendLine("UI operation: " + (pendingControlAction is null ? "none" : pendingControlAction + ", pending"));
             if (controlOperationStartedAt is {} started) text.AppendLine($"UI operation started UTC: {started:O}");
             text.AppendLine("Phase: " + (status?.Phase.ToString() ?? "unknown"));
+            text.AppendLine("Mode: " + (status?.Mode?.ToString() ?? "unknown"));
             text.AppendLine("Protection: " + (status?.ProtectionActive.ToString() ?? "unknown"));
             text.AppendLine("Probe passed: " + (status?.ProbePassed.ToString() ?? "unknown"));
             text.AppendLine("Code: " + (LastServiceCode ?? "none"));
@@ -47,6 +48,12 @@ public sealed partial class MainViewModel
                 AppendDnsAttempt(text, 1, dns.First);
                 if (dns.Second is {} second) AppendDnsAttempt(text, 2, second);
                 if (dns.Third is {} third) AppendDnsAttempt(text, 3, third);
+                text.AppendLine(status?.Mode switch
+                {
+                    RoutingMode.SelectedApplications => "DNS meaning: shared resolver outside VPN; OwnedTunnel identifies the local TUN route, not the VPN outbound",
+                    RoutingMode.WholeComputer => "DNS meaning: shared resolver through VPN; owned TUN route and DNS answer are separate observations",
+                    _ => "DNS meaning: resolver observation; current routing mode is unconfirmed"
+                });
             }
             TrafficRouteDiagnostics.Append(text, status?.TrafficRoutes);
             return text.ToString();

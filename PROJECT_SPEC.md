@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.25. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.26. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,26 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.26 — selected-app recovery must not disable shared DNS
+
+Owner authorizes immediate production-channel release after mandatory checks. Alpha.25 owner diagnostics show two
+ProbeFailed recoveries, latest00:08:35 UTC27Oct, Connected00:09:27, and current healthy state at00:13:58. These times
+do not prove the server rebooted or measure every packet outage. Code establishes shared public DNS was VPN-routed
+and globally blocked outside TUN in selected mode, so unselected name resolution depended on VPN recovery.
+
+In SelectedApplications only, remove the global port53 WFP deny while retaining all selected exact-EXE blocks and
+existing LAN/TUN exemptions. Route the same shared HTTPS resolver peers directly; probe inbound remains VPN-only.
+WholeComputer DNS route/global protection stay unchanged. Windows shared DNS cannot identify its original caller:
+selected mode now explicitly allows shared name resolution outside VPN, including physical Windows DNS while TUN
+is absent. App-owned encrypted DNS follows its process rule. Do not claim DNS anonymity or replace system resolvers.
+
+For selected mode remote-only health failures, retain a still-owned healthy core/TUN/routes and existing direct flows
+for a bounded monotonic90-second grace, using Checking/ProbePassed=false and five-second check spacing. Success
+retains ConnectedAt; core/adapter/route/native-policy loss immediately recovers normally. Explicit off, replacement
+and successful health reset grace. No indefinite stuck-core deferral, fake Connected or protection release is allowed.
+Keep IPCv2 wire shape unchanged for the installed alpha.25 updater's strict result decoder. DNS diagnostics distinguish
+the shared-resolver policy from a local OwnedTunnel route. No server/website/DB/live-machine network mutation.
 
 ## Alpha.25 — integrated updates with tunnel ownership
 

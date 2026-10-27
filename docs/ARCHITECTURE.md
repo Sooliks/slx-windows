@@ -1,5 +1,13 @@
 # Boundaries
 
+Alpha.26: TrafficProtectionPolicy supplies the mode-scoped rule construction consumed by the existing atomic WFP
+transaction. Only whole-PC receives global port53/all-IP denies; selected mode retains exact enabled AppID denies.
+XrayRouting separates VPN-only probe inbound from shared resolver: selected direct, whole-PC VPN, same HTTPS peers.
+This intentionally changes selected shared-DNS privacy/availability, not system DNS settings or app identity rules.
+Selected remote-health failure can retain the owned healthy core/TUN/routes for90 monotonic seconds, Checking/false,
+with five-second retry gaps; healthy confirmation preserves ConnectedAt, resource failure bypasses grace. No new IPC
+fields/enums are added: the alpha.25 staged updater must read the new service's reply with its strict decoder.
+
 Alpha.25: IntegratedUpdateClient verifies and stages a separately published unprivileged WPF Updater using the
 protected installed manifest. GUID/PID/start-time ready plus committed handoff precede original UI shutdown. Typed
 DPAPI job/result state never supplies executable commands. Fixed native Inno arguments perform silent/no-reboot

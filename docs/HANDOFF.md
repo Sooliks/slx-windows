@@ -1,4 +1,22 @@
-# SLX Windows — контекст передачи, 25 октября 2026
+# SLX Windows — контекст передачи, 27 октября 2026
+
+## Alpha.26 — текущая работа по сбою связи вне выбранных приложений
+
+Владелец разрешил немедленный prod-выпуск после обязательных проверок. Рабочая база — опубликованная alpha.25
+ec2d552 и docs-коммит0edd93b; remote main проверен, локальных сторонних правок не было.
+Журнал27Oct00:13:58 UTC: current/Connected/Protection=true/Probe=true, Recovery2 ProbeFailed последний00:08:35,
+ConnectedAt00:09:27. Health245/retained243, primary/repeatGstaticTLS~2.2s, alternateSLX200/431ms, DNSsuccess233ms,
+IPv4обе/1 OwnedTunnel. Это состояние после восстановления, не доказательство перезагрузки сервера/пакетного outage.
+
+Найдено: выбранный режим тоже ставил глобальный WFP DNS53block и направлял общий DNS через VPN. Теперь DNS53block
+толькоWholeComputer; выбранные точныеEXEзащищеныкакпрежде. SharedHTTPSDNSSelectedидётDIRECTпрежними2peers,
+WholeVPN;probeвсегдаVPN. При кратком remote-onlyсбоеSelectedдо90сек сохраняет исправные ядро/TUN/маршруты и прямые
+сеансы, Checking/Probe=false, проверкис5секпаузами; ресурсныйсбой немедленно normalrecovery. ФорматIPCнерасширен,
+чтобы строгий updater25 прочитал reply26. UI/docs объясняют DNSвнеVPNи отличают OwnedTunnelотVPNoutbound.
+Реальный pinnedXrayloopbackDNScontract прошёл: Selected отвечаетприblackholeVPN, WholeневыходитDIRECT.
+Полная локальная проверка exit0:732 основных теста+1WPF,0warnings/errors/skips, source-sizegate; завершена00:23:09UTC.
+Rootповторил pinned-coreDNScontract, оба режима exit0; свежий RU940кадр просмотрен. Публикация фиксируется после
+завершения CI. Живую службу/сеть/сервер не меняли.
 
 ## Текущий подтверждённый выпуск alpha.25 — встроенное обновление
 
