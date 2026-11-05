@@ -9,6 +9,8 @@ internal interface IControlTunnelEngine
     bool IsConfirmedOff => false;
     Task StartAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken);
     Task ReconnectAsync(CancellationToken cancellationToken);
+    /// <summary>Explicit user reconnect with a plan: resolves the server again and starts from its first transport.</summary>
+    Task RestartAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken) => StartAsync(plan, sid, cancellationToken);
     Task UpdateApplicationsAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken);
     Task StopAsync(CancellationToken cancellationToken);
 }

@@ -11,7 +11,7 @@ internal static class XrayRouting
         "::/128", "::1/128", "fc00::/7", "fe80::/10", "ff00::/8"
     ];
 
-    public static XrayRouteRule[] Build(ConnectPlan plan)
+    public static XrayRouteRule[] Build(ConnectPlan plan, string? corePath = null)
     {
         var rules = new List<XrayRouteRule>
         {
@@ -24,17 +24,24 @@ internal static class XrayRouting
             new("dns") { Inbounds = ["tun"], Port = "53" },
             new("direct") { Processes = ["self/"] }
         };
-        if (IPAddress.TryParse(plan.Profile.Host, out var address))
-            rules.Add(new("direct") { Ips = [address.ToString()] });
-        else
-            rules.Add(new("direct") { Domains = ["full:" + plan.Profile.Host] });
+        // The separate VPN core reaches its server directly, by process and by every pinned endpoint.
+        if (corePath is not null) rules.Add(new("direct") { Processes = [corePath.Replace('\\', '/')] });
+        foreach (var host in Endpoints(plan))
+        {
+            if (IPAddress.TryParse(host, out var address))
+                rules.Add(new("direct") { Ips = [address.ToString()] });
+            else
+                rules.Add(new("direct") { Domains = ["full:" + host] });
+        }
         if (plan.Mode == RoutingMode.SelectedApplications)
         {
-
             rules.Add(new("vpn") { Processes = plan.Applications.Where(app => app.Enabled).Select(app => app.ExecutablePath.Replace('\\', '/')).ToArray() });
         }
         rules.Add(new(plan.Mode == RoutingMode.WholeComputer ? "vpn" : "direct")
         { Network = "tcp,udp", RuleTag = XrayRouteProtocol.MarkerPrefix + XrayRouteRevision.For(plan) });
         return rules.ToArray();
     }
+
+    private static IEnumerable<string> Endpoints(ConnectPlan plan) => new[] { plan.Profile.Host }
+        .Concat((plan.Alternates ?? []).Select(alternate => alternate.Host)).Distinct(StringComparer.OrdinalIgnoreCase);
 }

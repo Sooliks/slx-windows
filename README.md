@@ -83,6 +83,7 @@ pwsh -File scripts/package-source.ps1 -BaseRef v0.1.0-alpha.25
 
 Для владельца репозитория добавлен workflow `Publish Windows prerelease`: push изменения версии в `Directory.Build.props` в `main` запускает Windows-проверки, штатную сборку и публикацию prerelease. Повторный запуск доступен вручную в Actions. При ошибке любой проверки выпуск останавливается; наличие исходников в `main` само по себе ещё не означает готовое обновление.
 
+Обновление до alpha.27 (два процесса Xray, смена транспорта) и обязательная приёмка: [UPDATE_ALPHA27_RU.md](docs/UPDATE_ALPHA27_RU.md).
 Обновление до alpha.19 и выпуск исправления проверки новых версий: [UPDATE_ALPHA19_RU.md](docs/UPDATE_ALPHA19_RU.md).
 Восстановление сети при недоступной службе и проверка сетевых исправлений alpha.18: [UPDATE_ALPHA18_RU.md](docs/UPDATE_ALPHA18_RU.md).
 

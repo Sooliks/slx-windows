@@ -52,7 +52,8 @@ public sealed partial class MainViewModel
         try
         {
             if (action != "disconnect") await RepairVersionedApplicationsAsync(current.Token);
-            if(action != "disconnect" && SelectedProfile != null)plan=new(SelectedProfile,preferences.Mode,Slx.Client.Windows.ApplicationGroups.Expand(Applications.SelectMany(x=>x.ToRules())));
+            if(action != "disconnect" && SelectedProfile != null)plan=new(SelectedProfile,preferences.Mode,Slx.Client.Windows.ApplicationGroups.Expand(Applications.SelectMany(x=>x.ToRules())),
+                TransportAlternates.For(SelectedProfile,Profiles));
             await mutationGate.WaitAsync(current.Token);
             entered = true;
             if (action == "update-applications" && plan != null) RememberApplicationRevision(plan, routingOwner);

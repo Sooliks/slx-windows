@@ -39,7 +39,7 @@ internal sealed partial class TunnelEngine
             var oldPolicy = guard.CurrentApplications;
             var newPolicy = guard.PrepareApplications(plan);
             var union = oldPolicy.Union(newPolicy);
-            var control = new XrayRouteControl(probe.Port, probe.User, probe.Password);
+            var control = new XrayRouteControl(probe.Port, probe.User, probe.Password, RuntimeTrust.Verify());
             var transaction = new ApplicationUpdateTransaction(pinnedBefore, pinnedAfter,
                 stage => guard.ApplyApplications(stage switch
                 {

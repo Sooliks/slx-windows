@@ -44,8 +44,14 @@ internal static class HealthDiagnosticsChecks
         model.PollAsync().GetAwaiter().GetResult();
         Assert.Contains("Health alternate: Slx, Connection, 22 ms", model.SafeDiagnostics);
         Assert.DoesNotContain("Health repeat:", model.SafeDiagnostics);
+        observed = observed with { Attempt = new(UiFixtures.Primary.Name, "vless-reality", 2, 2, 3, "VPN_PROBE_FAILED", time) };
+        model.PollAsync().GetAwaiter().GetResult();
+        Assert.Contains("Transport: vless-reality (2/2), node: same-location alternate", model.SafeDiagnostics);
+        Assert.Contains("Connection attempt: 3, recovery reason: VPN_PROBE_FAILED", model.SafeDiagnostics);
+        Assert.DoesNotContain(UiFixtures.Primary.Name, model.SafeDiagnostics);
         observed = new(TunnelPhase.Disconnected, time.AddMinutes(1));
         model.PollAsync().GetAwaiter().GetResult();
+        Assert.DoesNotContain("Transport:", model.SafeDiagnostics);
         Assert.DoesNotContain("Health ", model.SafeDiagnostics);
         Assert.DoesNotContain("Connected UTC:", model.SafeDiagnostics);
     }

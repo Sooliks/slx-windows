@@ -5,10 +5,13 @@ namespace Slx.Client.Core;
 /// <summary>Only typed plans become configuration. Never accepts arbitrary Xray JSON.</summary>
 public static class XrayConfigBuilder
 {
+    /// <param name="core">When present this is the long-lived TUN process: "vpn" is the loopback link to the
+    /// separately restartable core, and the core's own transport traffic always leaves directly.</param>
     public static string Build(ConnectPlan plan, int probePort, string probeUser, string probePassword,
-        string outboundInterface = "auto")
+        string outboundInterface = "auto", XrayCoreLink? core = null)
     {
         PlanValidator.Validate(plan);
+        core?.Validate();
         if (probePort is < 1024 or > 65535 || !SafeProbe(probeUser) || !SafeProbe(probePassword))
             throw new ClientFault("INVALID_PLAN");
         if (string.IsNullOrWhiteSpace(outboundInterface) || outboundInterface.Length > 256
@@ -60,15 +63,15 @@ public static class XrayConfigBuilder
             outbounds = new object[]
             {
                 new { tag = "direct", protocol = "freedom", settings = new { domainStrategy = "AsIs" } },
-                XrayOutbound.Build(plan.Profile),
+                core is null ? XrayOutbound.Build(plan.Profile) : XrayOutbound.Link(core),
                 new { tag = "dns", protocol = "dns", settings = new { } }
             },
-            routing = new { domainStrategy = "AsIs", rules = XrayRouting.Build(plan) }
+            routing = new { domainStrategy = "AsIs", rules = XrayRouting.Build(plan, core?.CorePath) }
         };
         return JsonSerializer.Serialize(config);
     }
 
-    private static bool SafeProbe(string value) => !string.IsNullOrWhiteSpace(value)
+    internal static bool SafeProbe(string value) => !string.IsNullOrWhiteSpace(value)
         && value.Length is >= 16 and <= 128 && value.All(character => char.IsAsciiLetterOrDigit(character)
             || character is '-' or '_' or '=' or '+');
 }

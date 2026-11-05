@@ -12,7 +12,7 @@ internal sealed partial class TunnelEngine
     private long retryAt,healthAt;
     public string? OwnerSid=>ownerSid;
     public bool IsConfirmedOff=>confirmedUnprotected&&state.Phase==TunnelPhase.Disconnected&&!protectionActive&&ownerSid is null
-        &&!desiredConnected&&!offCleanup.Pending&&!startupOffCleanup.Pending&&child is null&&ownedAdapterId is null&&currentPlan is null;
+        &&!desiredConnected&&!offCleanup.Pending&&!startupOffCleanup.Pending&&child is null&&core is null&&ownedAdapterId is null&&currentPlan is null;
     public async Task RestoreAsync(CancellationToken cancellationToken, bool suppressResume = false)
     {
         await lifecycle.WaitAsync(cancellationToken);
@@ -26,6 +26,7 @@ internal sealed partial class TunnelEngine
             pinnedPlan=saved.Plan;currentPlan=saved.EndpointHost is null?saved.Plan:saved.Plan with{Profile=saved.Plan.Profile with{Host=saved.EndpointHost}};ownerSid=saved.OwnerSid;desiredConnected=true;
             var restored=ExactApplicationPlan.Prepare(RestoredTunnelPlan.Refresh(saved,cancellationToken),cancellationToken);
             pinnedPlan=restored.Plan;
+            rotation.Reset(restored.Plan);
             currentPlan=restored.EndpointHost is null?restored.Plan:restored.Plan with{Profile=restored.Plan.Profile with{Host=restored.EndpointHost}};
             // Preserve old rules until the complete refreshed native-ID set passes and replacement commits.
             ArmProtection(restored.Plan);
@@ -94,7 +95,7 @@ internal sealed partial class TunnelEngine
     private void ScheduleRecovery(string code)
     {
         recoveryAttempts=Math.Min(recoveryAttempts+1,30);
-        retryAt=System.Diagnostics.Stopwatch.GetTimestamp()+(long)(RecoveryBackoff.Delay(recoveryAttempts).TotalSeconds*System.Diagnostics.Stopwatch.Frequency);
+        retryAt=System.Diagnostics.Stopwatch.GetTimestamp()+(long)(RecoveryBackoff.Reconnect(recoveryAttempts).TotalSeconds*System.Diagnostics.Stopwatch.Frequency);
         state=new(TunnelPhase.Reconnecting,DateTimeOffset.UtcNow,currentPlan?.Profile.Name,code,
             Mode:currentPlan?.Mode,ProtectionActive:protectionActive);
     }

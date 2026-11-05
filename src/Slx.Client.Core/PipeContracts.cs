@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Slx.Client.Core;
 
 public static class PipeContract
@@ -16,7 +18,9 @@ public sealed record TunnelStatus(TunnelPhase Phase, DateTimeOffset ObservedAt,
     RoutingMode? Mode = null, bool ProbePassed = false, bool ProtectionActive = false, RecoveryObservation? Recovery = null,
     HealthCheckObservation? HealthCheck = null, string? ApplicationRevision = null, DnsCheckObservation? DnsCheck = null,
     TrafficRouteCheckObservation? TrafficRoutes = null, string? ServiceVersion = null,
-    UpdateMaintenanceObservation? UpdateMaintenance = null);
+    UpdateMaintenanceObservation? UpdateMaintenance = null,
+    // Omitted while off, so strict older updaters can still read an idle service reply.
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ConnectionAttemptObservation? Attempt = null);
 public sealed record UpdateMaintenanceObservation(Guid SessionId, DateTimeOffset ExpiresAt, bool Claimed);
 public sealed record PipeRequest(int Version, string Action, Guid RequestId, ConnectPlan? Plan = null,
     Guid? UpdateSessionId = null);

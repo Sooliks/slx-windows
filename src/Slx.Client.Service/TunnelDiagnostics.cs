@@ -16,8 +16,12 @@ internal sealed partial class TunnelEngine
     internal void RecordHealthIncident(HealthConfirmationResult result, bool retained)
     {
         if (result.Primary.Passed) return;
-        healthCheck = new(Math.Min(healthCheck?.Incidents ?? 0, int.MaxValue-1)+1,
-            (int)Math.Min((long)(healthCheck?.RetainedConnections ?? 0)+(retained ? 1 : 0), int.MaxValue),
+        // One failed TLS/connection attempt that the repeat check immediately passes is a blip: its details stay
+        // visible, but it is not an incident. Only a failed repeat makes the connection genuinely doubtful.
+        bool blip = result.Repeat?.Passed == true;
+        int incidents = healthCheck?.Incidents ?? 0, retainedCount = healthCheck?.RetainedConnections ?? 0;
+        healthCheck = new(blip ? incidents : Math.Min(incidents, int.MaxValue-1)+1,
+            blip ? retainedCount : (int)Math.Min((long)retainedCount+(retained ? 1 : 0), int.MaxValue),
             DateTimeOffset.UtcNow, result.Primary, result.Repeat, result.Alternate);
     }
 }

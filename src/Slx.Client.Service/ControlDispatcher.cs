@@ -102,7 +102,8 @@ internal sealed partial class ControlDispatcher(IControlTunnelEngine engine, ISe
                 else if (request.Action == "update-applications") await engine.UpdateApplicationsAsync(request.Plan!, sid, operation.Token);
                 else
                 {
-                    if (request.Plan is not null) await engine.StartAsync(request.Plan, sid, operation.Token);
+                    if (request.Plan is not null && request.Action == "reconnect") await engine.RestartAsync(request.Plan, sid, operation.Token);
+                    else if (request.Plan is not null) await engine.StartAsync(request.Plan, sid, operation.Token);
                     else await engine.ReconnectAsync(operation.Token);
                 }
                 result = new(true, "OK", ObservedStatus);

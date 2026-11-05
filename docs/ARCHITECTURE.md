@@ -1,5 +1,13 @@
 # Boundaries
 
+Alpha.27: two Xray processes. The long-lived TUN process keeps the adapter, split routes, DNS, probe/API inbound and
+per-application rules; its `vpn` outbound is an authenticated loopback SOCKS link to a separate VPN core that has
+no TUN, routes or DNS. The TUN process routes the core's own traffic direct by executable path and by every pinned
+transport endpoint. Health/remote failures restart only the core, so unselected direct flows never depend on the
+server; loss of the TUN process, adapter or routes still rebuilds both. TransportRotation switches to another
+transport of the same server/location after two consecutive failed cycles; alternates come only from the user's
+subscription with the same endpoint host or transport-free location name. New IPC members are omitted when null.
+
 Alpha.26: TrafficProtectionPolicy supplies the mode-scoped rule construction consumed by the existing atomic WFP
 transaction. Only whole-PC receives global port53/all-IP denies; selected mode retains exact enabled AppID denies.
 XrayRouting separates VPN-only probe inbound from shared resolver: selected direct, whole-PC VPN, same HTTPS peers.

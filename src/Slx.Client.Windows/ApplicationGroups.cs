@@ -12,7 +12,8 @@ public static partial class ApplicationGroups
     public static IReadOnlyList<AppRule> Discover(CancellationToken cancellationToken = default)
     {
         var primary=PackageExecutables(cancellationToken).FirstOrDefault(File.Exists);
-        return primary is null?[]:[AppDiscovery.FromExecutable(primary) with{Name="Codex / ChatGPT"}];
+        var families=ApplicationFamilies.Discover(cancellationToken);
+        return primary is null?families:[AppDiscovery.FromExecutable(primary) with{Name="Codex / ChatGPT"},..families];
     }
     public static AppRule Normalize(AppRule rule)=>Normalize(rule,CancellationToken.None);
     public static AppRule Normalize(AppRule rule,CancellationToken cancellationToken)
@@ -25,9 +26,12 @@ public static partial class ApplicationGroups
     public static List<AppRule> Expand(IEnumerable<AppRule> applications)
     {
         var expanded=new List<AppRule>();
-        foreach(var rule in applications)
+        foreach(var original in applications)
         {
+            var rule=original with{ExecutablePath=ApplicationFamilies.ResolveLink(original.ExecutablePath)};
             expanded.Add(rule);
+            foreach(var member in ApplicationFamilies.Members(rule.ExecutablePath))
+                expanded.Add(new(ApplicationFamilies.Id(member),rule.Name,member,rule.Enabled));
             if(!IsGroup(rule.ExecutablePath))continue;
             foreach(var path in PackageExecutables().Concat(Helpers()).Where(File.Exists))
             {

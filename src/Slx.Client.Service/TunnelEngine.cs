@@ -1,11 +1,14 @@
 using System.Diagnostics;
-using System.Net;
-using System.Net.Sockets;
 using Slx.Client.Core;
 using Slx.Client.Windows;
 
 namespace Slx.Client.Service;
 
+/// <summary>
+/// Two verified Xray processes: a long-lived TUN process that owns routes and sends unselected traffic directly,
+/// and a restartable VPN core reached over an authenticated loopback link. Recovery and transport switches
+/// restart only the core, so direct traffic of unselected applications never depends on the VPN server.
+/// </summary>
 internal sealed partial class TunnelEngine : IControlTunnelEngine
 {
     private readonly SemaphoreSlim lifecycle = new(1, 1);
@@ -19,14 +22,18 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
     private (int Port, string User, string Password) probe;
     private int recoveryAttempts;
     public TunnelStatus Status => state with { Recovery = recovery, HealthCheck = healthCheck, DnsCheck = dnsCheck,
-        TrafficRoutes = trafficRoutes };
+        TrafficRoutes = trafficRoutes, Attempt = desiredConnected ? attempt : null };
 
-    public async Task StartAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken)
+    public Task StartAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken) =>
+        ConnectAsync(plan, sid, repin: false, cancellationToken);
+
+    private async Task ConnectAsync(ConnectPlan plan, string sid, bool repin, CancellationToken cancellationToken)
     {
         plan = ExactApplicationPlan.Prepare(plan, cancellationToken);
-        var pinned = pinnedPlan is not null && currentPlan is not null
+        var pinned = !repin && pinnedPlan is not null && currentPlan is not null
             && (plan.Profile.Id==currentPlan.Profile.Id || string.Equals(plan.Profile.Host,currentPlan.Profile.Host,StringComparison.OrdinalIgnoreCase))
-            ? plan with{Profile=plan.Profile with{Host=pinnedPlan.Profile.Host}} : await PinEndpointAsync(plan, cancellationToken);
+            ? await TunnelEndpoints.PinAsync(plan with{Profile=plan.Profile with{Host=pinnedPlan.Profile.Host}}, cancellationToken, pinnedPlan)
+            : await TunnelEndpoints.PinAsync(plan, cancellationToken, repin ? null : pinnedPlan);
         string executable = RuntimeTrust.Verify();
         await lifecycle.WaitAsync(cancellationToken);
         try
@@ -36,13 +43,14 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
             cancellationToken.ThrowIfCancellationRequested();
             if (offCleanup.Pending) throw new ClientFault("TUN_CLEANUP_PENDING");
             bool rollback = confirmedUnprotected && InitialConnectionAttempt.CanRollback(state, desiredConnected,
-                currentPlan is not null, child is not null || ownedAdapterId is not null);
+                currentPlan is not null, child is not null || core is not null || ownedAdapterId is not null);
             await InitialConnectionAttempt.RunAsync(rollback, async () =>
             {
                 ArmProtection(plan);
                 pendingApplicationUpdate = null;
                 startupOffCleanup.Cancel();
                 currentPlan=plan;ownerSid=sid;desiredConnected=true;pinnedPlan=pinned;retryAt=0;
+                rotation.Reset(pinned);
                 state=new(TunnelPhase.Connecting,DateTimeOffset.UtcNow,plan.Profile.Name,Mode:plan.Mode,ProtectionActive:protectionActive);
                 try{intents.Save(new(sid,pinned,plan.Profile.Host));await StopChildAsync();}
                 catch(Exception error)
@@ -61,13 +69,6 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
             }, cancellationToken);
         }
         finally { lifecycle.Release(); }
-    }
-
-    public async Task ReconnectAsync(CancellationToken cancellationToken)
-    {
-        var plan = currentPlan ?? throw new ClientFault("NO_CONNECTION_PLAN");
-        string sid = ownerSid ?? throw new ClientFault("NO_CONNECTION_PLAN");
-        await StartAsync(plan, sid, cancellationToken);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
@@ -90,36 +91,20 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
         try
         {
             if (LocalProbe.AdapterExists()) throw new ClientFault("TUN_ADAPTER_CONFLICT");
+            rotation.Ensure(plan);
             probe = LocalProbe.ReserveCredentials();
+            coreLink = LocalProbe.ReserveCredentials();
+            coreLinkSuspect = false;
+            await StartCoreAsync(executable, cancellationToken);
             string config = XrayConfigBuilder.Build(plan, probe.Port, probe.User, probe.Password,
-                OutboundInterface.ForEndpoint(plan.Profile.Host));
-            var start = new ProcessStartInfo(executable)
-            {
-                UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true,
-                RedirectStandardOutput = true, RedirectStandardError = true,
-                WorkingDirectory = Path.GetDirectoryName(executable)!
-            };
-            start.ArgumentList.Add("run");
-            start.ArgumentList.Add("-config");
-            start.ArgumentList.Add("stdin:");
-            start.ArgumentList.Add("-format");
-            start.ArgumentList.Add("json");
-            start.Environment.Clear();
-            start.Environment["PATH"] = Environment.SystemDirectory;
-            start.Environment["SYSTEMROOT"] = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
-            start.Environment["NODE_ENV"] = "production";
-            var process = new Process { StartInfo = start };
-            if (!process.Start()) throw new ClientFault("CORE_START_FAILED");
-            child = process;
+                OutboundInterface.ForEndpoint(rotation.Current.Host), CoreLink(executable));
+            var process = XrayProcess.Start(executable, started => child = started);
             job = new ProcessJob(process);
             process.Exited += (_, _) => _ = HandleExitAsync(process);
             process.EnableRaisingEvents = true;
-            _ = DrainAsync(process.StandardOutput.BaseStream);
-            _ = DrainAsync(process.StandardError.BaseStream);
-            await process.StandardInput.WriteAsync(config.AsMemory(), cancellationToken);
-            process.StandardInput.Close();
+            await XrayProcess.SendConfigAsync(process, config, cancellationToken);
             config = "";
-            await LocalProbe.WaitAsync(probe.Port, probe.User, probe.Password, () => !process.HasExited, cancellationToken);
+            await WaitForVpnAsync(process, executable, phase, cancellationToken);
             ownedAdapterId = LocalProbe.AdapterIdentity() ?? throw new ClientFault("TUN_NOT_READY");
             TunnelSourcePolicy.Apply(ownedAdapterId);
             ArmProtection(plan,ownedAdapterId);
@@ -127,12 +112,13 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
             await TunnelDnsProbe.CheckAsync(ownedAdapterId, RecordDnsCheck, cancellationToken);
             await TrafficRouteProbe.CheckAsync(ownedAdapterId, RecordTrafficRoutes, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
-            if (process.HasExited || !LocalProbe.TunnelReady()) throw new ClientFault("CORE_EXITED");
+            if (process.HasExited || !CoreAlive || !LocalProbe.TunnelReady()) throw new ClientFault("CORE_EXITED");
             cancellationToken.ThrowIfCancellationRequested();
             state = new(TunnelPhase.Connected, DateTimeOffset.UtcNow, plan.Profile.Name,
                 ConnectedAt: DateTimeOffset.UtcNow, Mode: plan.Mode, ProbePassed: true, ProtectionActive:protectionActive,
                 ApplicationRevision: XrayRouteRevision.For(currentPlan ?? plan));
             pendingApplicationUpdate = null;
+            PublishAttempt(); rotation.Succeeded();
             recoveryAttempts=0; healthAt=Stopwatch.GetTimestamp()+15*Stopwatch.Frequency;
         }
         catch (Exception error)
@@ -147,26 +133,25 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
         }
     }
 
-    private static async Task<ConnectPlan> PinEndpointAsync(ConnectPlan plan, CancellationToken cancellationToken)
+    /// <summary>
+    /// While the user waits for a first connection, a transport that fails its whole readiness budget
+    /// (for example UDP blocked for Hysteria2) is replaced once by another transport of the same server.
+    /// </summary>
+    private async Task WaitForVpnAsync(Process front, string executable, TunnelPhase phase, CancellationToken cancellationToken)
     {
-        using var budget = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        budget.CancelAfter(TimeSpan.FromSeconds(8));
+        bool fallback = phase == TunnelPhase.Connecting && rotation.Count > 1;
         try
         {
-            var addresses = await Dns.GetHostAddressesAsync(plan.Profile.Host, budget.Token);
-            if (addresses.Length == 0 || addresses.Any(address => !EndpointPolicy.IsPublicAddress(address)))
-                throw new ClientFault("ENDPOINT_NOT_PUBLIC");
-            var selected = addresses.FirstOrDefault(address => address.AddressFamily == AddressFamily.InterNetwork) ?? addresses[0];
-            return plan with { Profile = plan.Profile with { Host = selected.ToString() } };
+            await LocalProbe.WaitAsync(probe.Port, probe.User, probe.Password, () => !front.HasExited && CoreAlive,
+                cancellationToken, TimeSpan.FromSeconds(fallback ? 20 : 32));
         }
-        catch (SocketException) { throw new ClientFault("ENDPOINT_UNREACHABLE"); }
-        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
-        { throw new ClientFault("ENDPOINT_TIMEOUT"); }
-    }
-
-    private static async Task DrainAsync(Stream stream)
-    {
-        try { await stream.CopyToAsync(Stream.Null); }
-        catch (Exception error) when (error is IOException or ObjectDisposedException) { }
+        catch (ClientFault fault) when (fallback && fault.Code == "VPN_PROBE_FAILED" && !front.HasExited && LocalProbe.TunnelReady())
+        {
+            rotation.Advance(fault.Code);
+            await StopCoreAsync();
+            await StartCoreAsync(executable, cancellationToken);
+            await LocalProbe.WaitAsync(probe.Port, probe.User, probe.Password, () => !front.HasExited && CoreAlive,
+                cancellationToken, TimeSpan.FromSeconds(15));
+        }
     }
 }

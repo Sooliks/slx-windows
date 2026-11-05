@@ -8,14 +8,17 @@ public sealed partial class XrayRouteControl
 {
     private readonly int port;
     private readonly string user, password;
-    public XrayRouteControl(int port, string user, string password)
+    private readonly string? corePath;
+    /// <param name="corePath">The separate VPN core whose own traffic the TUN process must keep direct.</param>
+    public XrayRouteControl(int port, string user, string password, string? corePath = null)
     {
-        if (port is < 1024 or > 65535 || !Safe(user) || !Safe(password)) throw new ClientFault("INVALID_PLAN");
-        this.port = port; this.user = user; this.password = password;
+        if (port is < 1024 or > 65535 || !Safe(user) || !Safe(password)
+            || corePath is not null && !PlanValidator.IsExecutablePath(corePath)) throw new ClientFault("INVALID_PLAN");
+        this.port = port; this.user = user; this.password = password; this.corePath = corePath;
     }
     public async Task ReplaceAsync(ConnectPlan pinnedPlan, CancellationToken cancellationToken)
     {
-        var response = await CallAsync("AddRule", XrayRouteProtocol.BuildReplacement(pinnedPlan), cancellationToken).ConfigureAwait(false);
+        var response = await CallAsync("AddRule", XrayRouteProtocol.BuildReplacement(pinnedPlan, corePath), cancellationToken).ConfigureAwait(false);
         if (response.Length != 0) throw new ClientFault("ROUTING_INVALID_REPLY");
     }
     public async Task<string> ReadRevisionAsync(CancellationToken cancellationToken)

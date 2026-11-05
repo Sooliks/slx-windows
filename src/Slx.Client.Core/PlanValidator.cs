@@ -9,6 +9,16 @@ public static partial class PlanValidator
         if (plan?.Profile is null || !Enum.IsDefined(plan.Mode) || plan.Applications is null
             || plan.Applications.Count > 128) throw new ClientFault("INVALID_PLAN");
         ValidateProfile(plan.Profile);
+        if (plan.Alternates is { } alternates)
+        {
+            if (alternates.Count > TransportAlternates.Limit) throw new ClientFault("INVALID_PLAN");
+            var ids = new HashSet<string>(StringComparer.Ordinal) { plan.Profile.Id };
+            foreach (var alternate in alternates)
+            {
+                ValidateProfile(alternate);
+                if (!ids.Add(alternate.Id)) throw new ClientFault("INVALID_PLAN");
+            }
+        }
         var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var app in plan.Applications)
         {

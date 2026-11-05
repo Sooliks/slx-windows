@@ -8,11 +8,12 @@ public static class XrayRouteProtocol
     public const string ApiTag = "slx-control";
     public const string MarkerPrefix = "slx-route-";
     public const string Service = "xray.app.router.command.RoutingService";
-    public static byte[] BuildReplacement(ConnectPlan plan)
+    public static byte[] BuildReplacement(ConnectPlan plan, string? corePath = null)
     {
         PlanValidator.Validate(plan);
+        if (corePath is not null && !PlanValidator.IsExecutablePath(corePath)) throw new ClientFault("INVALID_PLAN");
         var config = new RouteProtoWriter();
-        foreach (var rule in XrayRouting.Build(plan)) config.Bytes(2, Encode(rule));
+        foreach (var rule in XrayRouting.Build(plan, corePath)) config.Bytes(2, Encode(rule));
         var typed = new RouteProtoWriter().Text(1, "xray.app.router.Config").Bytes(2, config.Finish());
         return new RouteProtoWriter().Bytes(1, typed.Finish()).Number(2, 0).Finish();
     }

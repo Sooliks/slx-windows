@@ -2,6 +2,19 @@ namespace Slx.Client.Core;
 
 internal static class XrayOutbound
 {
+    /// <summary>Authenticated loopback SOCKS link (TCP and UDP) from the TUN process to the VPN core.</summary>
+    public static object Link(XrayCoreLink link) => new
+    {
+        tag = "vpn", protocol = "socks",
+        settings = new
+        {
+            servers = new[]
+            {
+                new { address = "127.0.0.1", port = link.Port, users = new[] { new { user = link.User, pass = link.Password } } }
+            }
+        }
+    };
+
     public static object Build(VpnProfile profile)
     {
         if (profile.Kind == "hysteria2")

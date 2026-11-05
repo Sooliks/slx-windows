@@ -15,8 +15,12 @@ internal sealed partial class TunnelEngine
         job?.Dispose();
         job = null;
         probe = default;
+        coreLink = default;
         try
         {
+            ClientFault? coreFault = null;
+            try { await StopCoreAsync(); }
+            catch (ClientFault fault) { coreFault = fault; }
             if (process is not null)
             {
                 bool stopped = false;
@@ -39,6 +43,7 @@ internal sealed partial class TunnelEngine
             // Never remove an adapter or bypass LaunchAsync's independent name conflict guard.
             await OwnedAdapterCleanup.WaitAsync(ownedAdapterId, LocalProbe.AdapterIdentityExists, CancellationToken.None);
             ownedAdapterId = null;
+            if (coreFault is not null) throw coreFault;
         }
         catch (Exception error)
         {

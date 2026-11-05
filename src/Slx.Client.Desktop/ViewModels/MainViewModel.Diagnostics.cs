@@ -35,9 +35,17 @@ public sealed partial class MainViewModel
             if (status?.ConnectedAt is {} connected) text.AppendLine($"Connected UTC: {connected:O}");
             if (status?.Recovery is {} recovery)
                 text.AppendLine($"Recovery: {recovery.Count}, {recovery.Cause}, {recovery.At:O}");
+            if (status?.Attempt is {} attempt)
+            {
+                // The profile name stays out of shared diagnostics, like addresses and the subscription link.
+                string node = attempt.TransportIndex == 1 ? "selected server" : "same-location alternate";
+                text.AppendLine($"Transport: {attempt.Transport} ({attempt.TransportIndex}/{attempt.TransportCount}), node: {node}");
+                text.AppendLine($"Connection attempt: {attempt.Attempt}, recovery reason: {attempt.Reason ?? "none"}, at: {attempt.At:O}");
+            }
             if (status?.HealthCheck is {} health)
             {
                 text.AppendLine($"Health incidents: {health.Incidents}, retained: {health.RetainedConnections}, at: {health.At:O}");
+                text.AppendLine("Health meaning: incidents count only checks whose repeat also failed; a single failed attempt is shown but not counted");
                 AppendHealthAttempt(text, "primary", health.Primary);
                 if (health.Repeat is {} repeat) AppendHealthAttempt(text, "repeat", repeat);
                 if (health.Alternate is {} alternate) AppendHealthAttempt(text, "alternate", alternate);

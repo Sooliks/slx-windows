@@ -17,10 +17,10 @@ internal static class LocalProbe
     }
 
     public static async Task WaitAsync(int port, string user, string password,
-        Func<bool> childAlive, CancellationToken cancellationToken)
+        Func<bool> childAlive, CancellationToken cancellationToken, TimeSpan? limit = null)
     {
         using var budget = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        budget.CancelAfter(TimeSpan.FromSeconds(32));
+        budget.CancelAfter(limit ?? TimeSpan.FromSeconds(32));
         while (!budget.IsCancellationRequested)
         {
             cancellationToken.ThrowIfCancellationRequested();

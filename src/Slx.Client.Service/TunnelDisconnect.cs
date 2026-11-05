@@ -12,6 +12,7 @@ internal sealed partial class TunnelEngine
         remoteHealthGrace.Reset();
         startupOffCleanup.Cancel();
         desiredConnected = false;
+        attempt = null;
         offCleanup.Begin(completionCode);
     }
 
@@ -47,6 +48,8 @@ internal sealed partial class TunnelEngine
         ReleaseProtection();
         pendingApplicationUpdate = null;
         currentPlan = pinnedPlan = null;
+        rotation.Clear();
+        attempt = null;
         DnsCache.Refresh();
     }
 }

@@ -17,12 +17,12 @@ internal sealed partial class TunnelEngine
             if(TryStartupOffCleanup())return;
             if(!desiredConnected||currentPlan==null)return;
             if(Stopwatch.GetTimestamp()<retryAt)return;
+            bool coreOnly=false;
             try
             {
                 InteractiveSessions.RequireSingleOwner(ownerSid??"");
-                bool wasConnected = state.Phase == TunnelPhase.Connected || state.Phase == TunnelPhase.Checking && remoteHealthGrace.Pending;
-                if(wasConnected && child is not null && !child.HasExited && LocalProbe.TunnelReady()
-                    && (!remoteHealthGrace.Pending || remoteHealthGrace.Remaining > TimeSpan.Zero && HealthResourcesReady(cancellationToken)))
+                bool wasConnected = state.Phase is TunnelPhase.Connected or TunnelPhase.Checking;
+                if(wasConnected && FrontAlive && CoreAlive && LocalProbe.TunnelReady())
                 {
                     if(state.Phase==TunnelPhase.Connected && pendingApplicationUpdate is not null && Stopwatch.GetTimestamp()>=applicationReconcileAt)
                     {
@@ -31,43 +31,44 @@ internal sealed partial class TunnelEngine
                     }
                     if(Stopwatch.GetTimestamp()<healthAt)return;
                     healthAt=Stopwatch.GetTimestamp()+15*Stopwatch.Frequency;
-                    using var checkBudget = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                    if(remoteHealthGrace.Pending)checkBudget.CancelAfter(remoteHealthGrace.Remaining);
-                    ConnectionHealthResult? result=null;
-                    try
-                    {
-                        result = await ConnectionHealthCheck.CheckAsync(state,
-                            (target, token) => LocalProbe.ObserveAsync(probe.Port, probe.User, probe.Password, target, token),
-                            () => HealthResourcesReady(checkBudget.Token), observed => state = observed, checkBudget.Token,
-                            deferFailure: currentPlan.Mode==RoutingMode.SelectedApplications?()=>remoteHealthGrace.Defer(currentPlan.Mode):null);
-                    }
-                    catch(OperationCanceledException) when(!cancellationToken.IsCancellationRequested && remoteHealthGrace.Pending
-                        && remoteHealthGrace.Remaining<=TimeSpan.Zero) { }
-                    if(result is not null)
-                    {
-                        RecordHealthIncident(result.Confirmation, result.Retained);
-                        if(result.Retained){remoteHealthGrace.Reset();return;}
-                        if(result.Deferred){healthAt=Stopwatch.GetTimestamp()+5*Stopwatch.Frequency;return;}
-                    }
+                    var result = await ConnectionHealthCheck.CheckAsync(state,
+                        (target, token) => LocalProbe.ObserveAsync(probe.Port, probe.User, probe.Password, target, token),
+                        () => HealthResourcesReady(cancellationToken), observed => state = observed, cancellationToken);
+                    RecordHealthIncident(result.Confirmation, result.Retained);
+                    if(result.Retained)return;
+                    // A remote-only failure counts against the current transport; lost local resources do not.
+                    if(!result.Confirmation.Passed){rotation.Failed("HEALTH_PROBE_FAILED");PublishAttempt();}
                 }
                 if(wasConnected)
-                    RecordRecovery(child is null||child.HasExited?RecoveryCause.CoreExited
+                    RecordRecovery(!FrontAlive||!CoreAlive?RecoveryCause.CoreExited
                         :LocalProbe.TunnelReady()?RecoveryCause.ProbeFailed:RecoveryCause.AdapterUnavailable);
+                string executable=RuntimeTrust.Verify();
+                if(CanRecoverCoreOnly())
+                {
+                    // Unselected applications keep their direct flows: only the VPN core is replaced.
+                    coreOnly=true;
+                    await RecoverCoreAsync(executable,cancellationToken);
+                    retryAt=0;
+                    return;
+                }
                 PrepareExactApplicationPaths(cancellationToken);
                 state=state with{Phase=TunnelPhase.Reconnecting,ObservedAt=DateTimeOffset.UtcNow,ProbePassed=false,ProtectionActive=protectionActive};
                 await StopChildAsync();
                 ArmProtection(currentPlan);
-                var pinned=pinnedPlan??await PinEndpointAsync(currentPlan,cancellationToken);
+                var pinned=pinnedPlan??await TunnelEndpoints.PinAsync(currentPlan,cancellationToken);
                 intents.Save(new(ownerSid!,pinned,currentPlan.Profile.Host));
-                await LaunchAsync(pinned,RuntimeTrust.Verify(),TunnelPhase.Reconnecting,cancellationToken);
+                await LaunchAsync(pinned,executable,TunnelPhase.Reconnecting,cancellationToken);
                 retryAt=0;
             }
             catch(OperationCanceledException) when(cancellationToken.IsCancellationRequested)
             { serviceToken.ThrowIfCancellationRequested(); }
             catch(Exception error)
             {
+                string code=error is ClientFault fault?fault.Code:"SERVICE_FAILURE";
+                if(coreOnly){await FailCoreRecoveryAsync(code);return;}
                 await BackgroundCleanup.TryAsync(StopChildAsync);
-                ScheduleRecovery(error is ClientFault fault?fault.Code:"SERVICE_FAILURE");
+                if(code=="VPN_PROBE_FAILED"){rotation.Failed(code);PublishAttempt();}
+                ScheduleRecovery(code);
             }
         }
         finally{lifecycle.Release();}

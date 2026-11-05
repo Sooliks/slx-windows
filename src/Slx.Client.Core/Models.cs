@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Slx.Client.Core;
 
 public enum RoutingMode { SelectedApplications, WholeComputer }
@@ -29,7 +31,9 @@ public sealed record ClientPreferences(string Language = "ru", string Theme = "o
 {
     public override string ToString() => "ClientPreferences { Private settings = [redacted] }";
 }
-public sealed record ConnectPlan(VpnProfile Profile, RoutingMode Mode, List<AppRule> Applications)
+/// <summary>Alternates are other transports of the same server/location, tried only after repeated failures.</summary>
+public sealed record ConnectPlan(VpnProfile Profile, RoutingMode Mode, List<AppRule> Applications,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] List<VpnProfile>? Alternates = null)
 {
     public override string ToString() => "ConnectPlan { Profile = [redacted], Applications = [redacted] }";
 }

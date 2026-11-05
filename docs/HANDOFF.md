@@ -1,6 +1,28 @@
-# SLX Windows — контекст передачи, 27 октября 2026
+# SLX Windows — контекст передачи, 5 ноября 2026
 
-## Текущий подтверждённый выпуск alpha.26 — связь вне выбранных приложений
+## Кандидат alpha.27 — два процесса Xray и смена транспорта (НЕ опубликован)
+
+Ветка `alpha27` от alpha.26 `9363744`. Код написан Claude в облачной сессии без доступа к командной строке ПК:
+не было ни сборки, ни `dotnet test`, ни установки. Проверено только синтаксически (tree-sitter C#, 0 ошибок в
+изменённых файлах). Первая настоящая сборка — CI ветки или `scripts/verify.ps1` на ПК.
+
+Работа Codex (драйвер Windscribe WFP, worktree `C:\Users\xls\Desktop\slx-vpn\.reports\client-isolation-alpha27`,
+ветка `codex/selected-app-isolation`, не закоммичена в origin) у владельца не заработала и в alpha.27 не входит.
+По решению владельца вместо драйвера — два процесса Xray. Worktree Codex не тронут.
+
+Архитектура: `TunnelEngine` запускает VPN-ядро (`XrayCoreConfig`: только SOCKS-вход на 127.0.0.1 с паролем и
+VPN-выход), затем TUN-процесс (`XrayConfigBuilder.Build(..., XrayCoreLink)`): прежний TUN, маршруты, DNS и правила,
+`vpn` = SOCKS к ядру, трафик самого ядра (по пути процесса и по закреплённым IP всех транспортов) — direct.
+`TunnelCore.RecoverCoreAsync` меняет только ядро. Полная пересборка — только при потере TUN-процесса, адаптера
+или маршрутов либо при сломанной локальной связи (`coreLinkSuspect`). `TransportRotation`: 2 неудачных цикла →
+следующий транспорт. `TransportAlternates` (Core) выбирает кандидатов в UI; `PlanValidator` ограничивает ≤4.
+Новые поля IPC (`ConnectPlan.Alternates`, `TunnelStatus.Attempt`) не сериализуются, когда null, поэтому строгий
+updater alpha.26 читает ответ выключенной службы 27 без изменений. `RemoteHealthGrace` оставлен, но не используется.
+
+Открыто: CI, установленная приёмка `scripts/acceptance-alpha27.ps1` (TCP/UDP, убийство ядра, блок UDP), Windows 10,
+IPv6, обновление 26→27. Публиковать (push в main с версией) только после этого.
+
+## Подтверждённый выпуск alpha.26 — связь вне выбранных приложений
 
 **Alpha.26 опубликована** из `c90bc890396d4cff55fed79f0951d68a778b118a` в2026-10-27T00:29:36Z.
 [Windows CI40426248413](https://github.com/Sooliks/slx-windows/actions/runs/40426248413) успешен:732 основных теста+1WPF,
