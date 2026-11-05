@@ -6,7 +6,7 @@
 #>
 param(
  [ValidateSet('Build','Egress','CoreRestart','UdpBlock','All')][string]$Step = 'All',
- [string]$ServerHost,
+ [string]$ServerHost,   # optional: detected from this user's SLX subscription (Hysteria2 hosts)
  [int]$WaitSeconds = 150
 )
 $ErrorActionPreference = 'Stop'
@@ -80,10 +80,23 @@ function Test-CoreRestart {
  $results['Selected app recovers after the core is killed (gap < 30 s)'] = ($s.ok -gt 0 -and $s.longestGapMs -lt 30000)
  $results['A new VPN core process replaced the killed one'] = ((Find-CorePid) -ne $core)
 }
+function Read-HysteriaHosts {
+ # Reads only this user's own encrypted SLX subscription (DPAPI CurrentUser); prints names/hosts, never secrets.
+ $vault = Join-Path $env:LOCALAPPDATA 'SLX\VPN\profile.dat'
+ if (-not (Test-Path -LiteralPath $vault)) { throw 'SLX subscription not found; pass -ServerHost' }
+ Add-Type -AssemblyName System.Security
+ $entropy = [Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes('SLX.Windows.UserVault.v1'))
+ $plain = [Security.Cryptography.ProtectedData]::Unprotect([IO.File]::ReadAllBytes($vault), $entropy, 'CurrentUser')
+ $profiles = @(([Text.Encoding]::UTF8.GetString($plain) | ConvertFrom-Json).Subscription.Snapshot.Profiles)
+ foreach ($profile in $profiles) { Write-Output "Profile: $($profile.Kind)/$($profile.Transport) $($profile.Name) @ $($profile.Host)" | Out-Host }
+ $hosts = @($profiles | Where-Object Kind -eq 'hysteria2' | ForEach-Object Host | Select-Object -Unique)
+ if (-not $hosts) { throw 'No Hysteria2 profile in the subscription; UDP fallback cannot be tested' }
+ return $hosts
+}
 function Test-UdpBlock([string]$DirectAddress) {
  Require-Admin
- if (-not $ServerHost) { throw '-ServerHost (the VPN server host or IP of the selected location) is required' }
- $addresses = @([Net.Dns]::GetHostAddresses($ServerHost) | ForEach-Object { $_.IPAddressToString })
+ $targets = if ($ServerHost) { @($ServerHost) } else { Read-HysteriaHosts }
+ $addresses = @($targets | ForEach-Object { [Net.Dns]::GetHostAddresses($_) } | ForEach-Object { $_.IPAddressToString } | Select-Object -Unique)
  $name = 'SLX alpha27 acceptance - temporary UDP block'
  $direct = Start-Hold 'Direct' $WaitSeconds
  New-NetFirewallRule -DisplayName $name -Direction Outbound -Protocol UDP -RemoteAddress $addresses -Action Block | Out-Null
