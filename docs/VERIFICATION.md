@@ -2,14 +2,17 @@
 
 ## Alpha.27 candidate — what was and was not executed
 
-STATUS: NOT VERIFIED. Written in a cloud session without a shell on the owner PC and without .NET/NuGet access.
+STATUS: BUILD/TESTS PASSED, INSTALLED ACCEPTANCE PENDING. Written in a cloud session without a shell on the owner PC and without .NET/NuGet access.
 Executed commands (Linux container, branch `alpha27`):
 
 - `python3 cscheck.py <36 changed/new .cs files>` (tree-sitter C# parser) — exit 0, 0 syntax errors. Baseline
   check of 344 existing files reported only a known false positive (`partial` used as an identifier).
-- No `dotnet restore/build/test`, no installer build, no install, no packet test. Type errors are possible.
+- In the container: no `dotnet` (see owner PC result below); no installer build, install or packet test.
 
-Added tests (not yet run): TransportFallbackTests, CoreLinkConfigTests, ConnectionAttemptDiagnosticsTests,
+Owner PC, 2026-11-05 23:28–23:30 MSK: `.\scripts\verify.ps1` exit 0 — locked restore, Release build without
+warnings/errors, **754 tests** (Slx.Client.Tests + 1 composite WPF) 0 failed/skipped, source-size gate passed.
+
+Added tests (now run by verify.ps1 above): TransportFallbackTests, CoreLinkConfigTests, ConnectionAttemptDiagnosticsTests,
 ApplicationFamiliesTests. Existing tests were not weakened; RemoteHealthGrace tests still cover the unused class.
 
 Required before publication, with real exit codes to be recorded here:
