@@ -27,6 +27,10 @@ Hysteria2 flow, diagnostics still showed hysteria2. Changes after this run: the 
 TCP (UDP inside the stream, no loopback UDP sockets bound to the physical interface), and the UDP-block step now
 restarts the core and requires an established TCP (VLESS) flow from SLX Xray to the server.
 
+Owner PC, 2026-11-06 ~00:14 MSK, VLESS link build: 5/6. PASS selected TCP+UDP 89.124.90.55, unselected 95.24.39.94,
+core kill (unselected 0 failures, selected 1 failure, 4.1 s), unselected 0 failures under UDP block. FAIL: no automatic
+switch to VLESS within ~140 s of UDP block + core restart; cause not established. Manual VLESS selection works.
+
 Added tests (now run by verify.ps1 above): TransportFallbackTests, CoreLinkConfigTests, ConnectionAttemptDiagnosticsTests,
 ApplicationFamiliesTests. Existing tests were not weakened; RemoteHealthGrace tests still cover the unused class.
 
