@@ -10,9 +10,9 @@
 ветка `codex/selected-app-isolation`, не закоммичена в origin) у владельца не заработала и в alpha.27 не входит.
 По решению владельца вместо драйвера — два процесса Xray. Worktree Codex не тронут.
 
-Архитектура: `TunnelEngine` запускает VPN-ядро (`XrayCoreConfig`: только SOCKS-вход на 127.0.0.1 с паролем и
+Архитектура: `TunnelEngine` запускает VPN-ядро (`XrayCoreConfig`: только VLESS-вход на 127.0.0.1 с секретным id и
 VPN-выход), затем TUN-процесс (`XrayConfigBuilder.Build(..., XrayCoreLink)`): прежний TUN, маршруты, DNS и правила,
-`vpn` = SOCKS к ядру, трафик самого ядра (по пути процесса и по закреплённым IP всех транспортов) — direct.
+`vpn` = VLESS к ядру (UDP внутри TCP), трафик самого ядра (по пути процесса и по закреплённым IP всех транспортов) — direct.
 `TunnelCore.RecoverCoreAsync` меняет только ядро. Полная пересборка — только при потере TUN-процесса, адаптера
 или маршрутов либо при сломанной локальной связи (`coreLinkSuspect`). `TransportRotation`: 2 неудачных цикла →
 следующий транспорт. `TransportAlternates` (Core) выбирает кандидатов в UI; `PlanValidator` ограничивает ≤4.

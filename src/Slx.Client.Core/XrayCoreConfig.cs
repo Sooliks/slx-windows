@@ -20,12 +20,9 @@ public static class XrayCoreConfig
             {
                 new
                 {
-                    tag = "front", listen = "127.0.0.1", port = link.Port, protocol = "socks",
-                    settings = new
-                    {
-                        auth = "password", udp = true, ip = "127.0.0.1",
-                        accounts = new[] { new { user = link.User, pass = link.Password } }
-                    }
+                    tag = "front", listen = "127.0.0.1", port = link.Port, protocol = "vless",
+                    settings = new { clients = new[] { new { id = link.Id } }, decryption = "none" },
+                    streamSettings = new { network = "raw", security = "none" }
                 }
             },
             outbounds = new object[]

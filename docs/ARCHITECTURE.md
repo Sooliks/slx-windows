@@ -1,7 +1,7 @@
 # Boundaries
 
 Alpha.27: two Xray processes. The long-lived TUN process keeps the adapter, split routes, DNS, probe/API inbound and
-per-application rules; its `vpn` outbound is an authenticated loopback SOCKS link to a separate VPN core that has
+per-application rules; its `vpn` outbound is an authenticated loopback VLESS link (UDP carried inside TCP) to a separate VPN core that has
 no TUN, routes or DNS. The TUN process routes the core's own traffic direct by executable path and by every pinned
 transport endpoint. Health/remote failures restart only the core, so unselected direct flows never depend on the
 server; loss of the TUN process, adapter or routes still rebuilds both. TransportRotation switches to another

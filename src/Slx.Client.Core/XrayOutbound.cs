@@ -2,17 +2,21 @@ namespace Slx.Client.Core;
 
 internal static class XrayOutbound
 {
-    /// <summary>Authenticated loopback SOCKS link (TCP and UDP) from the TUN process to the VPN core.</summary>
+    /// <summary>
+    /// Loopback VLESS link (no TLS; the id is the per-connection secret) from the TUN process to the VPN core.
+    /// UDP travels inside this TCP stream, so no loopback UDP sockets bound to the physical interface are needed.
+    /// </summary>
     public static object Link(XrayCoreLink link) => new
     {
-        tag = "vpn", protocol = "socks",
+        tag = "vpn", protocol = "vless",
         settings = new
         {
-            servers = new[]
+            vnext = new[]
             {
-                new { address = "127.0.0.1", port = link.Port, users = new[] { new { user = link.User, pass = link.Password } } }
+                new { address = "127.0.0.1", port = link.Port, users = new[] { new { id = link.Id, encryption = "none" } } }
             }
-        }
+        },
+        streamSettings = new { network = "raw", security = "none" }
     };
 
     public static object Build(VpnProfile profile)

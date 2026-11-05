@@ -19,6 +19,14 @@ via the provider IP, so the core-kill result does not yet prove selected recover
 showed `hysteria2 (1/1)` — the connection was restored from the alpha.26 intent without alternates, and connect-if-idle
 / manual reconnect did not adopt them. Fixed after this run (AdoptAlternatesAsync, RestartAsync uses UI alternates).
 
+Owner PC, 2026-11-06 ~00:01 MSK, after the adoption fix and with the probe really selected: 5/6. Diagnostics before:
+`Transport: hysteria2 (1/2)` (alternates adopted). Selected TCP left via the VPN exit 89.124.90.55, unselected via
+95.24.39.94; selected UDP (STUN) returned null — FAIL. Core kill: unselected 0 failures (gap 552 ms), selected 2
+failures (gap 4.3 s) and recovered. The UDP-block PASS was a false positive: Windows keeps the already authorized
+Hysteria2 flow, diagnostics still showed hysteria2. Changes after this run: the TUN→core link is VLESS over loopback
+TCP (UDP inside the stream, no loopback UDP sockets bound to the physical interface), and the UDP-block step now
+restarts the core and requires an established TCP (VLESS) flow from SLX Xray to the server.
+
 Added tests (now run by verify.ps1 above): TransportFallbackTests, CoreLinkConfigTests, ConnectionAttemptDiagnosticsTests,
 ApplicationFamiliesTests. Existing tests were not weakened; RemoteHealthGrace tests still cover the unused class.
 

@@ -18,13 +18,15 @@ public sealed class CoreLinkConfigTests
         Assert.False(root.TryGetProperty("dns", out _));
         Assert.False(root.TryGetProperty("api", out _));
         var inbound = Assert.Single(root.GetProperty("inbounds").EnumerateArray());
-        Assert.Equal("socks", inbound.GetProperty("protocol").GetString());
+        Assert.Equal("vless", inbound.GetProperty("protocol").GetString());
         Assert.Equal("127.0.0.1", inbound.GetProperty("listen").GetString());
         Assert.Equal(28899, inbound.GetProperty("port").GetInt32());
         var settings = inbound.GetProperty("settings");
-        Assert.Equal("password", settings.GetProperty("auth").GetString());
-        Assert.True(settings.GetProperty("udp").GetBoolean());
-        Assert.Equal("linkUser000000000", settings.GetProperty("accounts")[0].GetProperty("user").GetString());
+        Assert.Equal("none", settings.GetProperty("decryption").GetString());
+        Assert.Equal(Link.Id, settings.GetProperty("clients")[0].GetProperty("id").GetString());
+        Assert.True(Guid.TryParse(Link.Id, out _));
+        Assert.NotEqual(Link.Id, (Link with { Password = "linkPassword00001" }).Id);
+        Assert.Equal("none", inbound.GetProperty("streamSettings").GetProperty("security").GetString());
         var outbounds = root.GetProperty("outbounds").EnumerateArray().ToArray();
         Assert.Equal("vpn", outbounds[0].GetProperty("tag").GetString());
         Assert.Equal("hysteria", outbounds[0].GetProperty("protocol").GetString());
@@ -39,9 +41,10 @@ public sealed class CoreLinkConfigTests
         using var config = JsonDocument.Parse(XrayConfigBuilder.Build(plan, 18899, "probeUser00000000", "probePassword0000", "auto", Link));
         var root = config.RootElement;
         var vpn = root.GetProperty("outbounds").EnumerateArray().Single(outbound => outbound.GetProperty("tag").GetString() == "vpn");
-        Assert.Equal("socks", vpn.GetProperty("protocol").GetString());
-        var server = vpn.GetProperty("settings").GetProperty("servers")[0];
+        Assert.Equal("vless", vpn.GetProperty("protocol").GetString());
+        var server = vpn.GetProperty("settings").GetProperty("vnext")[0];
         Assert.Equal(("127.0.0.1", 28899), (server.GetProperty("address").GetString(), server.GetProperty("port").GetInt32()));
+        Assert.Equal(Link.Id, server.GetProperty("users")[0].GetProperty("id").GetString());
         var rules = root.GetProperty("routing").GetProperty("rules").EnumerateArray().ToArray();
         int coreRule = Array.FindIndex(rules, rule => rule.TryGetProperty("process", out var process)
             && process[0].GetString() == Core.Replace('\\', '/'));
@@ -67,5 +70,6 @@ public sealed class CoreLinkConfigTests
         Assert.NotEqual(XrayRouteProtocol.BuildReplacement(CoreFixtures.Plan()),
             XrayRouteProtocol.BuildReplacement(CoreFixtures.Plan(), Core));
         Assert.DoesNotContain("linkPassword", Link.ToString(), StringComparison.Ordinal);
+        Assert.DoesNotContain(Link.Id, Link.ToString(), StringComparison.Ordinal);
     }
 }

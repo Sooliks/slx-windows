@@ -42,20 +42,30 @@ function Test-Egress {
  return $direct
 }
 function Find-CorePid {
- # The VPN core is the xray.exe whose loopback listener speaks SOCKS5; the TUN process listens with HTTP only.
+ # The TUN process's loopback listener is the HTTP probe; the VPN core's loopback VLESS listener never answers HTTP.
  foreach ($process in @(Get-Process xray -ErrorAction SilentlyContinue)) {
   $ports = @(Get-NetTCPConnection -State Listen -OwningProcess $process.Id -ErrorAction SilentlyContinue |
    Where-Object LocalAddress -eq '127.0.0.1' | Select-Object -ExpandProperty LocalPort)
+  if (-not $ports) { continue }
+  $http = $false
   foreach ($port in $ports) {
    $client = New-Object Net.Sockets.TcpClient
    try {
-    $client.Connect('127.0.0.1', $port); $stream = $client.GetStream(); $stream.ReadTimeout = 2000
-    $stream.Write([byte[]](5,1,2), 0, 3); $reply = New-Object byte[] 2
-    if ($stream.Read($reply, 0, 2) -eq 2 -and $reply[0] -eq 5) { return $process.Id }
+    $client.Connect('127.0.0.1', $port); $stream = $client.GetStream(); $stream.ReadTimeout = 1500
+    $request = [Text.Encoding]::ASCII.GetBytes("GET / HTTP/1.1`r`nHost: slx-acceptance.invalid`r`n`r`n")
+    $stream.Write($request, 0, $request.Length); $reply = New-Object byte[] 5
+    if ($stream.Read($reply, 0, 5) -eq 5 -and [Text.Encoding]::ASCII.GetString($reply) -eq 'HTTP/') { $http = $true }
    } catch { } finally { $client.Dispose() }
   }
+  if (-not $http) { return $process.Id }
  }
  throw 'VPN core process not found (is SLX alpha.27 connected?)'
+}
+function Test-VlessActive([string[]]$Addresses) {
+ # Hysteria2 is UDP; an established TCP flow from SLX's Xray to the server means a VLESS transport carries traffic.
+ $xray = @(Get-Process xray -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id)
+ return [bool](Get-NetTCPConnection -State Established -ErrorAction SilentlyContinue |
+  Where-Object { $_.RemoteAddress -in $Addresses -and $_.OwningProcess -in $xray })
 }
 function Start-Hold([string]$Role, [int]$Seconds) {
  $log = Join-Path $out "hold-$Role.json"
@@ -104,10 +114,14 @@ function Test-UdpBlock([string]$DirectAddress) {
  $started = [Diagnostics.Stopwatch]::StartNew(); $recovered = $null
  try {
   Write-Output "UDP to $($addresses -join ', ') blocked at $([DateTimeOffset]::UtcNow.ToString('O'))" | Out-Host
-  Start-Sleep -Seconds 20
+  # Windows keeps already-authorized UDP flows; restarting the core forces a new, now blocked, Hysteria2 flow.
+  $core = Find-CorePid
+  Stop-Process -Id $core -Force
+  Write-Output "VPN core PID $core restarted to drop the existing Hysteria2 flow" | Out-Host
+  Start-Sleep -Seconds 5
   while ($started.Elapsed.TotalSeconds -lt $WaitSeconds - 10) {
    $now = & (Probe 'Selected') ip | ConvertFrom-Json
-   if ($now.tcp -and $now.tcp -ne $DirectAddress) { $recovered = [int]$started.Elapsed.TotalSeconds; break }
+   if ($now.tcp -and $now.tcp -ne $DirectAddress -and (Test-VlessActive $addresses)) { $recovered = [int]$started.Elapsed.TotalSeconds; break }
    Start-Sleep -Seconds 5
   }
  } finally {
@@ -115,7 +129,7 @@ function Test-UdpBlock([string]$DirectAddress) {
   Write-Output 'Temporary UDP block removed.' | Out-Host
  }
  $d = Read-Hold $direct
- Write-Output "Selected app working again after: $recovered s (copy SLX diagnostics now: Transport should be vless-*)" | Out-Host
+ Write-Output "Selected app on a VLESS transport after: $recovered s (copy SLX diagnostics now: Transport should be vless-*)" | Out-Host
  $results['Selected app recovers through another transport while UDP is blocked'] = ($null -ne $recovered)
  $results['Unselected app unaffected during the UDP block'] = ($d.failed -eq 0)
 }
