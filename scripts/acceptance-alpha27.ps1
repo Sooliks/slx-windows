@@ -37,6 +37,7 @@ function Test-Egress {
  $direct = Read-Address 'Direct'; $selected = Read-Address 'Selected'
  $passed = $direct.tcp -and $direct.udp -and $selected.tcp -and $selected.udp -and
   $selected.tcp -ne $direct.tcp -and $selected.udp -ne $direct.udp -and $selected.tcp -eq $selected.udp
+ if ($selected.tcp -eq $direct.tcp) { Write-Output 'HINT: the selected probe left via your provider. Is SlxEgressSelected.exe in SLX "Applications" and enabled? Reconnect after adding it.' | Out-Host }
  $results['Egress (selected TCP+UDP via VPN, unselected via provider)'] = $passed
  return $direct
 }
@@ -119,7 +120,7 @@ function Test-UdpBlock([string]$DirectAddress) {
  $results['Unselected app unaffected during the UDP block'] = ($d.failed -eq 0)
 }
 New-Item -ItemType Directory -Force -Path $out | Out-Null
-if ($Step -in 'Build','All') { Build-Probes }
+if ($Step -eq 'Build' -or ($Step -eq 'All' -and -not (Test-Path -LiteralPath (Probe 'Selected')))) { Build-Probes }
 $directAddress = $null
 if ($Step -in 'Egress','UdpBlock','All') { $directAddress = (Test-Egress).tcp }
 if ($Step -in 'CoreRestart','All') { Test-CoreRestart }

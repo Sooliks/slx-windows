@@ -12,6 +12,13 @@ Executed commands (Linux container, branch `alpha27`):
 Owner PC, 2026-11-05 23:28–23:30 MSK: `.\scripts\verify.ps1` exit 0 — locked restore, Release build without
 warnings/errors, **754 tests** (Slx.Client.Tests + 1 composite WPF) 0 failed/skipped, source-size gate passed.
 
+Owner PC, 2026-11-05 ~23:44 MSK, first installed acceptance (`acceptance-alpha27.ps1 -Step All`, exit 1, 4/6):
+PASS unselected app 0 failures (longest gap 549 ms) while the VPN core PID was killed and replaced; PASS new core;
+PASS unselected 0 failures during a 2-minute UDP block to 91.142.72.132. FAIL egress: the selected probe also left
+via the provider IP, so the core-kill result does not yet prove selected recovery. FAIL transport switch: diagnostics
+showed `hysteria2 (1/1)` — the connection was restored from the alpha.26 intent without alternates, and connect-if-idle
+/ manual reconnect did not adopt them. Fixed after this run (AdoptAlternatesAsync, RestartAsync uses UI alternates).
+
 Added tests (now run by verify.ps1 above): TransportFallbackTests, CoreLinkConfigTests, ConnectionAttemptDiagnosticsTests,
 ApplicationFamiliesTests. Existing tests were not weakened; RemoteHealthGrace tests still cover the unused class.
 

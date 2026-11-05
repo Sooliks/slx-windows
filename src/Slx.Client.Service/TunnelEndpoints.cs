@@ -43,6 +43,13 @@ internal static class TunnelEndpoints
         return selected.ToString();
     }
 
+    /// <summary>True when the pinned plan already holds every alternate the UI offers (by profile id).</summary>
+    internal static bool HasAlternates(ConnectPlan pinned, ConnectPlan offered)
+    {
+        var known = (pinned.Alternates ?? []).Select(alternate => alternate.Id).ToHashSet(StringComparer.Ordinal);
+        return (offered.Alternates ?? []).All(alternate => known.Contains(alternate.Id));
+    }
+
     internal static IEnumerable<string> Hosts(ConnectPlan plan) =>
         new[] { plan.Profile.Host }.Concat((plan.Alternates ?? []).Select(alternate => alternate.Host));
 }

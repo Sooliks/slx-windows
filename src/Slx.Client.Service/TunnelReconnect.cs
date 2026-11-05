@@ -23,13 +23,47 @@ internal sealed partial class TunnelEngine
         if (current is not null && ownerSid == sid && ApplicationPlanChange.SameConnection(current, plan)
             && ApplicationPlanChange.SameRoutes(current, plan))
         {
-            var fresh = await TunnelEndpoints.PinAsync(current, cancellationToken);
-            if (await TryReconnectCoreAsync(current, fresh, cancellationToken)) return;
+            // The UI's plan carries the subscription's current alternates (an upgraded intent may have none).
+            var desired = current with { Alternates = plan.Alternates };
+            var fresh = await TunnelEndpoints.PinAsync(desired, cancellationToken);
+            if (await TryReconnectCoreAsync(current, fresh, cancellationToken, desired)) return;
         }
         await ConnectAsync(plan, sid, repin: true, cancellationToken);
     }
 
-    private async Task<bool> TryReconnectCoreAsync(ConnectPlan plan, ConnectPlan fresh, CancellationToken cancellationToken)
+    /// <summary>
+    /// An already running connection (for example restored from an older version's intent) adopts the other
+    /// transports of the same server from the UI's plan, so later recovery can switch transport. Best effort.
+    /// </summary>
+    public async Task AdoptAlternatesAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var current = currentPlan;
+            if (plan.Alternates is not { Count: > 0 } || current is null || ownerSid != sid
+                || !ApplicationPlanChange.SameConnection(current, plan) || pinnedPlan is not { } before
+                || TunnelEndpoints.HasAlternates(before, plan)) return;
+            PlanValidator.Validate(plan);
+            var pinned = await TunnelEndpoints.PinAsync(current with { Alternates = plan.Alternates }, cancellationToken, before);
+            await lifecycle.WaitAsync(cancellationToken);
+            try
+            {
+                if (!ReferenceEquals(currentPlan, current) || !ReferenceEquals(pinnedPlan, before) || !desiredConnected) return;
+                var next = before with { Alternates = pinned.Alternates };
+                intents.Save(new(OwnerSidOrFault(), next, current.Profile.Host));
+                currentPlan = current with { Alternates = plan.Alternates };
+                pinnedPlan = next;
+                rotation.Ensure(next);
+                PublishAttempt();
+            }
+            finally { lifecycle.Release(); }
+        }
+        catch (Exception error) when (error is ClientFault or OperationCanceledException or IOException
+            or UnauthorizedAccessException or System.Security.Cryptography.CryptographicException) { }
+    }
+
+    private async Task<bool> TryReconnectCoreAsync(ConnectPlan plan, ConnectPlan fresh, CancellationToken cancellationToken,
+        ConnectPlan? desired = null)
     {
         string executable = RuntimeTrust.Verify();
         await lifecycle.WaitAsync(cancellationToken);
@@ -47,6 +81,7 @@ internal sealed partial class TunnelEngine
             if (plan.Mode == RoutingMode.WholeComputer && !TunnelEndpoints.Hosts(fresh).All(known.Contains)) return false;
             var pinned = fresh with { Applications = before.Applications };
             intents.Save(new(OwnerSidOrFault(), pinned, plan.Profile.Host));
+            if (desired is not null) currentPlan = desired;
             pinnedPlan = pinned;
             rotation.Reset(pinned);
             try { await RecoverCoreAsync(executable, cancellationToken); }

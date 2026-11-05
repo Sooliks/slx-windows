@@ -85,6 +85,8 @@ internal sealed partial class ControlDispatcher(IControlTunnelEngine engine, ISe
             if(request.Action=="connect-if-idle"&&(observed.Phase!=TunnelPhase.Disconnected||observed.ProtectionActive))
             {
                 // Remember the no-op too: replaying this request after explicit off must never connect later.
+                // An existing (for example upgraded) connection still learns its server's other transports.
+                if(request.Plan is not null)_=engine.AdoptAlternatesAsync(request.Plan,sid,CancellationToken.None);
                 var unchanged=new PipeReply(true,"OK",ObservedStatus);
                 lock (observation) receipts.Add(request.RequestId,new(fingerprint,unchanged,Clock()));
                 return unchanged;

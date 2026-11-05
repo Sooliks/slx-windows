@@ -106,6 +106,17 @@ public sealed class TransportFallbackTests
         Assert.Throws<ClientFault>(() => rotation.Current);
     }
 
+    [Fact]
+    public void RunningConnectionAdoptsAlternatesOnlyWhenTheUiOffersNewOnes()
+    {
+        var reality = CoreFixtures.Profile(CoreFixtures.Reality);
+        var upgraded = CoreFixtures.Plan();
+        var offered = CoreFixtures.Plan() with { Alternates = [reality] };
+        Assert.False(TunnelEndpoints.HasAlternates(upgraded, offered));
+        Assert.True(TunnelEndpoints.HasAlternates(offered with { Alternates = [reality with { Host = "93.184.216.34" }] }, offered));
+        Assert.True(TunnelEndpoints.HasAlternates(upgraded, upgraded));
+    }
+
     [Theory]
     [InlineData(0, 1)]
     [InlineData(1, 1)]
