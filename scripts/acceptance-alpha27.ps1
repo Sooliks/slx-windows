@@ -84,7 +84,7 @@ function Read-HysteriaHosts {
  # Reads only this user's own encrypted SLX subscription (DPAPI CurrentUser); prints names/hosts, never secrets.
  $vault = Join-Path $env:LOCALAPPDATA 'SLX\VPN\profile.dat'
  if (-not (Test-Path -LiteralPath $vault)) { throw 'SLX subscription not found; pass -ServerHost' }
- Add-Type -AssemblyName System.Security
+ try { Add-Type -AssemblyName System.Security.Cryptography.ProtectedData } catch { Add-Type -AssemblyName System.Security }
  $entropy = [Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes('SLX.Windows.UserVault.v1'))
  $plain = [Security.Cryptography.ProtectedData]::Unprotect([IO.File]::ReadAllBytes($vault), $entropy, 'CurrentUser')
  $profiles = @(([Text.Encoding]::UTF8.GetString($plain) | ConvertFrom-Json).Subscription.Snapshot.Profiles)
