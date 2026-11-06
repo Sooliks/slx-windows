@@ -54,8 +54,9 @@ internal static class LocalProbe
 
     public static bool AdapterExists() => AdapterIdentity() is not null;
 
-    public static bool TunnelReady() => NetworkInterface.GetAllNetworkInterfaces().Any(adapter =>
-        adapter.Name == "SLX VPN" && adapter.OperationalStatus == OperationalStatus.Up
+    public static bool TunnelReady(string? ownedAdapterId = null) => NetworkInterface.GetAllNetworkInterfaces().Any(adapter =>
+        adapter.Name == "SLX VPN" && (ownedAdapterId is null || string.Equals(adapter.Id, ownedAdapterId, StringComparison.OrdinalIgnoreCase))
+        && adapter.OperationalStatus == OperationalStatus.Up
         && new[] { IPAddress.Parse("172.30.255.1"), IPAddress.Parse("fd73:6c78::1") }.All(expected =>
             adapter.GetIPProperties().UnicastAddresses.Any(address => address.Address.Equals(expected)
                 && address.DuplicateAddressDetectionState == DuplicateAddressDetectionState.Preferred)));

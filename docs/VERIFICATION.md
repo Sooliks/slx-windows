@@ -1,6 +1,147 @@
-# Verification — 0.1.0-alpha.27 candidate (2026-11-05)
+# Verification — 0.1.0-alpha.28 source preparation (2026-11-06)
 
-## Alpha.27 candidate — what was and was not executed
+## Alpha.28 evidence and execution
+
+STATUS: SOURCE BUILD AND FOCUSED TESTS PASSED; INSTALLED ACCEPTANCE PENDING. Source base is published `v0.1.0-alpha.27` at
+`b140056bc92c95f12bc37349e15299de9a44c05e`. Source preparation, a successful portable test run, a Windows release
+workflow and installed network acceptance are distinct evidence. No alpha.28 installer publication or native
+Windows/TUN acceptance is claimed by this section until actual results are recorded.
+
+### Reported incident and limits
+
+The friend reports no user action before whole-PC Internet loss. His alpha.27 report, captured 2026-11-06
+12:43:55.009 UTC, records Recovery 4 / ProbeFailed at 12:42:26.804, Health 85 / retained 81 and
+Gstatic primary/repeat plus SLX alternate timeouts (5015/3010/3010 ms). Startup DNS succeeds at 12:43:15.447;
+ConnectedAt is 12:43:15.625, Attempt 1 / reason none. Ordinary IPv4 route samples succeed at 12:43:48.880.
+The interval from the recorded recovery to connection is 48.821 seconds; it is not a measured whole-PC outage.
+
+The owner's nearby report (12:44:33.887 UTC) has Recovery 1 at 11:14:43.825, ConnectedAt 11:14:45.038,
+Attempt 2 / HEALTH_PROBE_FAILED and old startup DNS at 09:26:53.242. Its latest primary times out, but repeat
+and alternate succeed. The 1.213-second recovery interval and retained DNS are consistent with core-only recovery.
+
+The owner subsequently reports a brief automatic interruption affecting only selected applications. That report
+records Recovery 2 / ProbeFailed at 13:10:03.8310568 UTC and ConnectedAt 13:10:06.0746537, a 2.2436-second
+observation interval; Attempt is 2 / HEALTH_PROBE_FAILED and Health 75 / retained 73, with all three checks timed out.
+Startup DNS remains at 09:26:53.242 and the displayed route sample is from 13:09:41, before this recovery. This is
+consistent with the existing core-only path, not evidence of a full-TUN outage. The interval still does not measure
+the entire selected-app outage, and the earlier route snapshot does not verify routes after recovery.
+
+The alpha.27 code runs startup DNS from full launch, so the friend's fresh DNS supports full launch rather than
+only core replacement. The snapshots do not identify the exact full-launch trigger, packet-loss duration, failed
+hop or provider, and do not prove the whole-PC outage was caused exclusively by the client. Later successful
+DNS/routes cannot establish their state during the outage. Counts 85/81 do not mean 85 full reconnections;
+the Recovery record retains only the latest cause. No routine no-click UI reconnect defect was established.
+
+### Confirmed code corrections
+
+- Isolated core start/exit/containment/stop faults must not label a healthy shared TUN/link suspect.
+- Select recovery scope before core verification/start so core-scoped failure retains the healthy front.
+- An invalid native protection baseline and failed ordinary routes explicitly require full recovery.
+- A native protection failure before replacement-plan adoption withdraws the old Connected/revision claim and
+  requires full recovery of the old authoritative plan. Non-native preflight preserves the existing native session;
+  initial-off definitive rollback is unchanged.
+- Core-only recovery must reobserve ordinary-route ownership before Connected; preserve cancellation and protection.
+- A pending front routing acknowledgement stays unconfirmed after replacing only the VPN core. Restore provenance
+  is consumed by its own attempt and cannot label a later unrelated automatic recovery.
+- Keep a maximum of 16 lifecycle events with explicit origin/scope/reason/outcome, time and actual process-start
+  generations. Only bounded safe codes enter diagnostics; no addresses, paths, PIDs, credentials or raw exceptions.
+- Omit the active-only optional lifecycle property while off so a previously staged strict updater can read the
+  new service's idle reply. UI/service are a matched install; generations do not assert packet continuity.
+
+Readiness/probe targets and budgets, retry pacing, transport rotation, DNS policy, runtime/driver pins and production
+servers remain unchanged. Unselected public traffic still crosses the shared front before direct egress. Actual
+front/adapter failure can require a full rebuild and interrupt that traffic.
+
+The preservation predicate checks the front process, exact owned adapter and stored local-port state, not a new
+independent local control-liveness probe. Live hung-front and occupied-core-port recovery are not established;
+generic CORE_* codes cannot prove either. Explicit confirmed Disconnect then Connect allocates fresh local ports,
+whereas core-only Reconnect can reuse them. No speculative probe or error-message parsing was added for these cases.
+
+### Alpha.28 commands and results
+
+Executed in the Linux preparation environment with SDK 10.0.401, PowerShell 7.6.9 and Node.js 24.22.1:
+
+| Command or check | Actual result |
+| --- | --- |
+| `node --test scripts/tests/release-auth.test.mjs scripts/tests/release-base.test.mjs` | Exit 0; 24 passed, 0 failed/skipped. |
+| `/tmp/slx-powershell/pwsh -NoProfile -File scripts/tests/runtime-inputs.test.ps1` | Exit 0; 18 checks passed. |
+| Python inspection of edited version/docs: XML Version/FileVersion, local Markdown links, whitespace/fences, equality of current/versioned alpha.28 notes | Exit 0. |
+| PowerShell AST parse of the four code examples in `UPDATE_ALPHA28_RU.md` | Exit 0; syntax parsed, commands not executed. |
+| `git diff --check` for edited version/docs | Exit 0. |
+
+The following commands used `/tmp/slx-dotnet-401/dotnet`. Locked dependencies were restored to
+`/tmp/slx-alpha28-nuget`; the environment supplied `DOTNET_ROOT=/tmp/slx-dotnet-401`,
+`DOTNET_CLI_HOME=/tmp/slx-alpha28-dotnet-home`, `NUGET_PACKAGES=/tmp/slx-alpha28-nuget`, `DOTNET_NOLOGO=1`.
+
+- `dotnet restore Slx.Windows.slnx --locked-mode -p:PrunePackageTargetingPackRoots=/tmp/slx-alpha28-prune-packs
+  -m:1 -v:minimal`: **exit 0**, all seven projects restored. The extra property provisions Linux cross-compilation
+  with official WindowsDesktop targeting-pack data; it is not needed in the Windows release commands.
+- `dotnet build Slx.Windows.slnx -c Release --no-restore -m:1 -nr:false -p:UseSharedCompilation=false
+  -p:PrunePackageTargetingPackRoots=/tmp/slx-alpha28-prune-packs --verbosity minimal`: **exit 0**, all seven projects
+  including Desktop, Updater and WPF tests, **0 warnings, 0 errors**, 6.48 seconds on the final source tree.
+- `dotnet test tests/Slx.Client.Tests/Slx.Client.Tests.csproj -c Release --no-build --no-restore -m:1 -nr:false
+  --filter <classes below> --logger 'trx;LogFileName=alpha28-final.trx' --logger 'console;verbosity=minimal'
+  --results-directory /tmp/slx-alpha28-test-results`: **exit 0; 220 passed, 0 failed, 0 skipped**, reported duration
+  6 seconds. Each filter term is `FullyQualifiedName~Slx.Client.Tests.<Class>.`, joined with `|`.
+- Final `git diff --check` and the repository-wide 200-nonblank-line C#/XAML gate: **exit 0**. The five changed
+  lock files differ only in ten internal alpha.27-to-alpha.28 version ranges; external dependency pins/hashes did
+  not change. Remote `main` and tag `v0.1.0-alpha.27` still pointed to the exact baseline before packaging.
+
+Focused classes: CoreRecoveryPolicyTests, CoreRecoveryAttemptTests, ScopedRecoveryAttemptTests,
+TunnelLifecycleJournalTests, TunnelLifecycleContractTests, ReplacementProtectionRecoveryTests,
+ApplicationProtectionRecoveryTests, ConnectionHealthCheckTests, HealthConfirmationTests, ProbeRequestTests,
+TrafficRouteProbeTests, TrafficRouteLifecycleTests, TrafficRouteProtocolTests, RecoveryObservationTests,
+InitialConnectionAttemptTests, TunnelRecoveryPolicyTests, StartupReadinessTests, ApplicationUpdateTransactionTests,
+ApplicationPlanChangeTests, ServiceControlTests, ServiceAutoConnectTests, ServiceResponsivenessTests,
+PipeFramingTests, TunnelPhaseContractTests, TransportFallbackTests, ConnectionAttemptDiagnosticsTests,
+BackgroundCleanupTests, StartupOffCleanupTests.
+
+The 220 include 58 new recovery/lifecycle/replacement-protection cases and four extended application-protection
+recovery cases. The separate WPF lifecycle diagnostic checks compile and remain part of the full Windows scenario;
+they were not executed on Linux. Independent source review covered scope-specific cleanup, explicit cancellation,
+native protection invalidation, pending routing acknowledgement, provenance and older idle-updater compatibility.
+
+Earlier results are retained here rather than treated as successes:
+
+- Default parallel solution restore attempts exited 1 without a useful diagnostic. Serial locked restores with
+  SDK 10.0.403 and exact 10.0.401 reported three NU1004 WPF-project errors. The same errors reproduced on an untouched
+  archive of alpha.27, including static-graph restore. Linux's SDK pack root lacked WindowsDesktop data, so pruning
+  exposed ProtectedData dependencies that the Windows lock files correctly omit. The proper official targeting-pack
+  root changed its pruning range from 9.0.32767 to 10.0.32767; both untouched baseline and alpha.28 then passed locked
+  restore. Baseline lock files remained byte-identical. No unlocked restore, disabled audit/pruning or suppressed
+  warning was used. SDK behavior is described in Microsoft's
+  [GetPackagesToPrune source](https://source.dot.net/Microsoft.NET.Build.Tasks/GetPackagesToPrune.cs.html).
+- The first broader focused test run exited 1: **213 passed, 3 failed, 0 skipped**. All three failures were existing
+  `PipeAcknowledgementTests` calling Windows pipe ACL APIs, which throw PlatformNotSupportedException on Linux.
+  Those tests were left intact for the full Windows gate. The final portable filter omits that native-only class
+  and adds the final provenance/replacement-protection cases. It is not a claim that the full suite ran here.
+
+Local evidence: `/tmp/slx-alpha28-restore-provisioned.log`, `/tmp/slx-alpha28-build-final.log`,
+`/tmp/slx-alpha28-final-tests.log`, `/tmp/slx-alpha28-test-results/alpha28-final.trx`,
+`/tmp/slx-alpha28-release-tests.log`, `/tmp/slx-alpha28-runtime-tests.log`. These are preparation-environment logs,
+not files installed on the user's PC. Historical alpha.27 counts below are not alpha.28 verification. Compilation
+and policy/contract tests cannot prove WPF execution, WFP, adapter ownership or real packet continuity on installed
+Windows. No installer was built/published here and no GitHub push or production network mutation was performed.
+
+### Installed acceptance still required
+
+- Install matching alpha.28 UI/service and preserve both pre-incident and during-incident copied diagnostics on the
+  affected PC; capture fresh Service version, lifecycle origin/scope/reason, generations and DNS/health/route times.
+- Keep a selected TCP/UDP workload and an unselected persistent stream active. During isolated repeated VPN-core
+  failure, verify the TUN generation is unchanged, core generation advances, unselected packets continue and selected
+  traffic remains protected until real recovery. A normal core kill alone does not cover every start/stop failure.
+- In a controlled test, independently invalidate the front/adapter/routes or native protection baseline and verify
+  full recovery is required, Connected is not published early, cleanup remains owned and explicit off still works.
+  Do not kill the shared TUN or change firewall rules on the friend's normal work session to collect this evidence.
+- Check normal WholeComputer/SelectedApplications use, update from alpha.27, Windows 10, usable IPv6, sleep/network
+  changes and interaction with another VPN. Native packet/isolation acceptance is not replaced by route samples.
+- Automatic fallback after a real UDP block was unconfirmed in alpha.27 and remains a separate acceptance item.
+  Manual same-location VLESS comparison is diagnostic evidence, not proof of fallback or a universal repair.
+
+## Historical alpha.27 candidate and owner results — not alpha.28 evidence
+
+These records predate publication of the alpha.27 baseline used above. Preserve their failures and limitations;
+the original candidate/publication wording describes that earlier stage only.
 
 STATUS: BUILD/TESTS PASSED, INSTALLED ACCEPTANCE PENDING. Written in a cloud session without a shell on the owner PC and without .NET/NuGet access.
 Executed commands (Linux container, branch `alpha27`):

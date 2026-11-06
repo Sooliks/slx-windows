@@ -1,10 +1,32 @@
 # Boundaries
 
+Alpha.28: recovery has an explicit scope and full-rebuild reason. Isolated VPN-core start/exit/containment/stop
+errors retain an otherwise healthy shared TUN; they no longer make the local link suspect by error-code inference.
+The scope is selected before core verification/start work. Full recovery is reserved for missing/unready front,
+adapter or local link state and for independently recorded route/protection-baseline failures. Native application
+protection recovery must not be satisfied by restarting only the VPN core. Core-only success observes ordinary
+route ownership before Connected, with cancellation respected throughout. Existing per-attempt budgets and transport
+rotation remain authoritative; keeping TUN alive never converts failed VPN readiness into a healthy status.
+Core-only recovery also preserves an unacknowledged pending application's unknown routing revision and
+ROUTING_UPDATE_UNCONFIRMED; it cannot claim that restarting the core confirmed front routing mutations.
+
+Service lifecycle observations retain at most 16 events with explicit origin/scope/reason/outcome and process-start
+generations. Core owns the typed contract; Service records transitions; Desktop formats bounded safe values. The
+period and sequence distinguish accumulated history from the last connection. No credentials, addresses, paths,
+PIDs or raw exception messages enter the record. Request origin does not identify a human actor. Optional Lifecycle,
+like Attempt, is active-only and omitted from off-state JSON for strict older staged-updater compatibility. New
+UI/service install together; no new mutation action, persistent store or network privilege is introduced.
+
+The shared TUN is still in the path of unselected direct traffic. A genuine front/adapter failure and the necessary
+full rebuild can interrupt it. These changes correct recovery escalation and evidence gaps, not every possible
+network outage. The friend's exact 6 November trigger remains unconfirmed without a lifecycle/packet trace.
+
 Alpha.27: two Xray processes. The long-lived TUN process keeps the adapter, split routes, DNS, probe/API inbound and
 per-application rules; its `vpn` outbound is an authenticated loopback VLESS link (UDP carried inside TCP) to a separate VPN core that has
 no TUN, routes or DNS. The TUN process routes the core's own traffic direct by executable path and by every pinned
-transport endpoint. Health/remote failures restart only the core, so unselected direct flows never depend on the
-server; loss of the TUN process, adapter or routes still rebuilds both. TransportRotation switches to another
+transport endpoint. The intended ordinary recovery replaces only the core; alpha.28 corrects exceptional paths
+that previously escalated isolated core errors to shared-TUN replacement. Loss of the TUN process, adapter or routes
+still rebuilds both. TransportRotation switches to another
 transport of the same server/location after two consecutive failed cycles; alternates come only from the user's
 subscription with the same endpoint host or transport-free location name. New IPC members are omitted when null.
 

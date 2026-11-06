@@ -48,13 +48,15 @@ VPN для выбранных приложений или всего компь�
 
 Найденные приложения сохраняются в отдельном локальном кэше с защитой Windows DPAPI. Пока список обновляется, им можно пользоваться; последняя полная проверка отмечена временем. Иконки подгружаются отдельно, а перед добавлением SLX проверяет доступность файла. Обновление списка само по себе не меняет выбранные маршруты. При повторном открытии в течение пяти минут недавняя успешная проверка используется повторно; кнопка «Обновить список» запускает новую.
 
-При обрыве защищённый публичный трафик блокируется до восстановления связи или явного отключения VPN. В режиме «Приложения» общий DNS работает вне VPN, чтобы остальные программы могли разрешать имена при его сбое. С работающим ядром используются прежние HTTPS-резолверы напрямую, во время его остановки доступен обычный DNS Windows. Это не изоляция DNS по приложениям. Режим «Весь ПК» сохраняет DNS внутри VPN и блокирует его обход. Короткий сбой удалённого соединения в режиме приложений не требует немедленного перезапуска исправного ядра. Подробнее: [сеть](docs/NETWORK.md) и [безопасность](SECURITY.md).
+При обрыве защищённый публичный трафик блокируется до восстановления связи или явного отключения VPN. В режиме «Приложения» общий DNS работает вне VPN, чтобы остальные программы могли разрешать имена при его сбое. Пока работает локальный TUN-процесс, используются HTTPS-резолверы напрямую; при его отсутствии доступен обычный DNS Windows. Это не изоляция DNS по приложениям. Режим «Весь ПК» сохраняет DNS внутри VPN и блокирует его обход.
+
+Отдельное VPN-ядро восстанавливается с сохранением исправного общего TUN. Невыбранные приложения выходят напрямую к провайдеру, но тоже проходят через этот локальный процесс. Его собственная неисправность и необходимое полное восстановление могут прервать их соединения. Диагностика alpha.28 различает восстановление ядра и TUN и сохраняет причины переходов. Подробнее: [сеть](docs/NETWORK.md) и [безопасность](SECURITY.md).
 
 ## Совместимость и статус
 
-Текущий код: **0.1.0-alpha.26, предварительная версия**. Опубликованные установщики доступны в GitHub Releases; сборка кандидата сама по себе не означает публикацию.
+Текущий код: **0.1.0-alpha.28, предварительная версия**. Опубликованные установщики доступны в GitHub Releases; подготовка исходников или сборка кандидата сама по себе не означает публикацию.
 
-Alpha.26 исправляет зависимость общего DNS от VPN в режиме приложений и сохраняет исправное ядро во время короткого удалённого сбоя. Защита выбранных приложений и режима «Весь ПК» сохраняется. Встроенное обновление из alpha.25 доступно; автоматическая установка при выключенном VPN включается отдельно в настройках. [Как работают обновления](docs/UPDATES.md).
+Alpha.28 исправляет лишнее полное восстановление при ошибках отдельного VPN-ядра, проверяет обычные маршруты перед подтверждением связи после его перезапуска и добавляет историю восстановления. Конкретный эпизод потери интернета у друга требует повторной проверки на его ПК; успешные тесты исходников этого не подтверждают. Защита выбранных приложений и режима «Весь ПК» сохраняется. Встроенное обновление из alpha.25 доступно; автоматическая установка при выключенном VPN включается отдельно в настройках. [Как работают обновления](docs/UPDATES.md).
 
 Целевые системы — **Windows 10, сборка 19041+, и Windows 11**. Приёмка на Windows 10 ещё не завершена. Приложение и установщик распространяются без подписи; драйвер Wintun сохраняет подпись производителя. Готовый установщик включает .NET, отдельно устанавливать его пользователю не требуется.
 
@@ -76,14 +78,15 @@ pwsh -File scripts/build.ps1 -Candidate
 
 # Выпуск: проверенный чистый коммит и предыдущий опубликованный тег.
 pwsh -File scripts/build.ps1
-pwsh -File scripts/package-source.ps1 -BaseRef v0.1.0-alpha.25
+pwsh -File scripts/package-source.ps1 -BaseRef v0.1.0-alpha.27
 ```
 
 Кандидаты: `artifacts/candidates/<version>/<timestamp>/output/`. Чистая сборка выпуска: `artifacts/release/<version>/`. Упаковка создаёт полный и изменённый архивы исходников, отдельный список удалений, provenance и контрольные суммы. Команды сборки и упаковки не публикуют выпуск. Запуск из `bin/Debug` не заменяет установку службы.
 
 Для владельца репозитория добавлен workflow `Publish Windows prerelease`: push изменения версии в `Directory.Build.props` в `main` запускает Windows-проверки, штатную сборку и публикацию prerelease. Повторный запуск доступен вручную в Actions. При ошибке любой проверки выпуск останавливается; наличие исходников в `main` само по себе ещё не означает готовое обновление.
 
-Обновление до alpha.27 (два процесса Xray, смена транспорта) и обязательная приёмка: [UPDATE_ALPHA27_RU.md](docs/UPDATE_ALPHA27_RU.md).
+Обновление до alpha.28, команды выпуска и проверка восстановления: [UPDATE_ALPHA28_RU.md](docs/UPDATE_ALPHA28_RU.md).
+История перехода на два процесса Xray в alpha.27: [UPDATE_ALPHA27_RU.md](docs/UPDATE_ALPHA27_RU.md).
 Обновление до alpha.19 и выпуск исправления проверки новых версий: [UPDATE_ALPHA19_RU.md](docs/UPDATE_ALPHA19_RU.md).
 Восстановление сети при недоступной службе и проверка сетевых исправлений alpha.18: [UPDATE_ALPHA18_RU.md](docs/UPDATE_ALPHA18_RU.md).
 
@@ -96,3 +99,5 @@ SLX VPN is a native Windows client for your SLX subscription, with selected-app 
 From alpha.25, new versions download in the background and install in a dedicated SLX window without a setup wizard. Automatic installation while VPN is off is a separate opt-in, with a cancellable 15-second notice. An active VPN is preserved until explicit consent to disconnect and update. Windows may request administrator permission. Older clients need one installer upgrade to alpha.25 before using the integrated flow for future versions. Integrity uses SHA-256 from this repository's HTTPS releases; the app and installer remain unsigned, and Wintun retains its vendor signature.
 
 This is a prerelease targeting Windows 10 build 19041+ and Windows 11; Windows 10 acceptance is pending. App inventory stays local, and the personal subscription link uses Windows DPAPI protection. See [verification](docs/VERIFICATION.md) and [security](SECURITY.md) for current limits.
+
+Alpha.28 preserves a healthy shared TUN when only the separate VPN core fails, checks ordinary routes before confirming recovery, and adds bounded lifecycle diagnostics. Unselected traffic still crosses the local TUN before direct egress; a failure of that shared process can interrupt it. Installed acceptance on the affected PC remains open. [Release notes](docs/RELEASE_NOTES_ALPHA28.md).

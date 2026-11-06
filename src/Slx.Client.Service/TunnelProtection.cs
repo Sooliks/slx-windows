@@ -24,6 +24,8 @@ internal sealed partial class TunnelEngine
             {state=new(TunnelPhase.Faulted,DateTimeOffset.UtcNow,Code:"UPDATE_MAINTENANCE_UNCONFIRMED");return;}
             startupOffCleanup.Cancel();
             pinnedPlan=saved.Plan;currentPlan=saved.EndpointHost is null?saved.Plan:saved.Plan with{Profile=saved.Plan.Profile with{Host=saved.EndpointHost}};ownerSid=saved.OwnerSid;desiredConnected=true;
+            recoveryOrigin = TunnelLifecycleOrigin.ServiceRestore;
+            recoveryReason = TunnelLifecycleReason.StartupResume;
             var restored=ExactApplicationPlan.Prepare(RestoredTunnelPlan.Refresh(saved,cancellationToken),cancellationToken);
             pinnedPlan=restored.Plan;
             rotation.Reset(restored.Plan);
@@ -46,14 +48,30 @@ internal sealed partial class TunnelEngine
     }
     private void ArmProtection(ConnectPlan plan,string? adapter=null)
     {
-        trafficGuard??=new();
+        // Preflight failures must not discard an established native protection session.
+        string executable=RuntimeTrust.Verify();
+        string serviceExecutable=Environment.ProcessPath??throw new ClientFault("SERVICE_IDENTITY_FAILED");
         try
         {
-            trafficGuard.Apply(plan,RuntimeTrust.Verify(),Environment.ProcessPath??throw new ClientFault("SERVICE_IDENTITY_FAILED"),adapter);
+            trafficGuard??=new();
+            trafficGuard.Apply(plan,executable,serviceExecutable,adapter);
             confirmedUnprotected=false;
             protectionActive=true;
         }
         catch{CloseProtectionSession();throw;}
+    }
+    internal void ApplyReplacementProtection(Action apply)
+    {
+        try{apply();}
+        catch(ClientFault fault) when(desiredConnected&&currentPlan is not null
+            &&fault.Code.StartsWith("TRAFFIC_PROTECTION_",StringComparison.Ordinal))
+        {
+            // A replacement has not adopted its plan yet. Preserve the old authoritative intent,
+            // but never retain its Connected claim after the native baseline became uncertain.
+            coreRecovery.RequireFull(TunnelLifecycleReason.ProtectionBaselineInvalid);
+            ScheduleRecovery(fault.Code);
+            throw;
+        }
     }
     private bool TryStartupOffCleanup()
     {
@@ -94,6 +112,7 @@ internal sealed partial class TunnelEngine
     }
     private void ScheduleRecovery(string code)
     {
+        recoveryReason = CoreRecoveryPolicy.ReasonFor(code);
         recoveryAttempts=Math.Min(recoveryAttempts+1,30);
         retryAt=System.Diagnostics.Stopwatch.GetTimestamp()+(long)(RecoveryBackoff.Reconnect(recoveryAttempts).TotalSeconds*System.Diagnostics.Stopwatch.Frequency);
         state=new(TunnelPhase.Reconnecting,DateTimeOffset.UtcNow,currentPlan?.Profile.Name,code,

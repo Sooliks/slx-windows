@@ -48,7 +48,9 @@ internal sealed partial class TunnelEngine
         ReleaseProtection();
         pendingApplicationUpdate = null;
         currentPlan = pinnedPlan = null;
+        recoveryOrigin = TunnelLifecycleOrigin.AutomaticRecovery;
         rotation.Clear();
+        coreRecovery.FullBaselineRestored();
         attempt = null;
         DnsCache.Refresh();
     }

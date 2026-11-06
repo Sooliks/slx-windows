@@ -23,7 +23,7 @@ internal sealed partial class TunnelEngine
             var before = currentPlan ?? throw new ClientFault("ROUTING_NOT_READY");
             var pinnedBefore = pinnedPlan ?? throw new ClientFault("ROUTING_NOT_READY");
             if (!desiredConnected || state.Phase != TunnelPhase.Connected || !state.ProbePassed
-                || child is null || child.HasExited || ownedAdapterId is null || !LocalProbe.TunnelReady())
+                || child is null || child.HasExited || ownedAdapterId is null || !LocalProbe.TunnelReady(ownedAdapterId))
                 throw new ClientFault("ROUTING_NOT_READY");
             if (!ApplicationPlanChange.SameConnection(before, plan)) throw new ClientFault("ROUTING_CONNECTION_CHANGED");
             var pinnedAfter = pinnedBefore with { Applications = plan.Applications };
@@ -100,6 +100,7 @@ internal sealed partial class TunnelEngine
         currentPlan = transaction.RecoveryUsesAfter ? after : before;
         pinnedPlan = transaction.RecoveryUsesAfter ? pinnedAfter : pinnedBefore;
         pendingApplicationUpdate = null;
+        coreRecovery.RequireFull(TunnelLifecycleReason.ProtectionBaselineInvalid);
         ScheduleRecovery(transaction.FailureCode ?? "TRAFFIC_PROTECTION_FAILED");
         return true;
     }

@@ -22,12 +22,14 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
     private (int Port, string User, string Password) probe;
     private int recoveryAttempts;
     public TunnelStatus Status => state with { Recovery = recovery, HealthCheck = healthCheck, DnsCheck = dnsCheck,
-        TrafficRoutes = trafficRoutes, Attempt = desiredConnected ? attempt : null };
+        TrafficRoutes = trafficRoutes, Attempt = desiredConnected ? attempt : null,
+        Lifecycle = desiredConnected ? lifecycleJournal.Snapshot() : null };
 
     public Task StartAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken) =>
         ConnectAsync(plan, sid, repin: false, cancellationToken);
 
-    private async Task ConnectAsync(ConnectPlan plan, string sid, bool repin, CancellationToken cancellationToken)
+    private async Task ConnectAsync(ConnectPlan plan, string sid, bool repin, CancellationToken cancellationToken,
+        TunnelLifecycleOrigin origin = TunnelLifecycleOrigin.ConnectRequest)
     {
         plan = ExactApplicationPlan.Prepare(plan, cancellationToken);
         var pinned = !repin && pinnedPlan is not null && currentPlan is not null
@@ -44,12 +46,13 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
             if (offCleanup.Pending) throw new ClientFault("TUN_CLEANUP_PENDING");
             bool rollback = confirmedUnprotected && InitialConnectionAttempt.CanRollback(state, desiredConnected,
                 currentPlan is not null, child is not null || core is not null || ownedAdapterId is not null);
-            await InitialConnectionAttempt.RunAsync(rollback, async () =>
+            await InitialConnectionAttempt.RunAsync(rollback, () => TrackConnectionAsync(origin, async () =>
             {
-                ArmProtection(plan);
+                ApplyReplacementProtection(() => ArmProtection(plan));
                 pendingApplicationUpdate = null;
                 startupOffCleanup.Cancel();
                 currentPlan=plan;ownerSid=sid;desiredConnected=true;pinnedPlan=pinned;retryAt=0;
+                recoveryOrigin = TunnelLifecycleOrigin.AutomaticRecovery;
                 rotation.Reset(pinned);
                 state=new(TunnelPhase.Connecting,DateTimeOffset.UtcNow,plan.Profile.Name,Mode:plan.Mode,ProtectionActive:protectionActive);
                 try{intents.Save(new(sid,pinned,plan.Profile.Host));await StopChildAsync();}
@@ -62,7 +65,7 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
                 }
                 recoveryAttempts=0;
                 await LaunchAsync(pinned, executable, TunnelPhase.Connecting, cancellationToken);
-            }, async code =>
+            }, cancellationToken), async code =>
             {
                 RequestOff(code);
                 await ContinueOffCleanupAsync(force: true);
@@ -94,11 +97,10 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
             rotation.Ensure(plan);
             probe = LocalProbe.ReserveCredentials();
             coreLink = LocalProbe.ReserveCredentials();
-            coreLinkSuspect = false;
             await StartCoreAsync(executable, cancellationToken);
             string config = XrayConfigBuilder.Build(plan, probe.Port, probe.User, probe.Password,
                 OutboundInterface.ForEndpoint(rotation.Current.Host), CoreLink(executable));
-            var process = XrayProcess.Start(executable, started => child = started);
+            var process = XrayProcess.Start(executable, started => { child = started; lifecycleJournal.TunStarted(); });
             job = new ProcessJob(process);
             process.Exited += (_, _) => _ = HandleExitAsync(process);
             process.EnableRaisingEvents = true;
@@ -112,8 +114,9 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
             await TunnelDnsProbe.CheckAsync(ownedAdapterId, RecordDnsCheck, cancellationToken);
             await TrafficRouteProbe.CheckAsync(ownedAdapterId, RecordTrafficRoutes, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
-            if (process.HasExited || !CoreAlive || !LocalProbe.TunnelReady()) throw new ClientFault("CORE_EXITED");
+            if (process.HasExited || !CoreAlive || !LocalProbe.TunnelReady(ownedAdapterId)) throw new ClientFault("CORE_EXITED");
             cancellationToken.ThrowIfCancellationRequested();
+            coreRecovery.FullBaselineRestored();
             state = new(TunnelPhase.Connected, DateTimeOffset.UtcNow, plan.Profile.Name,
                 ConnectedAt: DateTimeOffset.UtcNow, Mode: plan.Mode, ProbePassed: true, ProtectionActive:protectionActive,
                 ApplicationRevision: XrayRouteRevision.For(currentPlan ?? plan));

@@ -55,6 +55,7 @@ public sealed class PopulatedUiTests
             TrafficRouteDiagnosticsChecks.Run(window);
             CheckingConnectionChecks.Run(window);
             HealthDiagnosticsChecks.Run();
+            LifecycleDiagnosticsChecks.Run();
         }
         finally { window.Close(); Sta.Pump(); }
     });

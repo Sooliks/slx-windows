@@ -17,12 +17,11 @@ internal sealed partial class TunnelEngine
             if(TryStartupOffCleanup())return;
             if(!desiredConnected||currentPlan==null)return;
             if(Stopwatch.GetTimestamp()<retryAt)return;
-            bool coreOnly=false;
             try
             {
                 InteractiveSessions.RequireSingleOwner(ownerSid??"");
                 bool wasConnected = state.Phase is TunnelPhase.Connected or TunnelPhase.Checking;
-                if(wasConnected && FrontAlive && CoreAlive && LocalProbe.TunnelReady())
+                if(wasConnected && FrontAlive && CoreAlive && ownedAdapterId is not null && LocalProbe.TunnelReady(ownedAdapterId))
                 {
                     if(state.Phase==TunnelPhase.Connected && pendingApplicationUpdate is not null && Stopwatch.GetTimestamp()>=applicationReconcileAt)
                     {
@@ -40,35 +39,34 @@ internal sealed partial class TunnelEngine
                     if(!result.Confirmation.Passed){rotation.Failed("HEALTH_PROBE_FAILED");PublishAttempt();}
                 }
                 if(wasConnected)
-                    RecordRecovery(!FrontAlive||!CoreAlive?RecoveryCause.CoreExited
-                        :LocalProbe.TunnelReady()?RecoveryCause.ProbeFailed:RecoveryCause.AdapterUnavailable);
-                string executable=RuntimeTrust.Verify();
-                if(CanRecoverCoreOnly())
                 {
-                    // Unselected applications keep their direct flows: only the VPN core is replaced.
-                    coreOnly=true;
-                    await RecoverCoreAsync(executable,cancellationToken);
-                    retryAt=0;
-                    return;
+                    var cause = !FrontAlive || !CoreAlive ? RecoveryCause.CoreExited
+                        : ownedAdapterId is not null && LocalProbe.TunnelReady(ownedAdapterId)
+                            ? RecoveryCause.ProbeFailed : RecoveryCause.AdapterUnavailable;
+                    RecordRecovery(cause);
+                    recoveryReason = cause switch
+                    {
+                        RecoveryCause.CoreExited => TunnelLifecycleReason.CoreExited,
+                        RecoveryCause.AdapterUnavailable => TunnelLifecycleReason.AdapterUnavailable,
+                        _ => TunnelLifecycleReason.HealthProbeFailed
+                    };
                 }
-                PrepareExactApplicationPaths(cancellationToken);
-                state=state with{Phase=TunnelPhase.Reconnecting,ObservedAt=DateTimeOffset.UtcNow,ProbePassed=false,ProtectionActive=protectionActive};
-                await StopChildAsync();
-                ArmProtection(currentPlan);
-                var pinned=pinnedPlan??await TunnelEndpoints.PinAsync(currentPlan,cancellationToken);
-                intents.Save(new(ownerSid!,pinned,currentPlan.Profile.Host));
-                await LaunchAsync(pinned,executable,TunnelPhase.Reconnecting,cancellationToken);
-                retryAt=0;
+                // Select scope before runtime verification: a failed core start/verification must not tear down a healthy TUN.
+                var decision = RecoveryDecision(recoveryReason);
+                await RunRecoveryAsync(TakeRecoveryOrigin(), decision, cancellationToken);
             }
             catch(OperationCanceledException) when(cancellationToken.IsCancellationRequested)
             { serviceToken.ThrowIfCancellationRequested(); }
             catch(Exception error)
             {
                 string code=error is ClientFault fault?fault.Code:"SERVICE_FAILURE";
-                if(coreOnly){await FailCoreRecoveryAsync(code);return;}
-                await BackgroundCleanup.TryAsync(StopChildAsync);
-                if(code=="VPN_PROBE_FAILED"){rotation.Failed(code);PublishAttempt();}
-                ScheduleRecovery(code);
+                // Failures before scoped work (owner, native policy, route observation) keep the existing fail-closed cleanup.
+                var decision = new CoreRecoveryDecision(TunnelLifecycleScope.FullTunnel,
+                    coreRecovery.RequiredFullReason ?? CoreRecoveryPolicy.ReasonFor(code));
+                var origin = TakeRecoveryOrigin();
+                lifecycleJournal.Record(origin, decision, TunnelLifecycleOutcome.Started);
+                await FailTunnelRecoveryAsync(code);
+                lifecycleJournal.Record(origin, decision, TunnelLifecycleOutcome.Failed, code);
             }
         }
         finally{lifecycle.Release();}
@@ -76,7 +74,7 @@ internal sealed partial class TunnelEngine
 
     private bool HealthResourcesReady(CancellationToken cancellationToken)
     {
-        if(child is null || child.HasExited || !LocalProbe.TunnelReady() || ownedAdapterId is null)return false;
+        if(child is null || child.HasExited || ownedAdapterId is null || !LocalProbe.TunnelReady(ownedAdapterId))return false;
         using var budget = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         budget.CancelAfter(TimeSpan.FromSeconds(3));
         try
@@ -96,6 +94,7 @@ internal sealed partial class TunnelEngine
     private ClientFault TrafficRouteFailure(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        coreRecovery.RequireFull(TunnelLifecycleReason.TrafficRouteFailed);
         // Invalidate the success observation before awaiting owned process/adapter cleanup.
         RecordRecovery(RecoveryCause.ProbeFailed);
         state=state with{Phase=TunnelPhase.Reconnecting,ObservedAt=DateTimeOffset.UtcNow,

@@ -14,7 +14,7 @@ internal sealed partial class TunnelEngine
         string sid = ownerSid ?? throw new ClientFault("NO_CONNECTION_PLAN");
         var fresh = await TunnelEndpoints.PinAsync(plan, cancellationToken);
         if (!await TryReconnectCoreAsync(plan, fresh, cancellationToken))
-            await ConnectAsync(plan, sid, repin: true, cancellationToken);
+            await ConnectAsync(plan, sid, repin: true, cancellationToken, TunnelLifecycleOrigin.ReconnectRequest);
     }
 
     public async Task RestartAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken)
@@ -28,7 +28,7 @@ internal sealed partial class TunnelEngine
             var fresh = await TunnelEndpoints.PinAsync(desired, cancellationToken);
             if (await TryReconnectCoreAsync(current, fresh, cancellationToken, desired)) return;
         }
-        await ConnectAsync(plan, sid, repin: true, cancellationToken);
+        await ConnectAsync(plan, sid, repin: true, cancellationToken, TunnelLifecycleOrigin.ReconnectRequest);
     }
 
     /// <summary>
@@ -65,7 +65,6 @@ internal sealed partial class TunnelEngine
     private async Task<bool> TryReconnectCoreAsync(ConnectPlan plan, ConnectPlan fresh, CancellationToken cancellationToken,
         ConnectPlan? desired = null)
     {
-        string executable = RuntimeTrust.Verify();
         await lifecycle.WaitAsync(cancellationToken);
         try
         {
@@ -84,15 +83,9 @@ internal sealed partial class TunnelEngine
             if (desired is not null) currentPlan = desired;
             pinnedPlan = pinned;
             rotation.Reset(pinned);
-            try { await RecoverCoreAsync(executable, cancellationToken); }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { throw; }
-            catch (Exception error)
-            {
-                string code = error is ClientFault fault ? fault.Code : "CORE_START_FAILED";
-                await FailCoreRecoveryAsync(code);
-                throw new ClientFault(code);
-            }
-            retryAt = 0;
+            var result = await RunRecoveryAsync(TunnelLifecycleOrigin.ReconnectRequest,
+                new(TunnelLifecycleScope.VpnCore, TunnelLifecycleReason.Requested), cancellationToken);
+            if (!result.Succeeded) throw new ClientFault(result.Code!);
             return true;
         }
         finally { lifecycle.Release(); }

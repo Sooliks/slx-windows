@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.26. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.28. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,40 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.28 — preserve the shared TUN during VPN-core recovery
+
+Source base is published v0.1.0-alpha.27 at b140056bc92c95f12bc37349e15299de9a44c05e. On 6 November the
+friend reported losing Internet throughout the PC without touching SLX. His 12:43:55 UTC report shows an earlier
+failed primary/repeat/alternate HTTPS confirmation, Recovery 4 / ProbeFailed at 12:42:26, Health 85 / retained 81, and
+fresh startup DNS just before Connected at 12:43:15. The owner's nearby report retains older DNS and shows only
+an earlier core recovery. This supports a full launch on the friend's client, but does not establish its exact
+trigger or prove that TUN replacement caused the entire reported outage. The intervals are not packet measurements.
+
+SelectedApplications still sends unselected public traffic through the common local TUN process before its direct
+outbound. Preserve that process when only the separately owned VPN core fails. CORE_EXITED/START/CONTAINMENT/STOP
+faults alone cannot label a healthy front/link suspect and authorize automatic full teardown. Decide recovery scope
+before core verification/start work so a core-scoped exception does not fall through to shared-TUN cleanup. Keep
+bounded readiness attempts, existing paced retries/transport rotation and explicit cancellation/protection semantics.
+
+Require full protected recovery for actual missing/dead front, missing/unready owned adapter or local link/probe
+state, failed ordinary-route ownership, or an invalid native protection baseline. The application-protection path
+must retain its explicit full-recovery requirement until the baseline is successfully rebuilt. A successful VPN
+HTTPS probe alone cannot publish Connected after core-only recovery: revalidate owned ordinary routes first.
+An unacknowledged pending application change must retain its unknown routing revision and safe fault after recovery;
+restarting the core cannot confirm a front routing change that was never acknowledged.
+
+Add a bounded in-memory lifecycle observation: service observation period, TUN/core process generations and at most
+16 events with sequence/time, request-or-recovery origin, VpnCore/FullTunnel scope, reason and outcome. Counts reflect
+actual started processes, not uninterrupted packet flow. A request origin is not proof that a person clicked a button.
+Do not include endpoints, process paths, PIDs, subscription values or raw exceptions; optional fault codes are bounded.
+The active-only optional IPCv2 field is omitted while off so older staged updaters can decode idle service replies.
+UI and service must be installed together. Existing health/DNS/route observations keep their distinct meanings.
+
+No speculative UI reconnect change, driver/runtime/dependency upgrade, server/website mutation, DNS policy change,
+foreign-route cleanup or weakened fail-closed rule belongs to this fix. Source verification and Windows CI are
+separate from installed friend/owner acceptance. Deliver changed/full source archives and the guarded GitHub release
+commands in UPDATE_ALPHA28_RU.md; source preparation is not a published installer or proof of the friend's repair.
 
 ## Alpha.26 — selected-app recovery must not disable shared DNS
 

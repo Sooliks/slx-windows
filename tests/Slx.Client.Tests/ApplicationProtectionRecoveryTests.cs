@@ -48,6 +48,9 @@ public sealed class ApplicationProtectionRecoveryTests
         Assert.Equal("TRAFFIC_PROTECTION_COMMIT_80320010", engine.Status.Code);
         Assert.Same(useAfter ? after : before, Field("currentPlan").GetValue(engine));
         Assert.Same(useAfter ? pinnedAfter : pinnedBefore, Field("pinnedPlan").GetValue(engine));
+        var recovery = (CoreRecoveryPolicy)Field("coreRecovery").GetValue(engine)!;
+        Assert.Equal(new CoreRecoveryDecision(TunnelLifecycleScope.FullTunnel, TunnelLifecycleReason.ProtectionBaselineInvalid),
+            recovery.Choose(new(true, true, true, true), TunnelLifecycleReason.HealthProbeFailed));
     }
     private static FieldInfo Field(string name) => typeof(TunnelEngine).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!;
 }

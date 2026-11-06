@@ -22,6 +22,8 @@ public sealed partial class MainViewModel
             text.AppendLine("Windows: " + Environment.OSVersion.Version);
             text.AppendLine("Captured UTC: " + DateTimeOffset.UtcNow.ToString("O"));
             text.AppendLine("Service observation: " + (statusFresh ? "current" : "unknown/stale"));
+            text.AppendLine("Service version: " + (ReleaseVersion.TryParse(status?.ServiceVersion, out var serviceVersion)
+                ? serviceVersion.Value : "unknown"));
             text.AppendLine("Service read UTC: " + (serviceReadAt?.ToString("O") ?? "none"));
             text.AppendLine("UI operation: " + (pendingControlAction is null ? "none" : pendingControlAction + ", pending"));
             if (controlOperationStartedAt is {} started) text.AppendLine($"UI operation started UTC: {started:O}");
@@ -63,6 +65,7 @@ public sealed partial class MainViewModel
                     _ => "DNS meaning: resolver observation; current routing mode is unconfirmed"
                 });
             }
+            LifecycleDiagnostics.Append(text, status?.Lifecycle);
             TrafficRouteDiagnostics.Append(text, status?.TrafficRoutes);
             return text.ToString();
         }

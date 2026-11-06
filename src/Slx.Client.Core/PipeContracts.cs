@@ -20,7 +20,8 @@ public sealed record TunnelStatus(TunnelPhase Phase, DateTimeOffset ObservedAt,
     TrafficRouteCheckObservation? TrafficRoutes = null, string? ServiceVersion = null,
     UpdateMaintenanceObservation? UpdateMaintenance = null,
     // Omitted while off, so strict older updaters can still read an idle service reply.
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ConnectionAttemptObservation? Attempt = null);
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ConnectionAttemptObservation? Attempt = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] TunnelLifecycleObservation? Lifecycle = null);
 public sealed record UpdateMaintenanceObservation(Guid SessionId, DateTimeOffset ExpiresAt, bool Claimed);
 public sealed record PipeRequest(int Version, string Action, Guid RequestId, ConnectPlan? Plan = null,
     Guid? UpdateSessionId = null);

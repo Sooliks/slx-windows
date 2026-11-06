@@ -1,4 +1,56 @@
-# Network model and limits — alpha.23
+# Network model and limits — alpha.28
+
+## Alpha.28 recovery scope and the shared TUN
+
+The alpha.27 two-process design remains: a common local TUN/front process owns the adapter, routes, shared DNS
+and per-application routing. Selected traffic uses a separate VPN core over an authenticated loopback link;
+unselected traffic takes the front process's direct outbound. Direct egress does not mean bypassing this local
+process. Loss or replacement of the front can interrupt unselected sessions even when the remote VPN is not their
+destination. Ordinary VPN-core replacement should preserve the front and its direct sessions.
+
+The friend's 6 November alpha.27 report records failed initial and repeat Gstatic checks and a failed SLX check,
+followed by Recovery 4 / ProbeFailed at 12:42:26 UTC. Health counts are 85 incidents, 81 with the connection retained,
+not 85 reconnections. New startup DNS at 12:43:15.447 and Connected at 12:43:15.625 indicate a fresh full launch in
+the published implementation. The friend reports no manual action. The owner's nearby report shows older startup
+DNS and an earlier short recovery, consistent with the core-only path. The snapshots do not establish the exact
+trigger of the friend's full launch, the failed network hop or the precise duration of whole-PC Internet loss.
+Successful DNS/routes measured afterwards cannot establish their condition during the outage.
+
+Alpha.28 removes the inference that an isolated CORE_EXITED/CORE_START_FAILED/CORE_CONTAINMENT_FAILED/CORE_STOP_FAILED
+automatically makes the shared link/front unusable. With owned front, adapter and local state intact, core failure
+stays a core-scoped retry. The existing 15-second core readiness budget, retry pacing, transport candidates and
+rotation policy remain. Failed readiness stays unconfirmed and keeps the existing traffic protection active.
+
+Full protected recovery still applies when the front is absent/dead, its owned adapter is missing/unready, required
+local link/probe state is absent, ordinary-route ownership fails, or native application protection has an invalid
+baseline. The last two conditions explicitly require a full rebuild; an otherwise successful core restart cannot
+clear them. Core-only recovery also checks ordinary routes before publishing Connected. Route snapshots are bounded
+observations of representative destinations, not packet captures or a guarantee for every application/destination.
+
+The front eligibility check observes its process, exact owned adapter and stored loopback-port state; it is not an
+independent authenticated local control-liveness test. A live but hung front or a core port taken by another process
+can still leave bounded core attempts repeating. Generic CORE_* faults cannot identify a bind conflict. For a
+persistent local-start failure, capture diagnostics and explicitly Disconnect, wait for confirmed off, then Connect
+to allocate fresh local ports. A core-only Reconnect can reuse the same ports. This limitation remains unverified
+on installed Windows; alpha.28 does not claim to detect every hung local component.
+
+The copied report now includes a bounded lifecycle history with origin, VpnCore/FullTunnel scope, reason, outcome,
+sequence and time, plus TUN/core generations. A generation counts an actually started process; it does not measure
+packet continuity. ConnectRequest/ReconnectRequest identifies a service request path, not proof of a human click.
+Up to 16 events remain in memory from the recorded observation period; later events replace older ones. No addresses,
+paths, PIDs, subscription values or raw exception text are included. The active-only optional IPC field is omitted
+while off for older staged-updater compatibility. Install the new UI and service together.
+
+SelectedApplications retains direct shared HTTPS DNS; WholeComputer retains VPN-routed DNS. The health probe stays
+VPN-only. DNS success/OwnedTunnel in selected mode proves a local route and successful shared-resolver exchange,
+not DNS through the VPN exit. No resolver, runtime/driver, foreign route, interface metric or WFP permission is changed.
+
+Installed acceptance must measure selected and unselected TCP/UDP sessions during repeated core failures on the
+friend's and owner's PCs. Actual front/adapter loss still requires disruptive recovery; physical-network failures,
+Windows 10, IPv6, sleep/network changes and all-destination isolation remain separate checks. The alpha.27 automatic
+UDP-block transport-switch acceptance was incomplete and is not promoted to PASS by these source changes.
+
+See [alpha.28 update and acceptance](UPDATE_ALPHA28_RU.md) and [executed verification](VERIFICATION.md).
 
 ## Alpha.23 ordinary traffic readiness and evidence limits
 
