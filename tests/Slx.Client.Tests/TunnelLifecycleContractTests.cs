@@ -19,7 +19,9 @@ public sealed class TunnelLifecycleContractTests
                 1, sequence / 2 + 1, "HEALTH_PROBE_FAILED")).ToArray();
         var history = new TunnelLifecycleObservation(Since, 1, 9, events);
         var status = new TunnelStatus(TunnelPhase.Connected, Since.AddMinutes(1), ProbePassed: true,
-            ProtectionActive: true, Lifecycle: history);
+            ProtectionActive: true, Lifecycle: history, LastHealthyAt: Since,
+            NetworkPath: new(Since, PhysicalPathState.Ready, Since, true),
+            TransportExecution: new(new("hysteria2", 1, 2, 1, Since), null, null));
         var reply = new PipeReply(true, "OK", status);
         using var stream = new MemoryStream();
         await PipeFraming.WriteAsync(stream, reply);
@@ -40,6 +42,9 @@ public sealed class TunnelLifecycleContractTests
         var json = JsonSerializer.Serialize(idle);
         Assert.DoesNotContain("Lifecycle", json, StringComparison.Ordinal);
         Assert.DoesNotContain("Attempt", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("NetworkPath", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("TransportExecution", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("LastHealthyAt", json, StringComparison.Ordinal);
         using var stream = new MemoryStream();
         await PipeFraming.WriteAsync(stream, new PipeReply(true, "OK", idle));
         stream.Position = 0;

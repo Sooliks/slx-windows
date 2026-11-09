@@ -71,6 +71,7 @@ public sealed partial class MainViewModel
     }
     private void SaveApplications()
     {
+        RefreshApplicationComposition();
         preferences = preferences with { Applications = Applications.SelectMany(x => x.ToRules()).ToList() };
         SavePreferences();
         foreach (var name in new[] { nameof(SelectedAppCount), nameof(FilteredApplications), nameof(HasApplications), nameof(HasSelectedApplications), nameof(HasSearchResults) }) OnPropertyChanged(name);

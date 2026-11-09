@@ -11,6 +11,7 @@ public sealed partial class MainViewModel
     private async Task AddLibraryAsync(LibraryEntry? entry)
     {
         if(entry is null||disposed||!CanEditRouting||libraryAddCancellation is not null)return;
+        if (entry.IsAdded) { Search = entry.Name; Page = "applications"; return; }
         if(entry.Rule is null)
         {
             var picker=new OpenFileDialog{Filter=Localization.Text.Catalog["ExecutableFilter"],CheckFileExists=true,Multiselect=false,

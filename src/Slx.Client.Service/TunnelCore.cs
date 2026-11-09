@@ -7,20 +7,28 @@ namespace Slx.Client.Service;
 internal sealed partial class TunnelEngine
 {
     private readonly TransportRotation rotation = new();
+    private readonly TransportExecution transportExecution = new();
     private Process? core;
     private ProcessJob? coreJob;
     private (int Port, string User, string Password) coreLink;
     private volatile ConnectionAttemptObservation? attempt;
+    private volatile TransportExecutionObservation? transportObservation;
     private bool CoreAlive => core is { HasExited: false };
     private bool FrontAlive => child is { HasExited: false };
     private XrayCoreLink CoreLink(string executable) => new(coreLink.Port, coreLink.User, coreLink.Password, executable);
-    private void PublishAttempt() => attempt = rotation.Observe(DateTimeOffset.UtcNow);
+    private void PublishAttempt()
+    {
+        attempt = rotation.Observe(DateTimeOffset.UtcNow);
+        transportObservation = transportExecution.Observe(rotation, DateTimeOffset.UtcNow);
+    }
 
     private async Task StartCoreAsync(string executable, CancellationToken cancellationToken)
     {
         if (core is not null) throw new ClientFault("CORE_START_FAILED");
+        transportExecution.Starting(rotation, DateTimeOffset.UtcNow);
         string config = XrayCoreConfig.Build(rotation.Current, CoreLink(executable));
         var process = XrayProcess.Start(executable, started => { core = started; lifecycleJournal.CoreStarted(); });
+        PublishAttempt();
         coreJob = new ProcessJob(process);
         process.Exited += (_, _) => _ = HandleCoreExitAsync(process);
         process.EnableRaisingEvents = true;
@@ -32,6 +40,7 @@ internal sealed partial class TunnelEngine
     {
         var process = core;
         core = null;
+        transportExecution.Stopped(); PublishAttempt();
         // KILL_ON_JOB_CLOSE also ends the core if this service cannot wait for it.
         coreJob?.Dispose();
         coreJob = null;
@@ -58,6 +67,9 @@ internal sealed partial class TunnelEngine
     {
         var plan = currentPlan ?? throw new ClientFault("NO_CONNECTION_PLAN");
         var front = child ?? throw new ClientFault("CORE_EXITED");
+        // A responsive process is not proof that the local routing service still answers. Check it on
+        // every recovery, including repeated failures, without mistaking a remote VPN fault for a front fault.
+        await CheckFrontControlAsync(cancellationToken);
         await CoreRecoveryAttempt.RunAsync(StopCoreAsync, token => StartCoreAsync(executable, token),
             token => LocalProbe.WaitAsync(probe.Port, probe.User, probe.Password, () => !front.HasExited && CoreAlive,
                 token, TimeSpan.FromSeconds(15)), CheckCoreRecoveryRoutesAsync,
@@ -67,6 +79,7 @@ internal sealed partial class TunnelEngine
             {
                 state = CoreRecoveryAttempt.ConnectedStatus(plan, protectionActive, pendingApplicationUpdate is not null);
                 PublishAttempt(); rotation.Succeeded();
+                lastHealthyAt = DateTimeOffset.UtcNow;
                 recoveryAttempts = 0; healthAt = Stopwatch.GetTimestamp() + 15 * Stopwatch.Frequency;
             }, cancellationToken);
     }
@@ -74,6 +87,7 @@ internal sealed partial class TunnelEngine
     /// <summary>A VPN-core failure alone never invalidates the independent TUN or its direct connections.</summary>
     private async Task FailCoreRecoveryAsync(string code)
     {
+        transportExecution.Failed();
         await BackgroundCleanup.TryAsync(StopCoreAsync);
         rotation.Failed(code);
         PublishAttempt();
@@ -88,7 +102,8 @@ internal sealed partial class TunnelEngine
             if (!ReferenceEquals(core, exited)) return;
             if (state.Phase is TunnelPhase.Connected or TunnelPhase.Checking) RecordRecovery(RecoveryCause.CoreExited);
             if (desiredConnected) lifecycleJournal.Record(TunnelLifecycleOrigin.AutomaticRecovery,
-                new(TunnelLifecycleScope.VpnCore, TunnelLifecycleReason.CoreExited), TunnelLifecycleOutcome.Failed, "CORE_EXITED");
+                new(TunnelLifecycleScope.VpnCore, TunnelLifecycleReason.CoreExited), TunnelLifecycleOutcome.Failed, "CORE_EXITED", transportExecution.Current);
+            transportExecution.Failed();
             await BackgroundCleanup.TryAsync(StopCoreAsync);
             if (!desiredConnected) return;
             rotation.Failed("CORE_EXITED");

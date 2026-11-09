@@ -1,5 +1,18 @@
 # Windows client UX brief
 
+## Alpha.29 common executables and truthful diagnostics (2026-11-09)
+
+Common RiotClientServices/UX executables display as Riot Client even when a game shortcut named them. The visible
+path and saved exact-file identity remain; no argument-based distinction or hidden game-family selection is added.
+Search includes names, EXE/path, Riot/LoL/VALORANT aliases and already-added entries. An added result offers Show
+selection without enabling it again. A group lists its files; a disabled overlapping group says files are also
+selected elsewhere, not that pending routes are already applied. The existing routing-pending notice remains.
+RU/EN WPF renders cover the search result and the disabled shared-file warning at 940x760 without horizontal overflow.
+
+Copied diagnostics distinguish current/last-failed/next transport and each recorded attempt, fresh successful health,
+physical route observation and local authenticated control. No addresses, paths, secrets or invented traffic metrics
+are added. Generation counters, DNS startup checks and historical health incidents keep their existing limited meanings.
+
 ## Alpha.26 selected-only outage isolation (2026-10-27)
 
 Selected-mode copy explicitly says shared Windows DNS is outside VPN so unselected applications do not depend on

@@ -13,7 +13,8 @@ internal sealed class CoreRecoveryPolicy
 
     internal void RequireFull(TunnelLifecycleReason reason)
     {
-        if (reason is not (TunnelLifecycleReason.ProtectionBaselineInvalid or TunnelLifecycleReason.TrafficRouteFailed))
+        if (reason is not (TunnelLifecycleReason.ProtectionBaselineInvalid or TunnelLifecycleReason.TrafficRouteFailed
+            or TunnelLifecycleReason.PhysicalInterfaceChanged or TunnelLifecycleReason.LocalLinkUnavailable))
             throw new ArgumentOutOfRangeException(nameof(reason));
         // A route check cannot make an uncertain native protection baseline valid again.
         if (RequiredFullReason != TunnelLifecycleReason.ProtectionBaselineInvalid) RequiredFullReason = reason;

@@ -2,17 +2,31 @@ using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Slx.Client.Core;
 using Slx.Client.Desktop.Presentation;
+using Slx.Client.Desktop.Localization;
+using Slx.Client.Windows;
 namespace Slx.Client.Desktop.ViewModels;
 public sealed class AppItemViewModel : ObservableObject
 {
     private bool enabled;
+    private readonly string ruleName;
     private readonly List<AppRule> members=[];
     private LocalIconRequest? iconRequest;
+    private string[] sharedWith = [], includedFiles = [];
+    public string GroupDescription => ApplicationLabels.IsRiotClient(ExecutablePath) ? Text.Catalog["RiotSharedClient"]
+        : includedFiles.Length > 1 ? Text.Catalog["IncludedExecutables"] + " " + string.Join(", ", includedFiles) : "";
+    public string SharedWarning => !Enabled && sharedWith.Length > 0
+        ? Text.Catalog["EnabledByOtherGroup"] + " " + string.Join(", ", sharedWith) : "";
+    public void RefreshComposition(IReadOnlyList<AppRule> expanded, IEnumerable<string> owners)
+    {
+        includedFiles = expanded.Select(x => System.IO.Path.GetFileName(x.ExecutablePath)).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+        sharedWith = owners.Distinct(StringComparer.CurrentCultureIgnoreCase).ToArray();
+        OnPropertyChanged(nameof(GroupDescription)); OnPropertyChanged(nameof(SharedWarning));
+    }
     public AppItemViewModel(AppRule rule):this(new[]{rule}){}
     public AppItemViewModel(IEnumerable<AppRule> rules)
     {
         var items=rules.ToArray();var primary=items[0];
-        Id=primary.Id;Name=primary.Name;ExecutablePath=primary.ExecutablePath;enabled=items.Any(x=>x.Enabled);
+        Id=primary.Id;ruleName=primary.Name;Name=ApplicationLabels.DisplayName(primary);ExecutablePath=primary.ExecutablePath;enabled=items.Any(x=>x.Enabled);
         foreach(var rule in items)AddPath(rule);
         RefreshIcon();
     }
@@ -39,8 +53,8 @@ public sealed class AppItemViewModel : ObservableObject
         OnPropertyChanged(nameof(ExecutablePath)); OnPropertyChanged(nameof(ExecutablePaths));
         return true;
     }
-    public AppRule ToRule()=>new(Id,Name,ExecutablePath,Enabled);
-    public IEnumerable<AppRule> ToRules()=>members.Select(x=>x with{Name=Name,Enabled=Enabled});
+    public AppRule ToRule()=>new(Id,ruleName,ExecutablePath,Enabled);
+    public IEnumerable<AppRule> ToRules()=>members.Select(x=>x with{Name=ruleName,Enabled=Enabled});
     internal void RefreshIcon()
     {
         var paths = members.Select(member => member.ExecutablePath).ToArray();

@@ -8,7 +8,7 @@ public enum TunnelLifecycleScope { FullTunnel, VpnCore }
 public enum TunnelLifecycleReason
 {
     Requested, StartupResume, HealthProbeFailed, CoreExited, FrontUnavailable, AdapterUnavailable,
-    LocalLinkUnavailable, TrafficRouteFailed, ProtectionBaselineInvalid, CoreFailure
+    LocalLinkUnavailable, TrafficRouteFailed, ProtectionBaselineInvalid, CoreFailure, PhysicalInterfaceChanged
 }
 public enum TunnelLifecycleOutcome { Started, Connected, Failed, Cancelled }
 
@@ -16,7 +16,8 @@ public enum TunnelLifecycleOutcome { Started, Connected, Failed, Cancelled }
 public sealed record TunnelLifecycleEvent(long Sequence, DateTimeOffset At, TunnelLifecycleOrigin Origin,
     TunnelLifecycleScope Scope, TunnelLifecycleReason Reason, TunnelLifecycleOutcome Outcome,
     int TunGeneration, int CoreGeneration,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Code = null);
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Code = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] TransportAttemptSnapshot? Transport = null);
 
 /// <summary>Recent in-memory service history. Older entries can be absent; no packet continuity is implied.</summary>
 public sealed record TunnelLifecycleObservation(DateTimeOffset Since, int TunGeneration, int CoreGeneration,
@@ -30,7 +31,7 @@ public sealed record TunnelLifecycleObservation(DateTimeOffset Since, int TunGen
         "CORE_EXITED" or "CORE_START_FAILED" or "CORE_STOP_FAILED" or "CORE_CONTAINMENT_FAILED"
         or "VPN_PROBE_FAILED" or "VPN_TRAFFIC_ROUTE_FAILED" or "VPN_DNS_FAILED" or "VPN_DNS_ROUTE_FAILED"
         or "TUN_NOT_READY" or "TUN_ADAPTER_CONFLICT" or "TUN_CLEANUP_PENDING" or "HEALTH_PROBE_FAILED"
-        or "OUTBOUND_INTERFACE_UNAVAILABLE" or "SERVICE_FAILURE" or "OPERATION_INTERRUPTED"
+        or "OUTBOUND_INTERFACE_UNAVAILABLE" or "FRONT_CONTROL_UNAVAILABLE" or "SERVICE_FAILURE" or "OPERATION_INTERRUPTED"
         or "TRAFFIC_PROTECTION_FAILED" or "RUNTIME_INSTALL_LOCATION" or "RUNTIME_MANIFEST_INVALID"
         or "RUNTIME_HASH_MISMATCH" or "RUNTIME_UNSAFE_PATH" or "RUNTIME_UNSAFE_OWNER" or "RUNTIME_UNSAFE_ACL"
             ? code : null;

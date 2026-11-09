@@ -38,6 +38,9 @@ public static class OutboundInterface
     [DllImport("iphlpapi.dll", ExactSpelling = true)]
     private static extern uint ConvertInterfaceLuidToGuid(in ulong luid, out Guid guid);
 
+    internal static uint ReadRoute(uint index, in SocketAddress destination, out RouteRow route)
+        => GetBestRoute2(0, index, 0, in destination, 0, out route, out _);
+
     public static string ForEndpoint(string pinnedAddress)
     {
         if (!IPAddress.TryParse(pinnedAddress, out var address) || !EndpointPolicy.IsPublicAddress(address))

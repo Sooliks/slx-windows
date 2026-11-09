@@ -19,6 +19,8 @@ internal static class LifecycleDiagnostics
                 + $"scope={Label(entry.Scope)}, reason={Label(entry.Reason)}, outcome={Label(entry.Outcome)}, "
                 + $"tun_generation={entry.TunGeneration}, core_generation={entry.CoreGeneration}");
             if (TunnelLifecycleObservation.SafeCode(entry.Code) is { } code) text.Append($", code={code}");
+            if (entry.Transport is { } attempt) text.Append($", transport={TransportDiagnostics.SafeTransport(attempt.Transport)}, "
+                + $"transport_index={attempt.Index}/{attempt.Count}, attempt={attempt.Attempt}, attempt_at={attempt.At:O}");
             text.AppendLine();
         }
         text.AppendLine("Lifecycle meaning: bounded service history; request origin does not prove a manual click; "

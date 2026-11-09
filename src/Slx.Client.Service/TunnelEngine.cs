@@ -23,7 +23,10 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
     private int recoveryAttempts;
     public TunnelStatus Status => state with { Recovery = recovery, HealthCheck = healthCheck, DnsCheck = dnsCheck,
         TrafficRoutes = trafficRoutes, Attempt = desiredConnected ? attempt : null,
-        Lifecycle = desiredConnected ? lifecycleJournal.Snapshot() : null };
+        Lifecycle = desiredConnected ? lifecycleJournal.Snapshot() : null,
+        NetworkPath = desiredConnected ? networkPath : null,
+        TransportExecution = desiredConnected ? transportObservation : null,
+        LastHealthyAt = desiredConnected ? lastHealthyAt : null };
 
     public Task StartAsync(ConnectPlan plan, string sid, CancellationToken cancellationToken) =>
         ConnectAsync(plan, sid, repin: false, cancellationToken);
@@ -98,8 +101,10 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
             probe = LocalProbe.ReserveCredentials();
             coreLink = LocalProbe.ReserveCredentials();
             await StartCoreAsync(executable, cancellationToken);
+            outboundBinding = PhysicalEgress.Read(rotation.Current.Host) ?? throw new ClientFault("OUTBOUND_INTERFACE_UNAVAILABLE");
+            networkPath = new(DateTimeOffset.UtcNow, PhysicalPathState.Ready);
             string config = XrayConfigBuilder.Build(plan, probe.Port, probe.User, probe.Password,
-                OutboundInterface.ForEndpoint(rotation.Current.Host), CoreLink(executable));
+                outboundBinding.Name, CoreLink(executable));
             var process = XrayProcess.Start(executable, started => { child = started; lifecycleJournal.TunStarted(); });
             job = new ProcessJob(process);
             process.Exited += (_, _) => _ = HandleExitAsync(process);
@@ -121,11 +126,13 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
                 ConnectedAt: DateTimeOffset.UtcNow, Mode: plan.Mode, ProbePassed: true, ProtectionActive:protectionActive,
                 ApplicationRevision: XrayRouteRevision.For(currentPlan ?? plan));
             pendingApplicationUpdate = null;
+            lastHealthyAt = DateTimeOffset.UtcNow;
             PublishAttempt(); rotation.Succeeded();
             recoveryAttempts=0; healthAt=Stopwatch.GetTimestamp()+15*Stopwatch.Frequency;
         }
         catch (Exception error)
         {
+            if (error is not OperationCanceledException) transportExecution.Failed();
             await StopChildAsync();
             string code = error is ClientFault fault ? fault.Code
                 : error is OperationCanceledException ? "OPERATION_INTERRUPTED" : "CORE_START_FAILED";
@@ -150,6 +157,9 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
         }
         catch (ClientFault fault) when (fallback && fault.Code == "VPN_PROBE_FAILED" && !front.HasExited && LocalProbe.TunnelReady())
         {
+            lifecycleJournal.Record(TunnelLifecycleOrigin.ConnectRequest, new(TunnelLifecycleScope.VpnCore, TunnelLifecycleReason.HealthProbeFailed),
+                TunnelLifecycleOutcome.Failed, fault.Code, transportExecution.Current);
+            transportExecution.Failed();
             rotation.Advance(fault.Code);
             await StopCoreAsync();
             await StartCoreAsync(executable, cancellationToken);

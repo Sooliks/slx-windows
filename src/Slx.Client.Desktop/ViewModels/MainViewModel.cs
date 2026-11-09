@@ -60,13 +60,14 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         InitializeDiagnostics();
         Discovered.CollectionChanged += (_,_)=>{if(!changingDiscovery)RefreshDiscoveryProperties();};
         RefreshDiscoveryProperties();
+        RefreshApplicationComposition();
         Text.Catalog.PropertyChanged += LanguageChanged;
     }
     public ObservableCollection<AppItemViewModel> Applications { get; } = [];
     public ObservableCollection<VpnProfile> Profiles { get; }
     public ObservableCollection<AppRule> Discovered { get; } = [];
     public IEnumerable<AppItemViewModel> FilteredApplications => Applications.Where(x =>
-        x.Name.Contains(Search, StringComparison.CurrentCultureIgnoreCase));
+        x.ToRules().Any(rule => ApplicationLabels.Matches(rule, Search)));
     public IEnumerable<AppItemViewModel> SelectedApplications => Applications;
     public bool HasApplications => Applications.Count > 0;
     public bool HasSelectedApplications => Applications.Any(x => x.Enabled);
@@ -135,7 +136,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public RelayCommand OpenWebsiteCommand { get; }
     public RelayCommand AskRemoveCommand { get; }
     public AsyncRelayCommand ConfirmRemoveCommand { get; }
-    private void LanguageChanged(object? sender, PropertyChangedEventArgs e) {foreach(var entry in libraryEntries.Values)entry.RefreshLanguage();OnPropertyChanged("");}
+    private void LanguageChanged(object? sender, PropertyChangedEventArgs e) {foreach(var entry in libraryEntries.Values)entry.RefreshLanguage();RefreshApplicationComposition();OnPropertyChanged("");}
     private void ClearMessage() { messageKey = ""; OnPropertyChanged(nameof(Message)); OnPropertyChanged(nameof(ShowMessage)); }
     private void Notice(string key) { messageKey = key; OnPropertyChanged(nameof(Message)); OnPropertyChanged(nameof(ShowMessage)); ScheduleNoticeDismiss(key); }
     private void NotifyState()

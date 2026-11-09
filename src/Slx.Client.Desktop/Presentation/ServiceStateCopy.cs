@@ -12,7 +12,7 @@ public static class ServiceStateCopy
         or "CORE_MISSING" or "CORE_FAILED" or "CORE_UNAVAILABLE" or "CORE_EXITED" or "CORE_START_FAILED" or "CORE_STOP_FAILED"
         or "TUN_ADAPTER_CONFLICT" or "TUN_CLEANUP_PENDING" or "TUN_ADDRESS_FAILED" or "ADAPTER_QUERY_FAILED"
         or "TUNNEL_NOT_READY" or "TUN_NOT_READY" or "VPN_PROBE_FAILED" or "VPN_DNS_FAILED" or "VPN_DNS_ROUTE_FAILED"
-        or "VPN_TRAFFIC_ROUTE_FAILED";
+        or "VPN_TRAFFIC_ROUTE_FAILED" or "FRONT_CONTROL_UNAVAILABLE";
     private static bool IsNativeTrafficCode(string code)
     {
         var parts = code.Split('_');
@@ -48,7 +48,8 @@ public static class ServiceStateCopy
         "VPN_DNS_ROUTE_FAILED" => "FaultVpnDnsRoute",
         "VPN_TRAFFIC_ROUTE_FAILED" => "FaultVpnTrafficRoute",
         "TUN_ADDRESS_FAILED" or "ADAPTER_QUERY_FAILED" or "CORE_MISSING" or "CORE_FAILED" or "CORE_UNAVAILABLE"
-            or "TUNNEL_NOT_READY" or "CORE_EXITED" or "CORE_START_FAILED" or "TUN_NOT_READY" or "CORE_STOP_FAILED" => "FaultCore",
+            or "TUNNEL_NOT_READY" or "CORE_EXITED" or "CORE_START_FAILED" or "TUN_NOT_READY" or "CORE_STOP_FAILED"
+            or "FRONT_CONTROL_UNAVAILABLE" => "FaultCore",
         "TRAFFIC_APPLICATION_MISSING" => "FaultTrafficMissing",
         "TRAFFIC_APPLICATION_DENIED" => "FaultTrafficDenied",
         "TRAFFIC_APPLICATION_PATH_UNSUPPORTED" => "FaultTrafficPath",

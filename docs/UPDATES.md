@@ -1,5 +1,10 @@
 # Application updates — alpha.25
 
+Alpha.29 uses this same integrated updater. UI, service and updater are installed together; saved subscription,
+application rules, DPAPI data and installation ID keep their existing format. New active diagnostics fields are
+omitted while off, so the strict alpha.28 (and earlier staged) helper can read the replacement idle service. This
+wire compatibility is covered by tests; a full installed alpha.28-to-.29 update is a separate acceptance result.
+
 Optional startup/six-hour checks download newer complete public SLX releases in the background. Active VPN continues
 working. A failed later check does not discard a verified ready package. The existing card floats above the page
 without moving content or taking focus; Settings retains the same offer and progress when Later hides it for 24h.

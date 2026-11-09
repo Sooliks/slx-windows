@@ -1,4 +1,44 @@
-# Verification — 0.1.0-alpha.28 source preparation (2026-11-06)
+# Verification — 0.1.0-alpha.29 (2026-11-09)
+
+## Alpha.29 local evidence
+
+STATUS: PARTIAL for installed/system acceptance. Base is published alpha.28 at
+`c8ffc7544bfe3ede91ef301e78be653d6fc953a5`. Work occurs in an isolated clean worktree; unrelated overlays on the old
+local checkout are preserved. Source changes, published release and installed acceptance are separate facts.
+
+| Command/check | Actual result |
+| --- | --- |
+| `dotnet restore Slx.Windows.slnx --force-evaluate` after version bump | Exit 0; internal project versions .28 to .29; external dependencies unchanged. |
+| `scripts/verify.ps1` | Exit 0; locked restore, all seven Release projects, zero warnings/errors; 821 main tests and one composite WPF test pass, no skips; <=200 nonblank source gate passes. |
+| `node --test scripts/tests/release-*.test.mjs` | Exit 0; 24 pass. |
+| `scripts/tests/runtime-inputs.test.ps1` | Exit 0; 18 pass. |
+| `scripts/fetch-runtime.ps1` | Exit 0; pinned official Xray 26.9.9 SHA-256 verified; Wintun vendor signature Valid. |
+| `scripts/tests/dns-routing.test.ps1` | Exit 0; real pinned Xray, selected DNS direct / whole-PC DNS protected, local UDP fixture. |
+| `scripts/tests/core-isolation.test.ps1` | Exit 0; real pinned front/core, persistent direct TCP and UDP across 20 exchanges with core stopped; selected TCP/UDP restored, no selected UDP direct fallback while core absent; same front process and authenticated route revision. |
+| `PhysicalEgress.Read` from Release assemblies | Exit 0; native read-only lookup returns a usable non-SLX interface; mapped IPv4 returns same binding. No route change or packets. |
+
+The loopback fixture replaces TUN ingress with local sockets and remote transport with a local echo stub. UDP
+selection is explicit test ingress, not Windows process attribution. The stub alone allows its exact loopback address
+and port through pinned Xray's default VLESS/private-destination guard; production configuration is unchanged.
+No local live VPN interruption, production server/site/DB change or subscription access was needed.
+
+Regressions cover primary/alternate readiness races with cancelled peer, caller cancellation, physical candidate
+selection excluding owned TUN, missing/same/changed bindings, immutable executed-vs-next transport, strict IPC
+round trips/old idle shape and Riot aliases/path/choice preservation. Existing health repeat/alternate, recovery
+scope, application revision, updater and protection contracts remain enabled. WPF RU/EN search/shared-file renders
+at 940x760 were inspected; the warning states desired selection, not confirmed applied traffic.
+
+An initial readiness change failed the existing caller-cancellation test; cancellation is now rechecked after
+draining tasks. Initial loopback harness failures exposed fixture ordering, Xray's private-target guard and a queued
+negative-test datagram; these were corrected in the fixture, without relaxing production guards or replacing Xray.
+
+Not verified: installed alpha.28-to-.29 update/UAC/resume; real TUN/WFP direct TCP/UDP/DNS during core faults; actual
+Wi-Fi/Ethernet loss/change and IPv6 switch; public Hysteria2-to-XHTTP fallback; long-duration or friend-game acceptance;
+Windows 10 installed compatibility. The environment has no available isolated VM for disruptive network tests.
+The owner authorizes an alpha prerelease after source gates with these explicit limitations; no claim of universal
+outage repair or complete TUN bypass is made. Release CI/provenance/redirect results are recorded separately below.
+
+## Historical alpha.28 source preparation (2026-11-06)
 
 ## Alpha.28 evidence and execution
 

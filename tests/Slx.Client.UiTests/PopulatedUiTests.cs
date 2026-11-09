@@ -56,6 +56,7 @@ public sealed class PopulatedUiTests
             CheckingConnectionChecks.Run(window);
             HealthDiagnosticsChecks.Run();
             LifecycleDiagnosticsChecks.Run();
+            Alpha29ApplicationChecks.Run(window);
         }
         finally { window.Close(); Sta.Pump(); }
     });

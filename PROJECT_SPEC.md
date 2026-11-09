@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.28. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.29. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -13,7 +13,34 @@ Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link need
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
 
-## Alpha.28 — preserve the shared TUN during VPN-core recovery
+## Alpha.29 — readiness, outbound-interface recovery and application identity
+
+Base: published v0.1.0-alpha.28 / c8ffc7544bfe3ede91ef301e78be653d6fc953a5. Owner authorizes source push and
+publication through the existing Windows prerelease/update process after source gates. No separate manual ZIP
+handoff, server, website, production route, driver or dependency change. The existing release asset contract remains.
+
+Startup/recovery readiness accepts the first successful strict HTTPS origin, cancels and observes the unused peer,
+and still honors caller cancellation. Preserve all existing probe budgets and all-origin-failure protection. Do not
+reinstate the obsolete 90-second health grace or convert accumulated incidents into claims of packet outages.
+
+Read the best usable non-owned interface per pinned endpoint, including while TUN split defaults exist. A missing
+physical route keeps the front/protection in Checking and retries after five seconds; rotating a remote transport
+cannot repair it. A confirmed interface identity/name change requires a full protected rebuild to rebind the front.
+During core recovery, check the authenticated local RoutingService with two bounded attempts. Failure of both marks
+the front unavailable; remote/core errors alone still do not authorize full teardown. A local RPC does not prove
+direct Internet TCP/UDP, and a Windows route lookup does not prove remote reachability.
+
+Report immutable current/last-failed/next transport snapshots, exact transport per lifecycle attempt, separate local
+control and physical-route observation times, and latest successful VPN health time. New IPCv2 fields are optional
+and omitted while off for strict staged-updater compatibility. UI and service update together; no settings migration.
+
+Normalize common Riot EXE display names without changing path, ID or enabled choice. Search names, exact paths,
+EXE and relevant aliases; search includes already-added entries. Show group members/shared-EXE selection without
+claiming an unacknowledged rule is active. No automatic all-Riot-game selection or argument-based process routing.
+Native installed switching, friend-game acceptance and alpha.28-to-.29 installed update remain explicitly separate
+from unit/WPF/loopback-core verification. Record publication and acceptance independently.
+
+## Historical alpha.28 — preserve the shared TUN during VPN-core recovery
 
 Source base is published v0.1.0-alpha.27 at b140056bc92c95f12bc37349e15299de9a44c05e. On 6 November the
 friend reported losing Internet throughout the PC without touching SLX. His 12:43:55 UTC report shows an earlier

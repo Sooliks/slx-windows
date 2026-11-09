@@ -1,6 +1,30 @@
-# Network model and limits — alpha.28
+# Network model and limits — alpha.29
 
-## Alpha.28 recovery scope and the shared TUN
+## Alpha.29 readiness and physical path
+
+Startup and core recovery race the same two strict HTTPS probes: once either succeeds, cancel/drain the unnecessary
+peer rather than let an unavailable peer consume the whole readiness budget. Caller cancellation still revokes
+success. No health timeout, target, rotation threshold, remote grace, DNS policy or fail-closed rule was relaxed.
+
+The front pins a usable non-owned outbound interface chosen by route prefix and effective route/interface metric.
+While active, Windows route lookups detect missing connectivity and a changed interface identity/name independently
+of remote probes. No usable interface: keep front/protection, Checking/ProbePassed=false, recheck in five seconds.
+Changed binding: full protected recovery is necessary to rebind the shared front; this can interrupt direct sessions.
+Same binding: a VPN-core failure remains core-only. Routes and native protection are still checked separately.
+This does not detect every gateway/path failure when interface identity stays the same.
+
+An authenticated local RoutingService read is checked after failed health confirmation and before each core retry.
+Two failures (two-second budget each) mark LocalLinkUnavailable. A live process alone is insufficient. Local-control
+success proves an answering front, not its complete direct TCP/UDP path or that another process has not occupied a
+core port. Transport diagnostics expose actual/current, last failed and next candidates with immutable attempt times.
+Latest healthy VPN time is separate from historical incident, startup DNS, physical route and local RPC timestamps.
+
+Actual pinned-Xray loopback contracts cover persistent direct TCP/UDP while a separate core is absent, restoration
+of selected test flows, authenticated front revision, and selected/whole-PC DNS dispatch. The test changes TUN ingress
+to local fixture sockets and remote outbounds to a local echo stub; it does not test Windows process attribution,
+native TUN/WFP, physical Wi-Fi/Ethernet switching, public TLS transports or the friend's games. See VERIFICATION.md.
+
+## Historical alpha.28 recovery scope and the shared TUN
 
 The alpha.27 two-process design remains: a common local TUN/front process owns the adapter, routes, shared DNS
 and per-application routing. Selected traffic uses a separate VPN core over an authenticated loopback link;

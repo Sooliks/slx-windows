@@ -20,8 +20,9 @@ internal sealed partial class TunnelEngine
             try
             {
                 InteractiveSessions.RequireSingleOwner(ownerSid??"");
+                if (!PhysicalPathReady()) return;
                 bool wasConnected = state.Phase is TunnelPhase.Connected or TunnelPhase.Checking;
-                if(wasConnected && FrontAlive && CoreAlive && ownedAdapterId is not null && LocalProbe.TunnelReady(ownedAdapterId))
+                if(wasConnected && coreRecovery.RequiredFullReason is null && FrontAlive && CoreAlive && ownedAdapterId is not null && LocalProbe.TunnelReady(ownedAdapterId))
                 {
                     if(state.Phase==TunnelPhase.Connected && pendingApplicationUpdate is not null && Stopwatch.GetTimestamp()>=applicationReconcileAt)
                     {
@@ -35,8 +36,9 @@ internal sealed partial class TunnelEngine
                         () => HealthResourcesReady(cancellationToken), observed => state = observed, cancellationToken);
                     RecordHealthIncident(result.Confirmation, result.Retained);
                     if(result.Retained)return;
+                    await CheckFrontControlAsync(cancellationToken);
                     // A remote-only failure counts against the current transport; lost local resources do not.
-                    if(!result.Confirmation.Passed){rotation.Failed("HEALTH_PROBE_FAILED");PublishAttempt();}
+                    if(!result.Confirmation.Passed){transportExecution.Failed();rotation.Failed("HEALTH_PROBE_FAILED");PublishAttempt();}
                 }
                 if(wasConnected)
                 {
@@ -44,7 +46,7 @@ internal sealed partial class TunnelEngine
                         : ownedAdapterId is not null && LocalProbe.TunnelReady(ownedAdapterId)
                             ? RecoveryCause.ProbeFailed : RecoveryCause.AdapterUnavailable;
                     RecordRecovery(cause);
-                    recoveryReason = cause switch
+                    recoveryReason = coreRecovery.RequiredFullReason ?? cause switch
                     {
                         RecoveryCause.CoreExited => TunnelLifecycleReason.CoreExited,
                         RecoveryCause.AdapterUnavailable => TunnelLifecycleReason.AdapterUnavailable,

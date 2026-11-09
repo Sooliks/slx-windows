@@ -10,4 +10,8 @@
 <data name="LibraryAppUnavailable" xml:space="preserve"><value>Не удалось открыть файл приложения. Обновите список или выберите актуальный .exe.</value></data>
 <data name="LibraryMore" xml:space="preserve"><value>Показать ещё приложения</value></data>
 <data name="LibrarySearchSlow" xml:space="preserve"><value>Поиск завершается дольше обычного. Можно пользоваться доступным списком.</value></data>
+  <data name="LibraryShowAdded" xml:space="preserve"><value>Добавлено · показать выбор</value></data>
+  <data name="RiotSharedClient" xml:space="preserve"><value>Общий клиент Riot. Игровые процессы выбираются отдельно.</value></data>
+  <data name="IncludedExecutables" xml:space="preserve"><value>Включает:</value></data>
+  <data name="EnabledByOtherGroup" xml:space="preserve"><value>Часть файлов также выбрана для VPN в группе:</value></data>
 </root>

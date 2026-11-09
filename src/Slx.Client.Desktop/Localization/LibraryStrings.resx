@@ -10,4 +10,8 @@
 <data name="LibraryAppUnavailable" xml:space="preserve"><value>Could not open the app executable. Refresh the list or choose its current .exe.</value></data>
 <data name="LibraryMore" xml:space="preserve"><value>Show more apps</value></data>
 <data name="LibrarySearchSlow" xml:space="preserve"><value>Finishing the search is taking longer. You can use the available list.</value></data>
+  <data name="LibraryShowAdded" xml:space="preserve"><value>Added · show selection</value></data>
+  <data name="RiotSharedClient" xml:space="preserve"><value>Shared Riot launcher. Game processes are selected separately.</value></data>
+  <data name="IncludedExecutables" xml:space="preserve"><value>Includes:</value></data>
+  <data name="EnabledByOtherGroup" xml:space="preserve"><value>Some files are also selected for VPN in:</value></data>
 </root>

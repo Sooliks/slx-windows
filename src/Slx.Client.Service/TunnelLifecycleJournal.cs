@@ -15,13 +15,13 @@ internal sealed class TunnelLifecycleJournal
     internal void CoreStarted() { lock (sync) coreGeneration = Math.Min(coreGeneration, int.MaxValue - 1) + 1; }
 
     internal void Record(TunnelLifecycleOrigin origin, CoreRecoveryDecision decision,
-        TunnelLifecycleOutcome outcome, string? code = null)
+        TunnelLifecycleOutcome outcome, string? code = null, TransportAttemptSnapshot? transport = null)
     {
         lock (sync)
         {
             sequence = Math.Min(sequence, long.MaxValue - 1) + 1;
             events.Enqueue(new(sequence, DateTimeOffset.UtcNow, origin, decision.Scope, decision.Reason, outcome,
-                tunGeneration, coreGeneration, TunnelLifecycleObservation.SafeCode(code)));
+                tunGeneration, coreGeneration, TunnelLifecycleObservation.SafeCode(code), transport));
             while (events.Count > TunnelLifecycleObservation.MaximumEvents) events.Dequeue();
         }
     }

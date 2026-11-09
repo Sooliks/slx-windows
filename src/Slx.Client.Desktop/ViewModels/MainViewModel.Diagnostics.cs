@@ -31,13 +31,16 @@ public sealed partial class MainViewModel
             text.AppendLine("Mode: " + (status?.Mode?.ToString() ?? "unknown"));
             text.AppendLine("Protection: " + (status?.ProtectionActive.ToString() ?? "unknown"));
             text.AppendLine("Probe passed: " + (status?.ProbePassed.ToString() ?? "unknown"));
+            text.AppendLine("Latest successful VPN observation UTC: " + (status?.LastHealthyAt?.ToString("O") ?? "unknown"));
+            text.AppendLine("Application rules: " + (RulesPending ? "pending / not confirmed" : "no pending UI change"));
             text.AppendLine("Code: " + (LastServiceCode ?? "none"));
             text.AppendLine("Observed UTC: " + (status?.ObservedAt.ToString("O") ?? "unknown"));
             text.AppendLine("Observed meaning: service state publication; DNS and health observations have separate timestamps");
             if (status?.ConnectedAt is {} connected) text.AppendLine($"Connected UTC: {connected:O}");
             if (status?.Recovery is {} recovery)
                 text.AppendLine($"Recovery: {recovery.Count}, {recovery.Cause}, {recovery.At:O}");
-            if (status?.Attempt is {} attempt)
+            TransportDiagnostics.Append(text, status?.TransportExecution);
+            if (status?.TransportExecution is null && status?.Attempt is {} attempt)
             {
                 // The profile name stays out of shared diagnostics, like addresses and the subscription link.
                 string node = attempt.TransportIndex == 1 ? "selected server" : "same-location alternate";
@@ -66,6 +69,12 @@ public sealed partial class MainViewModel
                 });
             }
             LifecycleDiagnostics.Append(text, status?.Lifecycle);
+            if (status?.NetworkPath is { } path)
+            {
+                text.AppendLine($"Physical route: {path.Physical}, at={path.At:O}");
+                text.AppendLine($"Front control: {path.LocalControlReady?.ToString() ?? "not checked"}, at={path.LocalControlAt?.ToString("O") ?? "none"}");
+                text.AppendLine("Path meaning: physical route is a Windows lookup; authenticated front control is local, not a direct TCP/UDP traffic test");
+            }
             TrafficRouteDiagnostics.Append(text, status?.TrafficRoutes);
             return text.ToString();
         }

@@ -1,5 +1,19 @@
 # Boundaries
 
+Alpha.29: StartupReadiness returns after a successful strict origin and drains the cancelled peer; caller cancellation
+still wins. Per-origin and recovery budgets are unchanged. PhysicalEgress uses read-only Windows route/interface
+APIs, excluding the exact owned TUN GUID. TunnelPhysicalPath owns detection of missing/changed bindings, records
+observation time, preserves the front on physical loss and requests a protected full rebuild on confirmed change.
+The separate local-control observation uses authenticated RoutingService/ListRule; two failures require full recovery.
+Every core retry checks this local control, including repeated remote failures. It is not a direct-egress packet test.
+
+TransportExecution snapshots what was actually started rather than relabelling an old attempt after rotation. The
+immutable lifecycle attempt keeps its own transport; current, last failed and next remain separate. LastHealthyAt
+is updated by successful VPN checks, not by DNS or status reads. Optional active-only fields are omitted while off;
+strict old updater replies and settings remain compatible. ApplicationLabels changes presentation/search only;
+existing exact-file validation/expansion still owns actual routing. Group overlap is desired selection, not applied
+revision. A read-only display expansion cannot authorize a connection plan.
+
 Alpha.28: recovery has an explicit scope and full-rebuild reason. Isolated VPN-core start/exit/containment/stop
 errors retain an otherwise healthy shared TUN; they no longer make the local link suspect by error-code inference.
 The scope is selected before core verification/start work. Full recovery is reserved for missing/unready front,

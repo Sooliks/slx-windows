@@ -6,6 +6,9 @@ internal sealed partial class TunnelEngine
     private volatile HealthCheckObservation? healthCheck;
     private volatile DnsCheckObservation? dnsCheck;
     private volatile TrafficRouteCheckObservation? trafficRoutes;
+    private sealed record HealthSuccess(DateTimeOffset At);
+    private volatile HealthSuccess? lastHealthy;
+    private DateTimeOffset? lastHealthyAt { get => lastHealthy?.At; set => lastHealthy = value is { } at ? new(at) : null; }
     internal void RecordDnsCheck(DnsCheckObservation observation) => dnsCheck = observation;
     internal void RecordTrafficRoutes(TrafficRouteCheckObservation observation) => trafficRoutes = observation;
     internal void RecordRecovery(RecoveryCause cause)
@@ -15,6 +18,7 @@ internal sealed partial class TunnelEngine
     }
     internal void RecordHealthIncident(HealthConfirmationResult result, bool retained)
     {
+        if (retained) lastHealthyAt = DateTimeOffset.UtcNow;
         if (result.Primary.Passed) return;
         // One failed TLS/connection attempt that the repeat check immediately passes is a blip: its details stay
         // visible, but it is not an incident. Only a failed repeat makes the connection genuinely doubtful.

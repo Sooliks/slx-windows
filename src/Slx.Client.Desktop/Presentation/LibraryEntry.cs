@@ -7,6 +7,8 @@ public sealed class LibraryEntry(string Name, AppRule? Rule, CatalogApplication?
     private ImageSource? icon;
     private LocalIconRequest? iconRequest;
     private bool disposed;
+    private bool added;
+    public bool IsAdded { get => added; internal set { if (SetProperty(ref added, value)) OnPropertyChanged(nameof(Action)); } }
     public string Name { get; } = Name;
     public AppRule? Rule { get; private set; } = Rule;
     public CatalogApplication? Catalog { get; } = Catalog;
@@ -26,7 +28,7 @@ public sealed class LibraryEntry(string Name, AppRule? Rule, CatalogApplication?
             return icon;
         }
     }
-    public string Action=>Localization.Text.Catalog[Rule is null?"FindExecutable":"Add"];
+    public string Action=>Localization.Text.Catalog[IsAdded ? "LibraryShowAdded" : Rule is null?"FindExecutable":"Add"];
     public void RefreshLanguage() => OnPropertyChanged(nameof(Action));
     public void UpdatePaths(AppRule primary, IReadOnlyList<AppRule> paths)
     {

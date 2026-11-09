@@ -31,6 +31,7 @@ public static class ShortcutApplications
                         var rule=AppDiscovery.FromExecutable(path);
                         var name=Path.GetFileNameWithoutExtension(file);
                         if(name.Length is >0 and <=100)rule=rule with{Name=name};
+                        rule = rule with { Name = ApplicationLabels.DisplayName(rule) };
                         found.TryAdd(rule.ExecutablePath,rule);
                     }
                     catch(Exception error) when(error is COMException or ClientFault or IOException or UnauthorizedAccessException or ArgumentException) { }
