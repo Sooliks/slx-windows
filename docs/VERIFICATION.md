@@ -2,6 +2,30 @@
 
 ## Alpha.29 local evidence
 
+### Published release receipt — 2026-11-09
+
+**Alpha.29 is published.** Release commit/tag: `60e29cec25f4a9f1f591b08ebce4d8fc6a5c8cd6` /
+`v0.1.0-alpha.29`; public prerelease published at 10:05:25 UTC. This receipt is a later documentation-only change;
+the immutable release assets contain the source of that release commit, not this later receipt.
+
+- [Windows release workflow 42597757184](https://github.com/Sooliks/slx-windows/actions/runs/42597757184): success.
+  Clean locked restore/Release build; 821 main tests + one composite WPF test passed, no failures/skips; 24 release
+  tests and 18 runtime checks passed; source-size gate and clean installer/provenance/package/publication checks passed.
+- [Public release](https://github.com/Sooliks/slx-windows/releases/tag/v0.1.0-alpha.29): not draft, prerelease,
+  six expected assets. Tag and provenance commit match; exact previous base is c8ffc7544bfe3ede91ef301e78be653d6fc953a5.
+  Every published asset was streamed and SHA-256 checked against GitHub digest and SHA256SUMS where applicable.
+  No separate manual source archives were created or installed locally. Existing pipeline source assets remain.
+- Installer: 127243198 bytes; SHA-256 `bb4fffcf3960b70a82b8c8d40711903c33408a79591bdb5cd85730331b9d46b0`.
+  Provenance confirms version 0.1.0-alpha.29, file version 0.1.0.29, sourceClean=true, candidate=false and
+  publicationAllowed=true for the same release commit and installer hash.
+- Actual `ReleaseUpdateClient.CheckAsync("0.1.0-alpha.28")`: Available, offer 0.1.0-alpha.29, correct installer
+  size/hash, no error. This checks the production updater code/feed; it does not install the update or prove UAC/resume.
+- `https://slxvpn.com/download/windows`: initially cached alpha.28; at 10:07:16 UTC returned HTTP 302 to the exact
+  alpha.29 installer URL. Cache-Control public,max-age=60. No website mutation/cache purge was performed.
+
+Public download: https://github.com/Sooliks/slx-windows/releases/download/v0.1.0-alpha.29/SLX-VPN-0.1.0-alpha.29-win-x64-setup.exe
+Installed/system acceptance limitations below remain; successful publication does not remove PARTIAL status there.
+
 STATUS: PARTIAL for installed/system acceptance. Base is published alpha.28 at
 `c8ffc7544bfe3ede91ef301e78be653d6fc953a5`. Work occurs in an isolated clean worktree; unrelated overlays on the old
 local checkout are preserved. Source changes, published release and installed acceptance are separate facts.
