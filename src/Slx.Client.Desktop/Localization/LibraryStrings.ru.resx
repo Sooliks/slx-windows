@@ -14,4 +14,17 @@
   <data name="RiotSharedClient" xml:space="preserve"><value>Общий клиент Riot. Игровые процессы выбираются отдельно.</value></data>
   <data name="IncludedExecutables" xml:space="preserve"><value>Включает:</value></data>
   <data name="EnabledByOtherGroup" xml:space="preserve"><value>Часть файлов также выбрана для VPN в группе:</value></data>
+  <data name="QuickStartTitle" xml:space="preserve"><value>Быстрый старт</value></data>
+  <data name="QuickStartBody" xml:space="preserve"><value>Эти программы найдены на компьютере. Добавьте те, которым нужен VPN, — одним нажатием.</value></data>
+  <data name="QuickStartSearching" xml:space="preserve"><value>Ищем установленные программы на этом компьютере…</value></data>
+  <data name="QuickStartEmpty" xml:space="preserve"><value>Откройте «Выбрать приложения» и добавьте программы, которым нужен VPN.</value></data>
+  <data name="QuickStartDirectGames" xml:space="preserve"><value>Напрямую, без VPN, остаются {0} и все остальные программы.</value></data>
+  <data name="QuickStartDirectRest" xml:space="preserve"><value>Все остальные программы остаются напрямую, без VPN.</value></data>
+  <data name="QuickStartAdd" xml:space="preserve"><value>Добавить в VPN</value></data>
+  <data name="PasteLink" xml:space="preserve"><value>Вставить из буфера</value></data>
+  <data name="ImportClipboardHint" xml:space="preserve"><value>Ссылка SLX подставлена из буфера обмена. Проверьте её и нажмите «Добавить».</value></data>
+  <data name="ClipboardNoLink" xml:space="preserve"><value>В буфере обмена нет ссылки SLX. Скопируйте её в кабинете: «Устройства» → это устройство → «Скопировать ссылку для SLX Windows».</value></data>
+  <data name="HelpDevicesTitle" xml:space="preserve"><value>Телефон и другие устройства</value></data>
+  <data name="HelpDevicesBody" xml:space="preserve"><value>Каждому устройству нужна своя ссылка: ссылка этого компьютера на телефоне не заработает. Добавьте телефон в кабинете как отдельное устройство и откройте его настройки на самом телефоне.</value></data>
+  <data name="HelpDevicesAction" xml:space="preserve"><value>Добавить устройство</value></data>
 </root>

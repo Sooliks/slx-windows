@@ -58,6 +58,7 @@ public sealed class PopulatedUiTests
             LifecycleDiagnosticsChecks.Run();
             Alpha29ApplicationChecks.Run(window);
             ClaudeGroupChecks.Run();
+            QuickStartChecks.Run();
         }
         finally { window.Close(); Sta.Pump(); }
     });

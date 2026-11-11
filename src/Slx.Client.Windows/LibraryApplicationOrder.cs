@@ -24,6 +24,9 @@ public sealed class LibraryApplicationOrder
         }
     }
     public int Priority(AppRule app) => Priority(app.ExecutablePath);
+    /// <summary>First-run suggestion order: Discord, Telegram, then browsers; null is never suggested.</summary>
+    public int? StarterRank(AppRule app) => Priority(app.ExecutablePath) switch { 2 => 0, 1 => 1, 0 => 2, _ => null };
+    public bool IsGame(AppRule app) => Priority(app.ExecutablePath) == 3;
     public int Priority(CatalogApplication app) => Math.Min(Category(app.Category), app.Executables.Select(Priority).DefaultIfEmpty(4).Min());
     public IOrderedEnumerable<AppRule> Order(IEnumerable<AppRule> applications) => applications
         .OrderBy(Priority).ThenBy(app => app.Name.Trim(), StringComparer.OrdinalIgnoreCase)

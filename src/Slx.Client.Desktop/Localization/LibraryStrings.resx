@@ -14,4 +14,17 @@
   <data name="RiotSharedClient" xml:space="preserve"><value>Shared Riot launcher. Game processes are selected separately.</value></data>
   <data name="IncludedExecutables" xml:space="preserve"><value>Includes:</value></data>
   <data name="EnabledByOtherGroup" xml:space="preserve"><value>Some files are also selected for VPN in:</value></data>
+  <data name="QuickStartTitle" xml:space="preserve"><value>Quick start</value></data>
+  <data name="QuickStartBody" xml:space="preserve"><value>These programs were found on this computer. Add the ones that need VPN with one click.</value></data>
+  <data name="QuickStartSearching" xml:space="preserve"><value>Looking for installed programs on this computer…</value></data>
+  <data name="QuickStartEmpty" xml:space="preserve"><value>Open “Choose apps” and add the programs that need VPN.</value></data>
+  <data name="QuickStartDirectGames" xml:space="preserve"><value>{0} and all other programs stay direct, without VPN.</value></data>
+  <data name="QuickStartDirectRest" xml:space="preserve"><value>All other programs stay direct, without VPN.</value></data>
+  <data name="QuickStartAdd" xml:space="preserve"><value>Add to VPN</value></data>
+  <data name="PasteLink" xml:space="preserve"><value>Paste from clipboard</value></data>
+  <data name="ImportClipboardHint" xml:space="preserve"><value>The SLX link was filled in from the clipboard. Check it and press “Add”.</value></data>
+  <data name="ClipboardNoLink" xml:space="preserve"><value>There is no SLX link in the clipboard. Copy it in your account: Devices → this device → “Copy link for SLX Windows”.</value></data>
+  <data name="HelpDevicesTitle" xml:space="preserve"><value>Phone and other devices</value></data>
+  <data name="HelpDevicesBody" xml:space="preserve"><value>Each device needs its own link: the link of this computer will not work on a phone. Add the phone in your account as a separate device and open its settings on the phone itself.</value></data>
+  <data name="HelpDevicesAction" xml:space="preserve"><value>Add a device</value></data>
 </root>

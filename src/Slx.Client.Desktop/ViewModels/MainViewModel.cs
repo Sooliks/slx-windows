@@ -39,7 +39,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         selectedProfile = Profiles.FirstOrDefault(x => x.Id == preferences.SelectedProfileId)
             ?? Profiles.FirstOrDefault(x => x.Kind == "hysteria2") ?? Profiles.FirstOrDefault();
         NavigateCommand = new RelayCommand<string>(value => { Page = value ?? "connection"; ClearMessage(); });
-        OpenImportCommand = new RelayCommand(() => { CancelStartupRefresh(); ImportLink = ""; ImportVisible = true; ClearMessage(); });
+        OpenImportCommand = new RelayCommand(() => { CancelStartupRefresh(); ImportLink = ""; ImportVisible = true; ClearMessage(); OfferClipboardLink(); });
         CancelOverlayCommand = new RelayCommand(CloseOverlay);
         ImportCommand = new AsyncRelayCommand(ImportAsync, () => !IsBusy);
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => saved != null && !IsBusy);
@@ -76,7 +76,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public bool HasDiscovered => Discovered.Count > 0;
     public string Page { get => page; set { if (SetProperty(ref page, value) && value == "applications" && persistPreferences) _ = RefreshLibraryIfNeededAsync(); } }
     public string Search { get => search; set { if (SetProperty(ref search, value)) { OnPropertyChanged(nameof(FilteredApplications)); OnPropertyChanged(nameof(HasSearchResults)); } } }
-    public string ImportLink { get => importLink; set => SetProperty(ref importLink, value); }
+    public string ImportLink { get => importLink; set { if (SetProperty(ref importLink, value)) OnPropertyChanged(nameof(ImportFootnoteText)); } }
     public bool ImportVisible { get => importVisible; set { if (SetProperty(ref importVisible, value)) OnPropertyChanged(nameof(IsOverlayVisible)); } }
     public bool DiscoveryVisible { get => discoveryVisible; set { if (SetProperty(ref discoveryVisible, value)) OnPropertyChanged(nameof(IsOverlayVisible)); } }
     public bool RemoveVisible { get => removeVisible; set { if (SetProperty(ref removeVisible, value)) OnPropertyChanged(nameof(IsOverlayVisible)); } }
@@ -142,7 +142,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private void Notice(string key) { messageKey = key; OnPropertyChanged(nameof(Message)); OnPropertyChanged(nameof(ShowMessage)); ScheduleNoticeDismiss(key); }
     private void NotifyState()
     {
-        foreach (var name in new[] { nameof(StatusTone), nameof(HasConnectionFacts), nameof(HasActiveProtocol), nameof(ConnectionDuration), nameof(ActiveProtocol), nameof(LastConnectionCheck), nameof(RoutingUpdateText), nameof(IsConnected), nameof(CanEditRouting), nameof(CanConnect), nameof(CanReconnect), nameof(ConnectionAction), nameof(ShowConnectionAction), nameof(ShowImportAction), nameof(StatusText), nameof(StatusDetail), nameof(LastServiceCode), nameof(HasServiceCode), nameof(ServiceCodeLabel), nameof(HasSubscription), nameof(NoSubscription) }) OnPropertyChanged(name);
+        foreach (var name in new[] { nameof(StatusTone), nameof(HasConnectionFacts), nameof(HasActiveProtocol), nameof(ConnectionDuration), nameof(ActiveProtocol), nameof(LastConnectionCheck), nameof(RoutingUpdateText), nameof(IsConnected), nameof(CanEditRouting), nameof(CanConnect), nameof(CanReconnect), nameof(ConnectionAction), nameof(ShowConnectionAction), nameof(ShowImportAction), nameof(StatusText), nameof(StatusDetail), nameof(LastServiceCode), nameof(HasServiceCode), nameof(ServiceCodeLabel), nameof(HasSubscription), nameof(NoSubscription), nameof(ShowQuickStart) }) OnPropertyChanged(name);
         NotifyActivity();
         ImportCommand?.NotifyCanExecuteChanged(); RefreshCommand?.NotifyCanExecuteChanged();
         ReconnectCommand?.NotifyCanExecuteChanged(); AskRemoveCommand?.NotifyCanExecuteChanged();

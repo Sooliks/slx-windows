@@ -1,5 +1,35 @@
 # Verification — SLX Windows
 
+## Alpha.32: first-run setup (2026-11-11)
+
+STATUS: PARTIAL for installed end-to-end acceptance. `pwsh -File scripts/verify.ps1` exited 0 on the alpha.32
+tree: locked restore, Release build with 0 warnings/errors, 841 tests and the composite WPF test, no skips,
+source-size gate. New coverage: suggestion rank and game exclusion (7 cases); WPF checks for the Quick start card
+(found Discord/Telegram/browser offered in that order, games only named as direct, one press adds and enables the
+program, remaining suggestions stay for that session, hidden in Whole PC mode, for a user with applications and
+without a subscription, zero service commands while VPN is off) and for the clipboard offer (read only on the
+explicit action, only an exact SLX link kept, wrong host/scheme/query/oversize rejected, fixtures never read the
+real clipboard). RU render `artifacts/ui/slx-quick-start.png` was inspected.
+
+Live connection on the owner's Windows 11 PC, 14:01–14:04 local time, installed alpha.31 service with its running
+tunnel. The candidate UI was the same source before the version bump (it reports alpha.31, so the UI/service
+version guard was not bypassed); it replaced the installed UI process only for the check. The interface confirmed
+the connection and did not show Quick start for a user who already has applications. Egress was measured with the
+acceptance probe over HTTPS and STUN: selected copy 89.124.x.x (VPN exit) for TCP and UDP, unselected copy
+95.24.x.x (provider) for both. Removing the selected copy in the UI moved its new requests to the provider address
+within the first measurement (9 s including the probe run); adding it back through the manual EXE picker returned
+them to the VPN exit within 6 s; the unselected copy stayed direct. Both Xray processes kept their PIDs and
+13:34:43 creation time, so no tunnel or core restart occurred. Afterwards the installed UI was started again, the
+application list equalled the saved copy and the autostart entry was unchanged.
+
+Limits of that check: the status text was read before navigating to Applications, not after the change. The first
+two runs of the add step failed inside the check script (file-dialog automation), so the probe stayed removed from
+14:01:54 to 14:04:15; this was a script defect, not a client fault. The real add used the manual picker, which
+shares the validated addition and live `update-applications` path with the Quick start buttons but is not the
+button itself. Not verified: the card and clipboard offer on a clean Windows profile with a real first import,
+installed alpha.32 and its upgrade, real Discord voice/UDP during a game, CS2, Windows 10. No server, subscription,
+service or network setting was changed.
+
 ## Alpha.31: embedded Claude Code build folders (2026-11-11)
 
 STATUS: PARTIAL for installed end-to-end acceptance. `scripts/verify.ps1` exited 0 with 834 tests and the

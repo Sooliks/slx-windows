@@ -1,5 +1,18 @@
 # Windows client UX brief
 
+## Alpha.32 first-run setup (2026-11-11)
+
+Audience: a player who needs Discord through VPN during every game while the game stays direct. Job: from a copied
+link to a working choice without learning the library. Before: empty app list after import and a notice sending the
+user to another page. Now: the import dialog fills a copied SLX link (still an explicit Add), and the Connection
+page offers found Discord/Telegram/browsers as one-press additions with a sentence naming what stays direct.
+States: searching (reserved copy, no spinner row), found, nothing found (points to the library), routing locked
+(buttons disabled with the existing CanEditRouting). The card never appears for a user who already has
+applications, in Whole PC mode or without a subscription. Controls are native buttons with names, help text,
+tooltips and a 50px minimum height; RU/EN copy; both themes use existing tokens. The clipboard hint replaces the
+footnote in a reserved two-line slot, so the dialog does not move. Help card 04 explains that a phone needs its own
+device link. Not promised: ping, speed or that every game/anti-cheat tolerates the shared local TUN.
+
 ## Alpha.29 common executables and truthful diagnostics (2026-11-09)
 
 Common RiotClientServices/UX executables display as Riot Client even when a game shortcut named them. The visible

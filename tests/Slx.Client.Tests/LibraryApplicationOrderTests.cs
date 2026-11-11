@@ -26,6 +26,19 @@ public sealed class LibraryApplicationOrderTests
     [InlineData(@"D:\Tools\not-discord.exe",4)]
     public void OnlyExactExecutableOrKnownGamePathChangesPresentationRank(string path,int expected)
         =>Assert.Equal(expected,new LibraryApplicationOrder([]).Priority(new AppRule(Guid.NewGuid(),"Unrelated label",path)));
+    [Theory]
+    [InlineData("DISCORD.EXE",0,false)]
+    [InlineData("Telegram.exe",1,false)]
+    [InlineData("chrome.exe",2,false)]
+    [InlineData("cs2.exe",null,true)]
+    [InlineData("steam.exe",null,true)]
+    [InlineData("not-discord.exe",null,false)]
+    [InlineData("editor.exe",null,false)]
+    public void FirstRunSuggestsOnlyDiscordTelegramAndBrowsersAndNeverGames(string file,int? starter,bool game)
+    {
+        var order=new LibraryApplicationOrder([]);var app=App("Unrelated label",file,false);
+        Assert.Equal(starter,order.StarterRank(app));Assert.Equal(game,order.IsGame(app));Assert.False(app.Enabled);
+    }
     [Fact]
     public void CurrentCatalogCanRankNewBrowserOrGameWithoutAddingAnApplication()
     {

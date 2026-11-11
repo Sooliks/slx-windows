@@ -15,6 +15,7 @@ public sealed class Text : INotifyPropertyChanged
     public string this[string key] => resources.GetString(key, culture) ?? libraryResources.GetString(key, culture)
         ?? updateResources.GetString(key, culture) ?? routingResources.GetString(key, culture) ?? key;
     public string Language => culture.TwoLetterISOLanguageName;
+    public CultureInfo Culture => culture;
     public event PropertyChangedEventHandler? PropertyChanged;
     public void SetLanguage(string language)
     {

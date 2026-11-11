@@ -63,6 +63,7 @@ public sealed partial class MainViewModel
         }
         while(FilteredLibrary.Count>visible.Length)FilteredLibrary.RemoveAt(FilteredLibrary.Count-1);
         OnPropertyChanged(nameof(FilteredDiscovered));OnPropertyChanged(nameof(HasDiscoveryResults));OnPropertyChanged(nameof(HasDiscovered));
+        RefreshQuickStart(desired);
         NotifyLibraryState();
     }
     private static bool SameApplicationGroup(AppRule left, AppRule right) => string.Equals(

@@ -1,5 +1,13 @@
 # Boundaries
 
+Alpha.32: Windows LibraryApplicationOrder also owns the first-run suggestion rank (Discord, Telegram, browsers)
+and the game/launcher test; both are presentation only and never create a routing match. Desktop
+MainViewModel.QuickStart owns the Quick start card state, its single bounded discovery request and the clipboard
+offer. Suggestions reuse AddLibraryCommand, so path validation, exact-file identity, the 128-rule limit and live
+update-applications stay with their existing owners. The clipboard is read only inside an explicit import action
+and only a value accepted by SubscriptionClient.ValidateUrl is kept; non-persistent models read it only through
+a test override. No Core/Service/IPC/storage change.
+
 Alpha.31: ClaudeApplicationGroup recognizes both the flat embedded Code executable and a single 12-hex build
 directory below its version. Both layouts share the existing exact-path validation, Code path limit and live watcher.
 

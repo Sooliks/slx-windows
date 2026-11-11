@@ -38,6 +38,6 @@ public sealed partial class MainViewModel
     }
     private void NotifyLibraryState()
     {
-        foreach(var name in new[]{nameof(LibraryStatusText),nameof(LibraryObservationText),nameof(HasLibraryObservation)})OnPropertyChanged(name);
+        foreach(var name in new[]{nameof(LibraryStatusText),nameof(LibraryObservationText),nameof(HasLibraryObservation),nameof(QuickStartBody)})OnPropertyChanged(name);
     }
 }

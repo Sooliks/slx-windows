@@ -13,6 +13,7 @@ public sealed partial class MainViewModel
     {
         if (startupRefreshStarted || disposed) return;
         startupRefreshStarted = true;
+        EnsureQuickStartScan();
         if (saved is null) { startupRefreshFinished = true; return; }
         var source = saved;
         using var budget = new CancellationTokenSource(StartupRefreshBudget);
@@ -54,5 +55,6 @@ public sealed partial class MainViewModel
         startupRefreshFailed = false;
         foreach (var name in new[] { nameof(SubscriptionTitle), nameof(SubscriptionUpdated), nameof(SubscriptionExpiry), nameof(SubscriptionRefreshHint) }) OnPropertyChanged(name);
         NotifyState();
+        RefreshDiscoveryProperties(); EnsureQuickStartScan();
     }
 }

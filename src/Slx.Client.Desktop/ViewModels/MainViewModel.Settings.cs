@@ -62,6 +62,7 @@ public sealed partial class MainViewModel
         if (preferences.Mode == value) return;
         preferences = preferences with { Mode = value }; SavePreferences(); MarkConnectionChanged();
         OnPropertyChanged(nameof(IsSelectedMode)); OnPropertyChanged(nameof(IsWholeMode)); OnPropertyChanged(nameof(ModeDescription));
+        RefreshDiscoveryProperties(); EnsureQuickStartScan();
     }
     private void Attach(IEnumerable<AppRule> rules)
     {

@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.31. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.32. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,32 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.32 — first-run setup for people who need Discord while they play
+
+Owner request of 2026-11-11: pick one audience for selected-app routing and make SLX the easier choice for it.
+Audience: Windows players who need Discord (blocked without VPN) in every session while the game itself must keep
+its direct connection. Chosen lever: setup. Evidence is a support message of the same day (a customer could not
+paste the link and could not add a phone) and the previous first screen: after import the app list was empty and
+the only next step was a small link to the library.
+
+After a subscription exists, in Apps mode and with nothing chosen, the Connection page shows Quick start: up to four
+locally found programs in the order Discord, Telegram, browsers, each added by one press through the existing
+validated library addition. Games are never suggested; found games/launchers are named only to restate that
+unselected programs stay direct. The card stays for that first session while suggestions remain and never returns
+once the user has applications. One bounded local discovery scan (the existing scanner, cache and limits) runs for
+this screen. A suggestion is presentation: it enables nothing, sends no service command and proves no route.
+
+The import dialog offers a copied link: on the explicit "Add subscription" action, and on "Paste from clipboard",
+the clipboard text is read once and kept only if it passes the existing exact SLX subscription URL validation.
+Import still requires pressing "Add" and still sends this installation's own X-Hwid. Nothing else from the clipboard
+is stored, shown or logged; render checks and UI fixtures never read the real clipboard. Help gains a fourth card:
+each device needs its own link, with a button to the account's device page.
+
+No ping, speed, Discord-voice or anti-cheat claim is made: unselected traffic still passes the shared local TUN
+process before its direct outbound. Desktop/Windows presentation only: no Core contract, IPC, service, storage
+format, dependency, driver, server or database change. UI and service still install together by the installer.
+Rollback: install alpha.31; preferences and subscription are unchanged.
 
 ## Alpha.31 — embedded Claude Code build folders
 
