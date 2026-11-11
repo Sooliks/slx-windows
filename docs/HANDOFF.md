@@ -1,5 +1,10 @@
 # SLX Windows — контекст передачи, 9 ноября 2026
 
+## Alpha.31 — вложенная папка сборки Claude Code
+
+Alpha.30 пропускала текущий `claude-code/<версия>/<12 hex>/claude.exe`. Оба формата установки теперь
+объединяются одним переключателем. Релиз использует штатный workflow от точного тега alpha.30.
+
 ## Alpha.30 — Claude и обновление путей во время подключения
 
 Результаты проверки Claude Desktop/Code, объединения дублей и live-update: [VERIFICATION](VERIFICATION.md).

@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.30. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.31. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,12 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.31 — embedded Claude Code build folders
+
+Accept the embedded `claude-code/<version>/<12-hex-build>/claude.exe` layout alongside the existing flat
+`claude-code/<version>/claude.exe` layout. The same Claude switch and exact-path validation apply. Bound
+the build scan, keep at most 20 Code paths, and observe build-folder and executable changes.
 
 ## Alpha.30 — Claude selection and live executable path refresh
 

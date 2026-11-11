@@ -33,8 +33,8 @@ internal sealed class ClaudeApplicationGroup(string local, string roaming)
         }
         if (Under(path, codeRoot) is { } code)
         {
-            string[] parts = code.Split('\\');
-            if (parts.Length == 2 && ParseVersion(parts[0]) is not null && Same(parts[1], "claude.exe")) return Member.Code;
+            if (Same(Path.GetFileName(code), "claude.exe") && Path.GetDirectoryName(code) is { } parent
+                && IsCodeDirectory(parent)) return Member.Code;
         }
         return null;
     }
@@ -54,7 +54,7 @@ internal sealed class ClaudeApplicationGroup(string local, string roaming)
     {
         var paths = new List<string>();
         AddVersions(desktopRoot, DesktopVersion, ["claude.exe", "squirrel.exe", @"resources\chrome-native-host.exe"], paths, token);
-        AddVersions(codeRoot, ParseVersion, ["claude.exe"], paths, token);
+        AddVersions(codeRoot, ParseVersion, ["claude.exe"], paths, token, includeCodeBuilds: true);
         AddExisting(Path.Combine(desktopRoot, "claude.exe"), paths, token);
         AddExisting(Path.Combine(desktopRoot, "Update.exe"), paths, token);
         return paths.OrderBy(Identify).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
@@ -88,7 +88,7 @@ internal sealed class ClaudeApplicationGroup(string local, string roaming)
     }
 
     private void AddVersions(string root, Func<string, Version?> version, string[] names, List<string> result,
-        CancellationToken token)
+        CancellationToken token, bool includeCodeBuilds = false)
     {
         token.ThrowIfCancellationRequested();
         try
@@ -99,11 +99,30 @@ internal sealed class ClaudeApplicationGroup(string local, string roaming)
                 .Where(item => item.Version is not null)
                 .OrderByDescending(item => item.Version).ThenByDescending(item => item.Path, StringComparer.OrdinalIgnoreCase);
             int accepted = 0;
+            int pathLimit = includeCodeBuilds ? result.Count + VersionsPerRoot : int.MaxValue;
             foreach (var item in candidates)
             {
                 int before = result.Count;
                 foreach (string name in names) AddExisting(Path.Combine(item.Path, name), result, token);
-                if (result.Count != before && ++accepted == VersionsPerRoot) break;
+                if (includeCodeBuilds) AddCodeBuilds(item.Path, result, pathLimit, token);
+                if (result.Count >= pathLimit || (result.Count != before && ++accepted == VersionsPerRoot)) break;
+            }
+        }
+        catch (Exception error) when (Unavailable(error)) { }
+    }
+
+    private void AddCodeBuilds(string version, List<string> result, int limit, CancellationToken token)
+    {
+        if (result.Count >= limit) return;
+        try
+        {
+            using var directory = ExactExecutablePath.OpenDirectory(version, token);
+            var builds = Directory.EnumerateDirectories(directory.Path).Take(DirectoryBudget)
+                .Where(path => IsCodeBuild(Path.GetFileName(path))).Order(StringComparer.OrdinalIgnoreCase);
+            foreach (string build in builds)
+            {
+                AddExisting(Path.Combine(build, "claude.exe"), result, token);
+                if (result.Count >= limit) break;
             }
         }
         catch (Exception error) when (Unavailable(error)) { }
@@ -119,7 +138,7 @@ internal sealed class ClaudeApplicationGroup(string local, string roaming)
 
     internal FileSystemWatcher? WatchCode(Action changed) => Watch(Path.GetDirectoryName(codeRoot)!,
         path => Same(path, codeRoot) || Identify(path) == Member.Code
-            || Under(path, codeRoot) is { } child && ParseVersion(child) is not null, changed);
+            || Under(path, codeRoot) is { } child && IsCodeDirectory(child), changed);
 
     internal FileSystemWatcher? WatchDesktop(Action changed) => Watch(desktopRoot,
         path => Identify(path) is not null || Under(path, desktopRoot) is { } child && DesktopVersion(child) is not null, changed);
@@ -146,6 +165,12 @@ internal sealed class ClaudeApplicationGroup(string local, string roaming)
     private static bool Same(string a, string b) => a.Equals(b, StringComparison.OrdinalIgnoreCase);
     private static Version? DesktopVersion(string name) => name.StartsWith("app-", StringComparison.OrdinalIgnoreCase)
         ? ParseVersion(name[4..]) : null;
+    private static bool IsCodeDirectory(string path)
+    {
+        var parts = path.Split('\\');
+        return ParseVersion(parts[0]) is not null && (parts.Length == 1 || parts.Length == 2 && IsCodeBuild(parts[1]));
+    }
+    private static bool IsCodeBuild(string name) => name.Length == 12 && name.All(char.IsAsciiHexDigit);
     private static Version? ParseVersion(string name)
     {
         if (name.Length is 0 or >64 || name.Any(c => !char.IsAsciiLetterOrDigit(c) && c is not ('.' or '-'))) return null;

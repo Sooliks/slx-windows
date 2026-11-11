@@ -12,7 +12,7 @@ internal static class ClaudeGroupChecks
         string desktop = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "AnthropicClaude", "app-0.0.1", "claude.exe");
         string code = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "Claude", "claude-code", "0.0.2", "claude.exe");
+            "Claude", "claude-code", "0.0.2", "d0e23af87588", "claude.exe");
         var desktopRule = new AppRule(Guid.NewGuid(), "Claude Desktop", desktop, false);
         var codeRule = new AppRule(Guid.NewGuid(), "Claude Code", code, true);
         using var model = new MainViewModel(false, UiFixtures.Subscription, new ClientPreferences(Applications:

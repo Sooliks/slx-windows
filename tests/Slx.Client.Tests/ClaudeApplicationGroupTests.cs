@@ -10,17 +10,20 @@ public sealed class ClaudeApplicationGroupTests : IDisposable
     private ClaudeApplicationGroup Family => new(Path.Combine(root, "Other Local"), Path.Combine(root, "Other Roaming"));
     private string Desktop(string version) => Path.Combine(root, "Other Local", "AnthropicClaude", "app-" + version, "claude.exe");
     private string Code(string version) => Path.Combine(root, "Other Roaming", "Claude", "claude-code", version, "claude.exe");
+    private string CodeBuild(string version, string build) => Path.Combine(Path.GetDirectoryName(Code(version))!, build, "claude.exe");
     private static AppRule Rule(string path, string name = "Claude", bool enabled = true) => new(Guid.NewGuid(), name, path, enabled);
 
-    [Fact]
-    public async Task FirstCodeLaunchAfterSelectionIsObservedAndExpandsTheExistingRule()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task FirstCodeLaunchAfterSelectionIsObservedAndExpandsTheExistingRule(bool nested)
     {
         string desktop = Create(Desktop("1.20186.9"));
         var family = Family;
         var selected = Rule(desktop);
         Directory.CreateDirectory(Path.Combine(root, "Other Roaming", "Claude"));
         Assert.Equal(selected, Assert.Single(family.Refresh([selected])));
-        string code = Code("2.1.209");
+        string code = nested ? CodeBuild("2.1.321", "d0e23af87588") : Code("2.1.209");
         var appeared = new TaskCompletionSource<IReadOnlyList<AppRule>>(TaskCreationOptions.RunContinuationsAsynchronously);
         using var watcher = family.WatchCode(() =>
         {
@@ -41,7 +44,7 @@ public sealed class ClaudeApplicationGroupTests : IDisposable
         var family = Family;
         string desktop = Create(Desktop("1.2.3")), oldCode = Create(Code("2.1.9"));
         var selected = family.Refresh([Rule(desktop)]);
-        string nextCode = Create(Code("2.1.10"));
+        string nextCode = Create(CodeBuild("2.1.10", "a0e23af87588"));
         var both = family.Refresh(selected);
         Assert.Equal(new[] { desktop, nextCode, oldCode }, both.Select(rule => rule.ExecutablePath));
         File.Delete(oldCode);
@@ -80,7 +83,7 @@ public sealed class ClaudeApplicationGroupTests : IDisposable
     public void SavedDesktopChoiceWinsOverManualCodeDuplicate(bool desktopEnabled, bool codeEnabled)
     {
         var desktop = Rule(Create(Desktop("1.2.3")), "Claude Desktop", desktopEnabled);
-        var code = Rule(Create(Code("2.1.209")), "Claude Code", codeEnabled);
+        var code = Rule(Create(CodeBuild("2.1.321", "d0e23af87588")), "Claude Code", codeEnabled);
         var duplicate = Rule(code.ExecutablePath.ToUpperInvariant(), "Manual Claude", codeEnabled);
         var foreign = Rule(Create(Path.Combine(root, "Unrelated", "claude.exe")), "Claude", true);
         var migrated = Family.Migrate([code, duplicate, foreign, desktop]);
@@ -122,6 +125,37 @@ public sealed class ClaudeApplicationGroupTests : IDisposable
         Directory.CreateDirectory(Path.GetDirectoryName(alias)!);
         using var junction = LocalJunctionFixture.Create(alias, Path.GetDirectoryName(outside)!);
         Assert.Equal(desktop, Assert.Single(Family.Refresh([Rule(desktop)])).ExecutablePath);
+    }
+
+    [Fact]
+    public void NestedBuildChangeRefreshesExactPathsAndRejectsAliasesAndOtherSubfolders()
+    {
+        string desktop = Create(Desktop("5.1231.0"));
+        string previous = Create(CodeBuild("2.1.321", "d0e23af87588"));
+        var selected = Family.Refresh([Rule(desktop)]);
+        Assert.Equal(previous, selected[1].ExecutablePath);
+        string current = Create(CodeBuild("2.1.321", "d0e23af87589"));
+        File.Delete(previous);
+        string unrelated = Create(CodeBuild("2.1.321", "support"));
+        string deep = Create(Path.Combine(Path.GetDirectoryName(previous)!, "d0e23af87590", "claude.exe"));
+        string alias = CodeBuild("2.1.321", "d0e23af87591");
+        using var junction = LocalJunctionFixture.Create(Path.GetDirectoryName(alias)!, Path.GetDirectoryName(unrelated)!);
+        var resolved = Family.Refresh(selected);
+        Assert.Equal(new[] { desktop, current }, resolved.Select(rule => rule.ExecutablePath));
+        Assert.Null(Family.Identify(unrelated));
+        Assert.Null(Family.Identify(deep));
+        Assert.Equal(selected[0], resolved[0]);
+        Assert.All(resolved, rule => Assert.True(rule.Enabled));
+    }
+
+    [Fact]
+    public void NestedBuildsShareTheExistingCodePathLimit()
+    {
+        string desktop = Create(Desktop("5.1231.0"));
+        for (int index = 0; index < 26; index++) _ = Create(CodeBuild("2.1.321", index.ToString("x12")));
+        var rules = Family.Refresh([Rule(desktop)]);
+        Assert.Equal(21, rules.Count);
+        Assert.Equal(20, rules.Count(rule => Family.Identify(rule.ExecutablePath) == ClaudeApplicationGroup.Member.Code));
     }
 
     [Fact]

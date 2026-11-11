@@ -1,5 +1,8 @@
 # Boundaries
 
+Alpha.31: ClaudeApplicationGroup recognizes both the flat embedded Code executable and a single 12-hex build
+directory below its version. Both layouts share the existing exact-path validation, Code path limit and live watcher.
+
 Alpha.30: ClaudeApplicationGroup owns exact current-user Anthropic locations, stable selection migration and
 bounded existing-file discovery. ApplicationGroups integrates it with the existing package/version resolvers.
 MainViewModel.LivePaths uses confirmed status polls plus Claude file notifications, rejects a stale snapshot after

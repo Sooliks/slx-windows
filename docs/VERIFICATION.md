@@ -1,5 +1,18 @@
 # Verification — SLX Windows
 
+## Alpha.31: embedded Claude Code build folders (2026-11-11)
+
+STATUS: PARTIAL for installed end-to-end acceptance. `scripts/verify.ps1` exited 0 with 834 tests and the
+composite WPF test, no warnings or skips. The tests cover first launch, changes within and across versions,
+manual duplicates, exact identity, directory junction rejection, and the existing path cap. Release-policy
+tests (24) and runtime-input checks (18) exited 0.
+
+The installed alpha.30 plan matched its live routing revision but omitted the observed nested Code binary.
+The alpha.31 resolver produced two additional exact Code paths including that binary. The normal application
+update was acknowledged by the live Hysteria2 connection, with no TUN or core generation change and no other
+enabled paths changed. No user preference or server change. A new Claude request and installed alpha.31
+authentication remain to be checked.
+
 ## Alpha.30: Claude grouping and live path refresh (2026-11-11)
 
 STATUS: PARTIAL for installed end-to-end acceptance. Local locked restore, Release build, 831 unit tests and
