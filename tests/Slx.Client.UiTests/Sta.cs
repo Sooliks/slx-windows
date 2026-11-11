@@ -38,7 +38,8 @@ internal static class Sta
             finally { finished.TrySetResult(failure); }
         }) { Name = "SLX UI regression dispatcher" };
         thread.SetApartmentState(ApartmentState.STA); thread.Start();
-        var failure = await finished.Task.WaitAsync(TimeSpan.FromSeconds(45));
+        // Hang watchdog only, not an assertion: the composite reached 39-41 s on the hosted runner before alpha.32.
+        var failure = await finished.Task.WaitAsync(TimeSpan.FromSeconds(90));
         if (!thread.Join(TimeSpan.FromSeconds(5))) throw new TimeoutException("UI dispatcher did not exit");
         if (failure != null) ExceptionDispatchInfo.Capture(failure).Throw();
     }

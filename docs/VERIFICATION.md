@@ -22,6 +22,13 @@ them to the VPN exit within 6 s; the unselected copy stayed direct. Both Xray pr
 13:34:43 creation time, so no tunnel or core restart occurred. Afterwards the installed UI was started again, the
 application list equalled the saved copy and the autostart entry was unchanged.
 
+First publication attempt: [run 43011976630](https://github.com/Sooliks/slx-windows/actions/runs/43011976630)
+for `ec6244b` failed in `scripts/verify.ps1`: 841 tests passed, the composite WPF test hit the harness's own
+45-second wait (`TimeoutException` in `Sta.Run`), no assertion failed. The two previous successful runs took 39
+and 41 s for that test; the new checks add about 1–2 s. A clean clone of `ec6244b` passed locally in 36 s. The
+hang watchdog is now 90 s; no assertion, check or product timeout was removed or relaxed. Nothing was published
+by the failed run.
+
 Limits of that check: the status text was read before navigating to Applications, not after the change. The first
 two runs of the add step failed inside the check script (file-dialog automation), so the probe stayed removed from
 14:01:54 to 14:04:15; this was a script defect, not a client fault. The real add used the manual picker, which

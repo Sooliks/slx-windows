@@ -53,7 +53,6 @@ internal static class QuickStartChecks
             Assert.True(model.ShowQuickStart);
             Assert.Equal(new[] { "Telegram", "Google Chrome" }, model.StarterApplications.Select(entry => entry.Name));
             Sta.Pump(); Assert.True(card.IsVisible);
-            UiScreenshots.Save(window, "slx-quick-start-added");
             model.IsWholeMode = true; Sta.Pump();
             Assert.False(model.ShowQuickStart); Assert.False(card.IsVisible);
             model.IsSelectedMode = true; Assert.True(model.ShowQuickStart);
