@@ -29,6 +29,14 @@ and 41 s for that test; the new checks add about 1–2 s. A clean clone of `ec62
 hang watchdog is now 90 s; no assertion, check or product timeout was removed or relaxed. Nothing was published
 by the failed run.
 
+Publication: [run 43014017644](https://github.com/Sooliks/slx-windows/actions/runs/43014017644) for `c385ec5`
+failed in the pre-existing `IconLoadingChecks.CheckSharedWorkers` one-second wait (841 tests passed, the composite
+failed after 8 s, before the new checks ran). The unchanged commit was dispatched again:
+[run 43015086886](https://github.com/Sooliks/slx-windows/actions/runs/43015086886) succeeded and published
+`v0.1.0-alpha.32` at 2026-11-11T11:53:42Z from `c385ec5` as a prerelease with six assets (installer 127284987
+bytes). Asset hashes were not downloaded and re-verified in this session. Two timing-sensitive WPF waits on the
+hosted runner remain a known source of false failures.
+
 Limits of that check: the status text was read before navigating to Applications, not after the change. The first
 two runs of the add step failed inside the check script (file-dialog automation), so the probe stayed removed from
 14:01:54 to 14:04:15; this was a script defect, not a client fault. The real add used the manual picker, which
