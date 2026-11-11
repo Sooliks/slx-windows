@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.29. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.30. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,19 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.30 — Claude selection and live executable path refresh
+
+One Claude selection owns the current user's known Anthropic Desktop, embedded Code, native host and updater paths.
+Recognition uses exact known directory layouts and executable names, never display labels, generic names or child
+process inheritance. Discovery checks local paths without following reparses. A saved Desktop selection controls
+a merged manual embedded-Code duplicate; a Code-only selection keeps its own choice.
+
+During a confirmed selected-app connection, Desktop (including tray) observes supported versioned families at
+the existing status cadence. Claude directory notifications can trigger an earlier bounded scan. Only a changed
+and current plan reaches the existing application update transaction, preserving its acknowledgement and WFP/Xray
+guards, 128-rule cap, and cancellation fencing. Deleted versions are replaced by existing exact paths; still-installed
+versions may coexist. No generic search for replacements of arbitrary manual executables is authorized.
 
 ## Alpha.29 — readiness, outbound-interface recovery and application identity
 

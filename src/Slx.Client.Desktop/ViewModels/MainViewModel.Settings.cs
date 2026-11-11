@@ -90,7 +90,8 @@ public sealed partial class MainViewModel
         var rule=ApplicationGroups.Normalize(paths[0]);
         paths=paths.Select(ApplicationGroups.Normalize).Select(x=>x with{Name=rule.Name,Enabled=true})
             .DistinctBy(x=>x.ExecutablePath,StringComparer.OrdinalIgnoreCase).ToArray();
-        var existing=Applications.FirstOrDefault(x=>string.Equals(x.Name.Trim(),rule.Name.Trim(),StringComparison.CurrentCultureIgnoreCase));
+        var existing=Applications.FirstOrDefault(x=>string.Equals(ApplicationGroups.GroupKey(x.ToRule()),
+            ApplicationGroups.GroupKey(rule),StringComparison.CurrentCultureIgnoreCase));
         if(existing!=null){foreach(var path in paths)existing.AddPath(path);existing.Enabled=true;}
         else Attach(paths.Select(x=>x with{Enabled=true}));
         SaveApplications();MarkRulesChanged();

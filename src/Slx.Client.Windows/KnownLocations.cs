@@ -18,7 +18,7 @@ internal static class KnownLocations
             yield return Path.Combine(local,path);
         foreach(var path in new[]{@"Telegram Desktop\Telegram.exe",@"Spotify\Spotify.exe",@"Zoom\bin\Zoom.exe"})
             yield return Path.Combine(roaming,path);
-        foreach(var app in new[]{("Discord","Discord.exe"),("slack","slack.exe"),("AnthropicClaude","claude.exe")})
+        foreach(var app in new[]{("Discord","Discord.exe"),("slack","slack.exe")})
         {
             var root=Path.Combine(local,app.Item1);
             string[] versions;

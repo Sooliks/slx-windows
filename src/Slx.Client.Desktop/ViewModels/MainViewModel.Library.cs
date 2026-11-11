@@ -13,8 +13,8 @@ public sealed partial class MainViewModel
     internal IReadOnlyList<CatalogApplication> CatalogEntries {get=>catalogEntries;set{catalogEntries=value;RefreshDiscoveryProperties();}}
     public string DiscoverySearch {get=>discoverySearch;set{if(SetProperty(ref discoverySearch,value)){libraryLimit=12;RefreshDiscoveryProperties();}}}
     public IEnumerable<AppRule> FilteredDiscovered=>new LibraryApplicationOrder(CatalogEntries).Order(Discovered.Where(app=>
-        !Applications.Any(added=>string.Equals(added.Name.Trim(),app.Name.Trim(),StringComparison.CurrentCultureIgnoreCase))
-        &&ApplicationLabels.Matches(app, DiscoverySearch))).GroupBy(x=>x.Name.Trim(),StringComparer.CurrentCultureIgnoreCase).Select(x=>x.First());
+        !Applications.Any(added=>SameApplicationGroup(added.ToRule(),app))
+        &&ApplicationLabels.Matches(app, DiscoverySearch))).GroupBy(ApplicationGroups.GroupKey,StringComparer.CurrentCultureIgnoreCase).Select(x=>x.First());
     public ObservableCollection<LibraryEntry> FilteredLibrary {get;}=[];
     public bool HasDiscoveryResults=>FilteredLibrary.Count>0;
     private void RefreshDiscoveryProperties()
@@ -23,13 +23,15 @@ public sealed partial class MainViewModel
         var names=Discovered.Concat(Applications.SelectMany(x=>x.ToRules())).Select(x=>System.IO.Path.GetFileName(x.ExecutablePath)).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var selectedRules = Applications.SelectMany(x => x.ToRules()).ToArray();
         foreach(var group in Discovered.Concat(selectedRules).Select(rule => rule with { Name = ApplicationLabels.DisplayName(rule) })
-            .DistinctBy(x => x.ExecutablePath, StringComparer.OrdinalIgnoreCase).GroupBy(x=>x.Name.Trim(),StringComparer.CurrentCultureIgnoreCase))
+            .DistinctBy(x => x.ExecutablePath, StringComparer.OrdinalIgnoreCase).GroupBy(ApplicationGroups.GroupKey,StringComparer.CurrentCultureIgnoreCase))
         {
-            var paths=group.ToArray();string key="app:"+group.Key;retained.Add(key);
-            if(!libraryEntries.TryGetValue(key,out var entry)||entry.Name!=group.Key||entry.Paths is null)
-            {entry?.Dispose();libraryEntries[key]=entry=new(group.Key,paths[0],null,paths);}
+            var paths=group.ToArray();string key="app:"+group.Key;retained.Add(key);var name=paths[0].Name.Trim();
+            if(!libraryEntries.TryGetValue(key,out var entry)||entry.Name!=name||entry.Paths is null)
+            {entry?.Dispose();libraryEntries[key]=entry=new(name,paths[0],null,paths);}
             else if(!entry.Paths.Select(x=>x.ExecutablePath).SequenceEqual(paths.Select(x=>x.ExecutablePath),StringComparer.OrdinalIgnoreCase))entry.UpdatePaths(paths[0],paths);
-            entry.IsAdded = paths.Any(path => selectedRules.Any(selected => string.Equals(selected.ExecutablePath, path.ExecutablePath, StringComparison.OrdinalIgnoreCase)));
+            entry.IsAdded = paths.Any(path => selectedRules.Any(selected =>
+                string.Equals(selected.ExecutablePath, path.ExecutablePath, StringComparison.OrdinalIgnoreCase)
+                || ApplicationGroups.IsClaude(path) && SameApplicationGroup(selected,path)));
             desired.Add(entry);
         }
         foreach(var app in CatalogEntries.Where(app=>!app.Executables.Any(names.Contains)))
@@ -63,6 +65,8 @@ public sealed partial class MainViewModel
         OnPropertyChanged(nameof(FilteredDiscovered));OnPropertyChanged(nameof(HasDiscoveryResults));OnPropertyChanged(nameof(HasDiscovered));
         NotifyLibraryState();
     }
+    private static bool SameApplicationGroup(AppRule left, AppRule right) => string.Equals(
+        ApplicationGroups.GroupKey(left), ApplicationGroups.GroupKey(right), StringComparison.CurrentCultureIgnoreCase);
     private void ShowMoreApplications(){libraryLimit+=12;RefreshDiscoveryProperties();}
     private void RefreshMissingIcons()
     {

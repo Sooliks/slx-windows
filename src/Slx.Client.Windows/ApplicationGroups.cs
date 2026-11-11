@@ -4,7 +4,7 @@ using Slx.Client.Core;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 namespace Slx.Client.Windows;
-/// <summary>Known OpenAI desktop family, resolved for the current user. Exact paths, never generic node/shell rules.</summary>
+/// <summary>Known application families in the current user's context; expansion uses exact executable paths.</summary>
 public static partial class ApplicationGroups
 {
     private const string Family="OpenAI.Codex_2p2nqsd0c76g0";
@@ -13,12 +13,15 @@ public static partial class ApplicationGroups
     {
         var primary=PackageExecutables(cancellationToken).FirstOrDefault(File.Exists);
         var families=ApplicationFamilies.Discover(cancellationToken);
-        return primary is null?families:[AppDiscovery.FromExecutable(primary) with{Name="Codex / ChatGPT"},..families];
+        var claude=ClaudeApplicationGroup.Current.Discover(cancellationToken)
+            .Select(path=>new AppRule(ApplicationFamilies.Id(path),ClaudeApplicationGroup.Name,path));
+        return primary is null?[..claude,..families]:[AppDiscovery.FromExecutable(primary) with{Name="Codex / ChatGPT"},..claude,..families];
     }
     public static AppRule Normalize(AppRule rule)=>Normalize(rule,CancellationToken.None);
     public static AppRule Normalize(AppRule rule,CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        if(IsClaude(rule))return rule with{Name=ClaudeApplicationGroup.Name};
         if(!IsGroup(rule.ExecutablePath))return rule;
         var primary=PackageExecutables(cancellationToken).FirstOrDefault(File.Exists);
         return rule with{Name="Codex / ChatGPT",ExecutablePath=primary??rule.ExecutablePath};
@@ -26,7 +29,7 @@ public static partial class ApplicationGroups
     public static List<AppRule> Expand(IEnumerable<AppRule> applications)
     {
         var expanded=new List<AppRule>();
-        foreach(var original in applications)
+        foreach(var original in ClaudeApplicationGroup.Current.Refresh(applications.ToArray()))
         {
             var rule=original with{ExecutablePath=ApplicationFamilies.ResolveLink(original.ExecutablePath)};
             expanded.Add(rule);

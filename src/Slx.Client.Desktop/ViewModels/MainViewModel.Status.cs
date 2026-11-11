@@ -34,6 +34,7 @@ public sealed partial class MainViewModel
         finally { polling = false; NotifyState(); }
         ResumeDeferredRouting();
         await TryStartupConnectionAsync();
+        await RefreshSelectedApplicationPathsAsync();
     }
     [MemberNotNull(nameof(status))]
     private void AcceptStatus(TunnelStatus observed)

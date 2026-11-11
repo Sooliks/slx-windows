@@ -33,7 +33,8 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         }
         Text.Catalog.SetLanguage(preferences.Language);
         ThemeManager.Apply(preferences.Theme);
-        foreach (var group in (preferences.Applications ?? []).Select(ApplicationGroups.Normalize).GroupBy(x=>x.Name.Trim(),StringComparer.CurrentCultureIgnoreCase)) Attach(group);
+        var restored = ApplicationGroups.Restore(preferences.Applications ?? []);
+        foreach (var group in restored.GroupBy(ApplicationGroups.GroupKey, StringComparer.CurrentCultureIgnoreCase)) Attach(group);
         Profiles = new(saved?.Snapshot.Profiles ?? []);
         selectedProfile = Profiles.FirstOrDefault(x => x.Id == preferences.SelectedProfileId)
             ?? Profiles.FirstOrDefault(x => x.Kind == "hysteria2") ?? Profiles.FirstOrDefault();

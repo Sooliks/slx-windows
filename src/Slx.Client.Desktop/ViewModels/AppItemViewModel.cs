@@ -18,7 +18,7 @@ public sealed class AppItemViewModel : ObservableObject
         ? Text.Catalog["EnabledByOtherGroup"] + " " + string.Join(", ", sharedWith) : "";
     public void RefreshComposition(IReadOnlyList<AppRule> expanded, IEnumerable<string> owners)
     {
-        includedFiles = expanded.Select(x => System.IO.Path.GetFileName(x.ExecutablePath)).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+        includedFiles = expanded.Select(x => ApplicationGroups.MemberLabel(x.ExecutablePath)).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
         sharedWith = owners.Distinct(StringComparer.CurrentCultureIgnoreCase).ToArray();
         OnPropertyChanged(nameof(GroupDescription)); OnPropertyChanged(nameof(SharedWarning));
     }

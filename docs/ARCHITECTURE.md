@@ -1,5 +1,12 @@
 # Boundaries
 
+Alpha.30: ClaudeApplicationGroup owns exact current-user Anthropic locations, stable selection migration and
+bounded existing-file discovery. ApplicationGroups integrates it with the existing package/version resolvers.
+MainViewModel.LivePaths uses confirmed status polls plus Claude file notifications, rejects a stale snapshot after
+an intervening routing edit, and submits only changed paths through the normal live application transaction.
+The UI/tray is the discovery owner; the service independently validates the resulting exact paths and applies
+the protected revision. This introduces no wildcard, recursive process routing, new IPC operation, or service privilege.
+
 Alpha.29: StartupReadiness returns after a successful strict origin and drains the cancelled peer; caller cancellation
 still wins. Per-origin and recovery budgets are unchanged. PhysicalEgress uses read-only Windows route/interface
 APIs, excluding the exact owned TUN GUID. TunnelPhysicalPath owns detection of missing/changed bindings, records

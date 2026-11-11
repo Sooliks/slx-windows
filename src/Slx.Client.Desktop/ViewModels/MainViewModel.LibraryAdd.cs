@@ -43,7 +43,7 @@ public sealed partial class MainViewModel
     {
         if(rule is null)return;
         rule=ApplicationGroups.Normalize(rule);
-        var paths=Discovered.Where(x=>string.Equals(x.Name.Trim(),rule.Name.Trim(),StringComparison.CurrentCultureIgnoreCase))
+        var paths=Discovered.Where(x=>string.Equals(ApplicationGroups.GroupKey(x),ApplicationGroups.GroupKey(rule),StringComparison.CurrentCultureIgnoreCase))
             .Append(rule).DistinctBy(x=>x.ExecutablePath,StringComparer.OrdinalIgnoreCase).ToArray();
         using var entry=new LibraryEntry(rule.Name,rule,null,paths);
         await AddLibraryAsync(entry);
