@@ -1,6 +1,6 @@
 # Boundaries
 
-Unreleased: EstablishedProbe owns one pooled HTTPS connection per VPN core generation through the existing
+Alpha.33: EstablishedProbe owns one pooled HTTPS connection at a time through the VPN core's existing
 authenticated local probe inbound. HealthConfirmation confirms reuse on both sides of the fresh-connection
 retry and treats a reopened socket as fresh. TunnelUpstreamHold owns the recovery decision: existing-only
 traffic keeps the service in Checking while the core, front, adapter and owned IPv4 routes are ready.

@@ -1,6 +1,6 @@
 # Verification — SLX Windows
 
-## Unreleased: fresh connection failures with an established stream (2026-11-12)
+## Alpha.33: fresh connection failures with an established stream (2026-11-12)
 
 STATUS: PARTIAL for installed acceptance. `pwsh -File scripts/verify.ps1` exited 0 with a locked restore,
 Release build (0 warnings and errors), 847 unit tests and one composite WPF test. The local pinned Xray 26.9.9

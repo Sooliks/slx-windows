@@ -1,6 +1,6 @@
 # SLX Windows
 
-Version: 0.1.0-alpha.32. STATUS: PARTIAL until required Windows acceptance passes.
+Version: 0.1.0-alpha.33. STATUS: PARTIAL until required Windows acceptance passes.
 
 Owner authorized the separate public Sooliks/slx-windows repository, source push, unsigned build and GitHub Release assets.
 Desktop: C#/.NET 10 LTS, WPF + MVVM, RU/EN resources; native SLX olive/lime and Terminal themes.
@@ -12,6 +12,14 @@ Data: DPAPI CurrentUser, user settings under LocalAppData; typed SID-authorized 
 Import accepts only explicit SLX HTTPS subscription URLs. A Happ-bound link needs the official website transfer.
 Separate source history: no website/server history, env, database, real tokens or actual client profiles.
 Source <=200 nonblank lines; preserve SLX tokens; real statuses and recovery, no mock production features.
+
+## Alpha.33 — preserve established traffic during fresh-connection failures
+
+When all fresh checks fail, defer core recovery only if an HTTPS request before and after the fresh retries
+is answered on the same already established VPN connection and the owned local resources are ready.
+Publish Checking during the bounded 45-second hold, and recheck after five seconds. A fresh success
+restores Connected with the original connection time. A lost stream or expired hold resumes normal recovery.
+The existing installer and updater deliver UI and service together. No settings migration.
 
 ## Alpha.32 — first-run setup for people who need Discord while they play
 
