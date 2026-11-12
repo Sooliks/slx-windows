@@ -54,6 +54,47 @@ public sealed class HealthConfirmationTests
             (target, _) => { cancel.Cancel(); return Task.FromResult(new ProbeObservation(target, ProbeOutcome.Success, 1)); },
             () => throw new InvalidOperationException(), cancel.Token));
     }
+
+    [Theory]
+    [InlineData(false, true, true, false, 1)]
+    [InlineData(true, false, true, false, 2)]
+    [InlineData(true, true, false, false, 2)]
+    [InlineData(true, true, true, true, 2)]
+    public async Task RecoveryRequiresAStreamThatPredatedTheRoundAndStillAnswers(bool initiallyReused,
+        bool reusedAfterFailure, bool answeredAfterFailure, bool eligible, int expectedReads)
+    {
+        int reads = 0;
+        var result = await HealthConfirmation.CheckAsync(
+            (target, _) => Task.FromResult(new ProbeObservation(target, ProbeOutcome.Timeout, 1)),
+            () => { }, default, _ => Task.CompletedTask,
+            _ =>
+            {
+                bool first = ++reads == 1;
+                var outcome = first || answeredAfterFailure ? ProbeOutcome.Success : ProbeOutcome.Timeout;
+                return Task.FromResult(new EstablishedObservation(new(ProbeTarget.Gstatic, outcome, 1),
+                    first ? initiallyReused : reusedAfterFailure));
+            });
+        Assert.Equal(eligible, result.OnlyEstablishedStreamPassed);
+        Assert.Equal(expectedReads, reads);
+    }
+
+    [Fact]
+    public void NewHealthFieldsAreOmittedFromOffRepliesEvenAfterAnIncident()
+    {
+        var engine = new TunnelEngine();
+        var failed = new ProbeObservation(ProbeTarget.Gstatic, ProbeOutcome.Timeout, 5000);
+        var reused = new EstablishedObservation(new(ProbeTarget.Gstatic, ProbeOutcome.Success, 10, 204), true);
+        var intent = typeof(TunnelEngine).GetField("desiredConnected",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!;
+        intent.SetValue(engine, true);
+        engine.RecordHealthIncident(new(failed, failed, failed, reused), false);
+        Assert.Equal(reused.Observation, engine.Status.HealthCheck!.Established);
+        intent.SetValue(engine, false);
+        using var json = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(engine.Status.HealthCheck));
+        Assert.False(json.RootElement.TryGetProperty("Established", out _));
+        Assert.False(json.RootElement.TryGetProperty("UpstreamHolds", out _));
+        Assert.Equal(1, json.RootElement.GetProperty("Incidents").GetInt32());
+    }
     [Fact]
     public void DiagnosticsRetainFailedIncidentWithoutInventingSuccess()
     {

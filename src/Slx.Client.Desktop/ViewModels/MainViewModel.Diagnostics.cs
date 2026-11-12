@@ -54,6 +54,9 @@ public sealed partial class MainViewModel
                 AppendHealthAttempt(text, "primary", health.Primary);
                 if (health.Repeat is {} repeat) AppendHealthAttempt(text, "repeat", repeat);
                 if (health.Alternate is {} alternate) AppendHealthAttempt(text, "alternate", alternate);
+                if (health.Established is {} established) AppendHealthAttempt(text, "existing stream", established);
+                if (health.UpstreamHolds is {} holds)
+                    text.AppendLine($"Health checks that deferred core recovery: {holds}");
             }
             if (status?.DnsCheck is {} dns)
             {

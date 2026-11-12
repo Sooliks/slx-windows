@@ -5,13 +5,13 @@ namespace Slx.Client.Service;
 internal static class ProbeRequest
 {
     internal static async Task<ProbeObservation> ObserveAsync(HttpClient client, ProbeTarget target,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, Func<ProbeTarget, string>? address = null)
     {
         var clock = Stopwatch.StartNew();
         try
         {
-            string url = target == ProbeTarget.Gstatic
-                ? "https://www.gstatic.com/generate_204" : "https://slxvpn.com/robots.txt";
+            string url = address?.Invoke(target) ?? (target == ProbeTarget.Gstatic
+                ? "https://www.gstatic.com/generate_204" : "https://slxvpn.com/robots.txt");
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.CacheControl = new() { NoCache = true, NoStore = true };
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);

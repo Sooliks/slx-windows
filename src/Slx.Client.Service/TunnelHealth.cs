@@ -3,7 +3,6 @@ using Slx.Client.Core;
 namespace Slx.Client.Service;
 internal sealed partial class TunnelEngine
 {
-    private readonly RemoteHealthGrace remoteHealthGrace = new();
     public async Task CheckHealthAsync(CancellationToken cancellationToken)
     {
         await lifecycle.WaitAsync(cancellationToken);
@@ -30,15 +29,7 @@ internal sealed partial class TunnelEngine
                         if(state.Phase!=TunnelPhase.Connected || !state.ProbePassed)return;
                     }
                     if(Stopwatch.GetTimestamp()<healthAt)return;
-                    healthAt=Stopwatch.GetTimestamp()+15*Stopwatch.Frequency;
-                    var result = await ConnectionHealthCheck.CheckAsync(state,
-                        (target, token) => LocalProbe.ObserveAsync(probe.Port, probe.User, probe.Password, target, token),
-                        () => HealthResourcesReady(cancellationToken), observed => state = observed, cancellationToken);
-                    RecordHealthIncident(result.Confirmation, result.Retained);
-                    if(result.Retained)return;
-                    await CheckFrontControlAsync(cancellationToken);
-                    // A remote-only failure counts against the current transport; lost local resources do not.
-                    if(!result.Confirmation.Passed){transportExecution.Failed();rotation.Failed("HEALTH_PROBE_FAILED");PublishAttempt();}
+                    if (await CheckOwnedHealthAsync(cancellationToken)) return;
                 }
                 if(wasConnected)
                 {
@@ -76,7 +67,7 @@ internal sealed partial class TunnelEngine
 
     private bool HealthResourcesReady(CancellationToken cancellationToken)
     {
-        if(child is null || child.HasExited || ownedAdapterId is null || !LocalProbe.TunnelReady(ownedAdapterId))return false;
+        if (!FrontAlive || !CoreAlive || ownedAdapterId is null || !LocalProbe.TunnelReady(ownedAdapterId)) return false;
         using var budget = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         budget.CancelAfter(TimeSpan.FromSeconds(3));
         try

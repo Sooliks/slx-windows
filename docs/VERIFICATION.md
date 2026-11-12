@@ -1,5 +1,20 @@
 # Verification — SLX Windows
 
+## Unreleased: fresh connection failures with an established stream (2026-11-12)
+
+STATUS: PARTIAL for installed acceptance. `pwsh -File scripts/verify.ps1` exited 0 with a locked restore,
+Release build (0 warnings and errors), 847 unit tests and one composite WPF test. The local pinned Xray 26.9.9
+loopback test used authenticated HTTP CONNECT, a pinned fixture certificate and a separate application stream.
+Leaving newly accepted origin sockets unanswered made the normal three probes time out. Without evidence
+from the established stream, the health decision entered Reconnecting. With evidence, it stayed in Checking while the application received
+responses on the same TLS connection and Xray kept running. Accepting new sockets restored Connected with the
+original ConnectedAt. Closing the existing streams restored the normal recovery decision. A subsequent
+successful request opened a new connection and reported Reused=false.
+
+Source tests cover deadline expiry, cancellation, unavailable owned resources, invalid native routes and
+reopened connections. The loopback test runs without TUN/WFP or an installed service. Installed Windows
+acceptance and the effect on live production sessions remain open.
+
 ## Alpha.32: first-run setup (2026-11-11)
 
 STATUS: PARTIAL for installed end-to-end acceptance. `pwsh -File scripts/verify.ps1` exited 0 on the alpha.32

@@ -21,7 +21,7 @@ internal sealed partial class TunnelEngine : IControlTunnelEngine
     private string? ownedAdapterId;
     private (int Port, string User, string Password) probe;
     private int recoveryAttempts;
-    public TunnelStatus Status => state with { Recovery = recovery, HealthCheck = healthCheck, DnsCheck = dnsCheck,
+    public TunnelStatus Status => state with { Recovery = recovery, HealthCheck = HealthForStatus(), DnsCheck = dnsCheck,
         TrafficRoutes = trafficRoutes, Attempt = desiredConnected ? attempt : null,
         Lifecycle = desiredConnected ? lifecycleJournal.Snapshot() : null,
         NetworkPath = desiredConnected ? networkPath : null,

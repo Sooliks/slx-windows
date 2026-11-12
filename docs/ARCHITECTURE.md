@@ -1,5 +1,13 @@
 # Boundaries
 
+Unreleased: EstablishedProbe owns one pooled HTTPS connection per VPN core generation through the existing
+authenticated local probe inbound. HealthConfirmation confirms reuse on both sides of the fresh-connection
+retry and treats a reopened socket as fresh. TunnelUpstreamHold owns the recovery decision: existing-only
+traffic keeps the service in Checking while the core, front, adapter and owned IPv4 routes are ready.
+UpstreamStallHold gives these checks a 45-second monotonic budget, with a 5-second delay between retries.
+A fresh success clears the hold. Loss of the established stream or expiry resumes the normal recovery path.
+Core stop and explicit disconnect discard the pooled stream. Only a successful fresh check updates LastHealthyAt.
+
 Alpha.32: Windows LibraryApplicationOrder also owns the first-run suggestion rank (Discord, Telegram, browsers)
 and the game/launcher test; both are presentation only and never create a routing match. Desktop
 MainViewModel.QuickStart owns the Quick start card state, its single bounded discovery request and the clipboard

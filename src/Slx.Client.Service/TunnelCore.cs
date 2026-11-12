@@ -38,6 +38,7 @@ internal sealed partial class TunnelEngine
 
     private async Task StopCoreAsync()
     {
+        ResetEstablishedHealth();
         var process = core;
         core = null;
         transportExecution.Stopped(); PublishAttempt();
