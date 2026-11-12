@@ -12,8 +12,15 @@ original ConnectedAt. Closing the existing streams restored the normal recovery 
 successful request opened a new connection and reported Reused=false.
 
 Source tests cover deadline expiry, cancellation, unavailable owned resources, invalid native routes and
-reopened connections. The loopback test runs without TUN/WFP or an installed service. Installed Windows
-acceptance and the effect on live production sessions remain open.
+reopened connections. The loopback test runs without TUN/WFP or an installed service.
+
+Installed acceptance on Windows 11, 2026-11-12: the candidate installer from `1ccedf4` exited 0 over
+alpha.32 without an OS reboot. Both installed binaries reported alpha.33. The service restored the saved
+Hysteria2 connection in selected-app mode. In 37 samples over 110 seconds, protection and the fresh probe
+were confirmed, both process generations stayed at 1, and no recovery was recorded. The same service-to-Xray
+loopback socket remained present across samples. In one confirmation round the established probe responded
+and fresh checking recovered with zero recorded incidents. The simultaneous fresh-connection failure was
+reproduced on the isolated Xray fixture. No such failure occurred during the installed observation.
 
 ## Alpha.32: first-run setup (2026-11-11)
 
